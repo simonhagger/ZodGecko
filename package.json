@@ -1,6 +1,6 @@
 {
   "name": "zodgecko",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.1-beta.1",
   "description": "Typed Zod schemas and helpers for the CoinGecko API — runtime validation + TypeScript types.",
   "keywords": [
     "coingecko",
