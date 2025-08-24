@@ -25,6 +25,9 @@
     "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "alwaysStrict": true,
-    "useUnknownInCatchVariables": true
+    "useUnknownInCatchVariables": true,
+
+    "preserveConstEnums": true,
+    "strictBuiltinIteratorReturn": true
   }
 }
