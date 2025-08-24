@@ -1,0 +1,16 @@
+# IDE folders
+.vscode/
+
+# Local caches / build outputs
+.cache/
+node_modules/
+node_modules/.cache/
+dist/
+coverage/
+
+# TypeScript incremental build metadata
+*.tsbuildinfo
+*.buildinfo
+
+# Detailed project dump file of structure and content
+project-dump*

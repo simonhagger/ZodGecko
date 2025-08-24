@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "sourceMap": true,
+    "inlineSources": true,
+
+    "types": ["vitest/globals", "node"]
+  },
+  "include": ["src", "src/**/__tests__/**/*.ts", "vitest.setup.ts"],
+  "exclude": ["dist", "node_modules", "coverage"]
+}

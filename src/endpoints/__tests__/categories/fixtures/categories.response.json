@@ -1,0 +1,13 @@
+[
+  {
+    "id": "decentralized_finance_defi",
+    "name": "Decentralized Finance (DeFi)",
+    "market_cap": 1234567890,
+    "market_cap_change_24h": 1.23,
+    "content": { "description": "small stub" },
+    "top_3_coins": ["https://.../btc.png", "https://.../eth.png", "https://.../uni.png"],
+    "volume_24h": 55555555,
+    "updated_at": "2024-12-24T00:00:00Z",
+    "some_future_field": { "ok": true }
+  }
+]

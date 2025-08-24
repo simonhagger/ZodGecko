@@ -1,0 +1,16 @@
+{
+  "name": "Binance",
+  "tickers": [
+    {
+      "base": "BTC",
+      "target": "USDT",
+      "market": { "name": "Binance" },
+      "last": 60000.0,
+      "volume": 1234.5,
+      "bid_ask_spread_percentage": 0.01,
+      "is_anomaly": false,
+      "is_stale": false,
+      "trade_url": "https://www.binance.com/en/trade/BTC_USDT"
+    }
+  ]
+}

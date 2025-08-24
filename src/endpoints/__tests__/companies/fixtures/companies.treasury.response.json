@@ -1,0 +1,23 @@
+[
+  {
+    "name": "MicroStrategy",
+    "symbol": "MSTR",
+    "country": "US",
+    "total_holdings": 174530.123,
+    "total_entry_value_usd": 3760000000,
+    "total_current_value_usd": 11000000000,
+    "percentage_of_supply": 0.833,
+    "last_updated": "2024-12-01T00:00:00Z"
+  },
+  {
+    "name": "Tesla",
+    "symbol": "TSLA",
+    "country": "US",
+    "total_holdings": 9720,
+    "total_entry_value_usd": 1500000000,
+    "total_current_value_usd": 600000000,
+    "percentage_of_supply": 0.046,
+    "last_updated": "2024-12-01T00:00:00Z",
+    "some_unknown": "ok"
+  }
+]

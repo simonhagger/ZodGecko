@@ -1,0 +1,20 @@
+{
+  "coins": [
+    {
+      "item": {
+        "id": "bitcoin",
+        "coin_id": 1,
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "market_cap_rank": 1,
+        "thumb": "https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png",
+        "small": "https://assets.coingecko.com/coins/images/1/small/bitcoin.png",
+        "large": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+        "slug": "bitcoin",
+        "price_btc": 1,
+        "score": 0
+      }
+    }
+  ],
+  "some_unknown": { "ok": true }
+}

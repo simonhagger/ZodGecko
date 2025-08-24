@@ -1,0 +1,29 @@
+{
+  "coins": [
+    {
+      "id": "bitcoin",
+      "name": "Bitcoin",
+      "symbol": "BTC",
+      "market_cap_rank": 1,
+      "thumb": "https://assets.coingecko.com/coins/images/1/thumb/bitcoin.png",
+      "large": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+      "score": 0,
+      "slug": "bitcoin",
+      "api_symbol": "bitcoin"
+    }
+  ],
+  "exchanges": [
+    {
+      "id": "binance",
+      "name": "Binance",
+      "market_type": "spot",
+      "thumb": "https://assets.coingecko.com/markets/images/52/thumb/binance.jpg",
+      "large": "https://assets.coingecko.com/markets/images/52/large/binance.jpg",
+      "year_established": 2017,
+      "country": "Cayman Islands"
+    }
+  ],
+  "categories": [{ "id": "layer-1", "name": "Layer 1 (L1)" }],
+  "nfts": [{ "id": "cryptopunks", "name": "CryptoPunks", "symbol": "PUNK" }],
+  "some_unknown": { "ok": true }
+}

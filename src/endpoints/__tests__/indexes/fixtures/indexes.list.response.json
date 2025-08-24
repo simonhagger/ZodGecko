@@ -1,0 +1,12 @@
+[
+  {
+    "id": "BTCUSD_PERP",
+    "name": "BTC Perpetual Futures Index",
+    "market": "binance_futures"
+  },
+  {
+    "id": "ETHUSD_PERP",
+    "name": "ETH Perpetual Futures Index",
+    "market": "kraken_futures"
+  }
+]

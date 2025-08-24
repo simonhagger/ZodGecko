@@ -1,0 +1,17 @@
+[
+  {
+    "name": "BTC Perpetual Futures Index",
+    "market": "binance_futures",
+    "last": 60000.12,
+    "is_multi": false,
+    "symbol": "BTCUSD_PERP",
+    "future_field": { "ok": true }
+  },
+  {
+    "name": "ETH Perpetual Futures Index",
+    "market": "kraken_futures",
+    "last": 3000.5,
+    "is_multi": false,
+    "symbol": "ETHUSD_PERP"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "status_updates": [
+    {
+      "category": "general",
+      "created_at": "2024-06-01T12:00:00Z",
+      "user": "coingecko",
+      "user_title": "CoinGecko",
+      "pin": false,
+      "project": {
+        "type": "Coin",
+        "id": "bitcoin",
+        "name": "Bitcoin",
+        "symbol": "BTC",
+        "image": "https://assets.coingecko.com/coins/images/1/small/bitcoin.png"
+      },
+      "description": "Test announcement"
+    }
+  ],
+  "some_future_field": { "ok": true }
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "id": "ethereum",
+    "chain_identifier": 1,
+    "name": "Ethereum",
+    "shortname": "ETH",
+    "some_future_field": { "ok": true }
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "data": {
+    "active_cryptocurrencies": 12000,
+    "markets": 800,
+    "ongoing_icos": 12,
+    "ended_icos": 3456,
+    "market_cap_change_percentage_24h_usd": 1.23,
+    "updated_at": 1710460800,
+    "total_market_cap": { "usd": 1800000000000, "btc": 68000000 },
+    "total_volume": { "usd": 60000000000, "btc": 2000000 }
+  }
+}

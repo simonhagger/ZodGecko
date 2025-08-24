@@ -1,0 +1,26 @@
+[
+  {
+    "id": "binance",
+    "name": "Binance",
+    "year_established": 2017,
+    "country": "Cayman Islands",
+    "trust_score": 10,
+    "trust_score_rank": 1,
+    "trade_volume_24h_btc": 123456.789,
+    "trade_volume_24h_btc_normalized": 120000.123,
+    "has_trading_incentive": false,
+    "url": "https://www.binance.com"
+  },
+  {
+    "id": "kraken",
+    "name": "Kraken",
+    "year_established": 2011,
+    "country": "United States",
+    "trust_score": 10,
+    "trust_score_rank": 5,
+    "trade_volume_24h_btc": 12345.67,
+    "trade_volume_24h_btc_normalized": 12000.0,
+    "has_trading_incentive": false,
+    "url": "https://www.kraken.com"
+  }
+]
