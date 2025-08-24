@@ -2,7 +2,7 @@
 
 First off, thanks for taking the time to contribute! 🎉  
 This library is a **hobby project** maintained on a best-efforts basis.  
-Contributions are welcome, but please follow the guidelines below to keep things consistent.
+Contributions are welcome—please follow the guidelines below to keep things consistent.
 
 ---
 
@@ -21,12 +21,14 @@ Contributions are welcome, but please follow the guidelines below to keep things
    npm run typecheck
    ```
 
-4. Run linting and formatting (if configured):
+4. Run linting and formatting:
 
    ```sh
    npm run lint
    npm run format
    ```
+
+> For detailed testing conventions and folder layout, see **TESTING.md** (authoritative).
 
 ---
 
@@ -47,72 +49,59 @@ src/
 ### Rules
 
 - **Requests**: always `strict()` and aligned with CoinGecko docs.
-- **Responses**: always `catchall(z.unknown())` (tolerant to new fields).
+- **Responses**: always tolerant via `.catchall(z.unknown())` to survive new upstream fields.
 - **Shared bits**: if multiple endpoints repeat a pattern, move it to `core/common.ts`.
 
 ---
 
 ## Coding Standards
 
-- **TypeScript** strict mode enabled (`--strict`).
-- **Zod schemas** must have comments or JSDoc for clarity.
-- Prefer **branded primitives** (`CoinId`, `VsCurrency`) over raw strings.
-- Use **`UrlString`** instead of `z.string().url()` (to handle `http` and empty strings).
-- Use **alphabetical order** for object keys where possible, for diff clarity.
+- **TypeScript** strict mode is on.
+- **Zod schemas** include comments / JSDoc for clarity.
+- Prefer **branded primitives** (e.g., `CoinId`, `VsCurrency`) over raw strings.
+- Use `UrlString` helper where applicable.
+- Alphabetize object keys where practical for cleaner diffs.
 
 ---
 
 ## JSDoc & Documentation
 
-- Every file starts with:
+Every source file starts with a concise file header:
 
-  ```ts
-  /**
-   * @file src/endpoints/coins/schemas.ts
-   * @module endpoints/coins/schemas
-   *
-   * Short description of what lives here.
-   */
-  ```
+```ts
+/**
+ * @file src/endpoints/coins/schemas.ts
+ * @module endpoints/coins/schemas
+ * @summary Zod schemas for Coins endpoints (requests/responses).
+ */
+```
 
-- Keep endpoint-specific **README.md** short, with examples.
+Keep endpoint-specific docs short and example-driven.
 
 ---
 
 ## Tests
 
-We are building toward **comprehensive tests per endpoint**.
+We’re building **comprehensive tests per endpoint**. See **TESTING.md** for specifics.
 
-- Place tests in `src/endpoints/__tests__/<endpoint>/`.
-- Test both **request parsing** and **response validation**.
-- Mock responses using minimal fixtures.
-- For query serialization, test `buildQuery` with defaults.
+- **Location**: `src/endpoints/__tests__/<endpoint>/`
+  - e.g., `src/endpoints/__tests__/coins/coins.requests.test.ts`
 
-* Use `z.input<typeof Schema>` for request literals; call `schema.parse(value)` only inside `expectValid/expectInvalid`.
-* Never read fields from `unknown`. Validate with small zod snippets (`safeParse`) or check presence via `isObjectRecord(...) && hasOwnProperty(...)`.
-* For `{id}` routes, use `dropId(req)` before `buildQuery()`.
-* Keep default-dropping assertions out of per-route tests; rely on the `*.sanity.functional.test.ts`.
-* Helpers live in `__tests__/_utils` and are excluded from coverage; include `/* c8 ignore file */` at the top.
-* Fixtures live beside their route; it’s fine to use minimal inline payloads for “tolerance” checks (don’t mutate fixtures).
-* Test titles read like the spec: _“normalizes X…”, “keeps Y…”, “rejects invalid Z”_.
+- **Shape**:
+  - **Requests**: valid/invalid shapes, CSV normalization, enum checks.
+  - **Responses**: tolerant parsing with minimal fixtures.
+  - **Functional**: buildQuery serialization + default-dropping.
+  - **Sanity**: tiny guardrails for “no params/defaults” routes.
+
+- **Fixtures**: keep them minimal and never mutate in tests (see TESTING.md for guidance).
 
 ---
 
-## Submitting a Pull Request
+## Pull Requests
 
-1. Ensure `npm run typecheck` passes.
-2. Ensure new schemas/changes are documented with JSDoc.
-3. Add/update tests if relevant.
-4. Keep PRs focused (one endpoint or one feature at a time).
-5. Open a PR with a clear description of what changed.
+- Keep changes focused.
+- Add/adjust tests with the patterns above.
+- Ensure `npm run typecheck`, `npm run lint`, and `npm run test:coverage` are green.
+- Include a brief PR description (what/why).
 
----
-
-## Questions?
-
-- Open a **Discussion** on GitHub for design topics.
-- Open an **Issue** for bugs or schema mismatches.
-
----
-
-Thanks for helping make ZodGecko better! 🚀
+Thank you! 🙂

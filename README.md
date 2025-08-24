@@ -1,136 +1,150 @@
 # ZodGecko
 
-A **TypeScript + Zod client toolkit** for the [CoinGecko API](https://www.coingecko.com/api/documentation).
+Type-safe CoinGecko v3 models powered by [Zod]. ZodGecko gives you:
 
-- ✅ End-to-end **runtime validation** with [Zod](https://zod.dev)
-- ✅ Strongly typed **request & response models**
-- ✅ Covers **all documented endpoints** (schemas, requests, responses)
-- ✅ Provides **helpers** for query building and server default handling
-- ✅ Modular, endpoint-scoped design for easy maintenance and tree-shaking
+- **Runtime validation** for requests & responses
+- **Type inference** (TS) straight from the schemas
+- A tiny **query builder** that normalizes values and **drops server defaults**
+- Clean **ESM**, **Node 18+**, tree-shakable subpath exports
 
-> ⚠️ **Disclaimer**  
-> This project is a **hobby library** maintained on a **best-efforts basis**.  
-> It is not officially affiliated with CoinGecko. Contributions welcome!
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+> **Status:** pre-1.0 **beta**. Expect sharp edges and incremental breaking changes while coverage expands.
 
 ---
 
-## Installation
+## Install
 
-```sh
-npm install zodgecko
+```bash
+npm i zodgecko zod
 # or
-yarn add zodgecko
+pnpm add zodgecko zod
 ```
 
-Peer dependency: [Zod](https://zod.dev).
+**Requirements**
+
+- Node **>= 18**
+- ESM only (no CJS)
+- Peer dep: `zod` **^3.25** or **^4** (either is supported)
 
 ---
 
-## Usage
-
-### Importing an endpoint
+## Quick start
 
 ```ts
 import { coins } from "zodgecko";
+import { buildQuery } from "zodgecko/runtime";
 
-// Validate a request
+// 1) Validate + infer request types using Zod schemas
 const req = coins.schemas.MarketsRequestSchema.parse({
   vs_currency: "usd",
   ids: ["bitcoin", "ethereum"],
 });
 
-// Serialize query string (drops defaults, stable order)
-import { buildQuery } from "zodgecko";
+// 2) Serialize query (stable CSV, drops defaults like per_page=100/page=1/order=market_cap_desc)
 const qs = new URLSearchParams(buildQuery("/coins/markets", req)).toString();
-// → "ids=bitcoin%2Cethereum&vs_currency=usd"
+// -> "ids=bitcoin%2Cethereum&vs_currency=usd"
 
-// Validate a response
+// 3) Fetch + validate the response at runtime
 const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?${qs}`);
 const data = coins.schemas.MarketsResponseSchema.parse(await res.json());
 ```
 
----
+### What `buildQuery` does
 
-## Project Structure
+- Arrays → **deduped, sorted CSV** (`["b","a","a"]` → `"a,b"`)
+- Booleans → `"true" | "false"`
+- Numbers → strings; **drops non-finite** (`NaN`, `±Infinity`)
+- **Drops empties** (empty arrays/strings/whitespace) & **unknown types**
+- **Drops documented server defaults** per endpoint (e.g. markets `per_page=100`, `page=1`, etc.)
 
-```
-src/
-  core/        # Shared Zod primitives & fragments
-  runtime/     # buildQuery + serverDefaults
-  endpoints/   # One folder per API group (coins, exchanges, simple, ...)
-```
-
-Each endpoint group contains:
-
-- `schemas.ts` — Zod schemas (runtime validation)
-- `requests.ts` — inferred request types
-- `responses.ts` — inferred response types
-- `index.ts` — public barrel
-- (optional) `README.md` — endpoint docs
-- (optional) `__tests__/` — unit tests
+If an endpoint has **no defaults**, `buildQuery` keeps everything (after normalization).
 
 ---
 
-## Why Zod + CoinGecko?
+## Endpoints covered
 
-CoinGecko’s API is powerful but untyped and fast-evolving.
-ZodGecko provides:
+- `asset-platforms`
+- `categories`
+- `coins` (detail, list, markets, tickers, history, ohlc, market_chart, market_chart/range)
+- `companies`
+- `contract` (by id + ERC20 subroutes)
+- `derivatives` (+ exchanges subroutes)
+- `exchanges`
+- `global`
+- `indexes`
+- `ping`
+- `search`
+- `simple`
+- `status_updates`
 
-- **Runtime safety** — every response is schema-validated
-- **Type inference** — no need to hand-maintain TypeScript interfaces
-- **Consistency** — defaults and CSV lists normalized
-- **Flexibility** — tolerant responses survive API changes
+Each group exposes:
+
+- **`schemas`** – Zod request/response schemas
+- **Types** – inferred from schemas in `requests.ts` / `responses.ts`
+
+Import from the **package root** for endpoint namespaces, and from **`zodgecko/runtime`** for runtime utilities.
+
+---
+
+## API surface
+
+```ts
+// Endpoint namespaces (exported at the root)
+import { coins, exchanges, simple /* ... */ } from "zodgecko";
+
+// Runtime helpers
+import { buildQuery, serverDefaults } from "zodgecko/runtime";
+
+// Low-level building blocks (if you need them)
+import * as core from "zodgecko/core"; // tolerantObject, CSList, primitives, etc.
+```
+
+> `serverDefaults` is a reference table that `buildQuery` uses to know which values to drop for each path.
+
+---
+
+## Error handling tips
+
+- Use `.parse(...)` to throw on invalid data, or `.safeParse(...)` if you prefer a result object.
+- Response schemas are intentionally **tolerant**: unknown fields are allowed so upstream additions don’t break you.
+
+---
+
+## Testing & quality
+
+- Full Vitest suite with 100% coverage across runtime logic and schemas
+- Per-endpoint **functional test docs** under `src/endpoints/**/docs/*.functional.testing.md`
+- A central **TESTING.md** explains the test layout, helpers, and fixtures
+
+Run locally:
+
+```bash
+npm run typecheck
+npm run lint
+npm run test:coverage
+```
+
+---
+
+## Versioning & stability
+
+- Pre-1.0 **beta** builds use `--tag beta`. Breaking changes may occur between betas.
+- Once stable, we’ll follow **SemVer**.
 
 ---
 
 ## Contributing
 
-Contributions are welcome!
-
-1. Fork and clone this repo
-2. Install dependencies: `npm install`
-3. Run type checks: `npm run typecheck`
-4. Add tests where possible
-5. Submit a PR
-
-**Coding standards:**
-
-- One endpoint = one folder in `src/endpoints/`
-- Requests strict, responses tolerant
-- Shared fragments in `src/core/`
-- Document new files with `@file` and `@module` JSDoc
+PRs welcome! Please run `typecheck`, `lint`, and the **full test suite** before opening. See **CONTRIBUTING.md** for guidelines.
 
 ---
-
-## Roadmap
-
-- [x] Full endpoint coverage
-- [x] Stable query serialization with defaults
-- [ ] Unit tests for each endpoint
-- [ ] Publish to NPM
-- [ ] Example usage in frameworks (Node, Deno, browser)
-
----
-
-### Notes
-
-- This library is provided **as-is**.
-- No guarantees of completeness, uptime, or compatibility with future CoinGecko API versions.
-- Please open an issue if you spot missing schemas or defaults.
-
----
-
-Happy hacking! 🚀
 
 ## License
 
-This project is licensed under the terms of the [MIT License](./LICENSE).
+MIT — see **LICENSE**.
 
 ## Note
 
-To produce an holistic overview of this repository there is a PowerShell script that can be run with:
+To produce an holistic overview of this repository there is an MS Windows PowerShell script that can be run with:
 
 ```powershell
 .\Export-Project.ps1 -OutputFile "project-dump-$(Get-Date -Format yyyyMMdd-HHmm).txt"
