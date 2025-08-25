@@ -6,7 +6,7 @@
 /* c8 ignore file */
 import type { z } from "zod";
 
-import { buildQuery, dropParams, serverDefaults, type Endpoint } from "../../../index.js";
+import { buildQuery, dropParams, getServerDefaults, type Endpoint } from "../../../index.js";
 
 // Re-export library helpers so tests don’t import from deep paths
 export { dropParams, dropId } from "../../../core/helpers.js";
@@ -73,7 +73,7 @@ export function isPlainObject(v: unknown): v is Record<string, unknown> {
 
 /** Assert that a route has no defaults and serializes an empty query from `{}`. */
 export function expectNoDefaultsAndEmptyQuery(endpoint: Endpoint): void {
-  expect(serverDefaults[endpoint]).toBeUndefined();
+  expect(getServerDefaults(endpoint)).toEqual({});
   expect(buildQuery(endpoint, {})).toEqual({});
 }
 
