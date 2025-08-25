@@ -11,8 +11,8 @@ import type { z } from "zod";
 import type {
   ExchangesResponseSchema,
   ExchangesListResponseSchema,
-  ExchangeTickersResponseSchema,
-  ExchangeVolumeChartResponseSchema,
+  ExchangesByIdTickersResponseSchema,
+  ExchangesByIdVolumeChartResponseSchema,
   ExchangeRowSchema,
   ExchangesListItemSchema,
 } from "./schemas.js";
@@ -33,7 +33,7 @@ export type ExchangesListResponse = z.infer<typeof ExchangesListResponseSchema>;
 export type ExchangeByIdResponse = z.infer<typeof ExchangeRowSchema>;
 
 /** Type for `GET /exchanges/{id}/tickers` response. */
-export type ExchangeTickersResponse = z.infer<typeof ExchangeTickersResponseSchema>;
+export type ExchangeTickersResponse = z.infer<typeof ExchangesByIdTickersResponseSchema>;
 
 /** Type for `GET /exchanges/{id}/volume_chart` response. */
-export type ExchangeVolumeChartResponse = z.infer<typeof ExchangeVolumeChartResponseSchema>;
+export type ExchangeVolumeChartResponse = z.infer<typeof ExchangesByIdVolumeChartResponseSchema>;

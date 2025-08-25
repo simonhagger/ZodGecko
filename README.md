@@ -1,13 +1,9 @@
 # ZodGecko
 
-Type-safe CoinGecko v3 models powered by [Zod]. ZodGecko gives you:
+Type-safe CoinGecko v3 models powered by \[Zod].
+Validate requests & responses at runtime, infer types at compile time, and serialize queries that “just work”.
 
-- **Runtime validation** for requests & responses
-- **Type inference** (TS) straight from the schemas
-- A tiny **query builder** that normalizes values and **drops server defaults**
-- Clean **ESM**, **Node 18+**, tree-shakable subpath exports
-
-> **Status:** pre-1.0 **beta**. Expect sharp edges and incremental breaking changes while coverage expands.
+> **Status:** pre-1.0 **beta** — expect changes between betas.
 
 ---
 
@@ -19,143 +15,145 @@ npm i zodgecko zod
 pnpm add zodgecko zod
 ```
 
-**Requirements**
-
-- Node **>= 18**
-- ESM only (no CJS)
-- Peer dep: `zod` **^3.25** or **^4** (either is supported)
+**Requirements:** Node 18+, ESM only.
 
 ---
 
-## Quick start
+## Quickstart
+
+Fetch markets with type-safe params + runtime-validated response:
 
 ```ts
 import { coins } from "zodgecko";
 import { buildQuery } from "zodgecko/runtime";
 
-// 1) Validate + infer request types using Zod schemas
+// 1) Type-safe params (throws if invalid)
 const req = coins.schemas.MarketsRequestSchema.parse({
   vs_currency: "usd",
   ids: ["bitcoin", "ethereum"],
 });
 
-// 2) Serialize query (stable CSV, drops defaults like per_page=100/page=1/order=market_cap_desc)
+// 2) Serialize query (arrays → stable CSV, booleans → "true"/"false",
+//    numbers → strings, empties dropped, documented server defaults dropped)
 const qs = new URLSearchParams(buildQuery("/coins/markets", req)).toString();
-// -> "ids=bitcoin%2Cethereum&vs_currency=usd"
 
-// 3) Fetch + validate the response at runtime
 const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?${qs}`);
 const data = coins.schemas.MarketsResponseSchema.parse(await res.json());
+//    ^ runtime-validated, fully typed
 ```
 
-### What `buildQuery` does
+---
 
-- Arrays → **deduped, sorted CSV** (`["b","a","a"]` → `"a,b"`)
-- Booleans → `"true" | "false"`
-- Numbers → strings; **drops non-finite** (`NaN`, `±Infinity`)
-- **Drops empties** (empty arrays/strings/whitespace) & **unknown types**
-- **Drops documented server defaults** per endpoint (e.g. markets `per_page=100`, `page=1`, etc.)
+## Why ZodGecko?
 
-If an endpoint has **no defaults**, `buildQuery` keeps everything (after normalization).
+- **Runtime validation**: catch API changes and bad inputs immediately.
+- **Type inference**: TS types come from schemas, no duplication.
+- **Smart query builder**: dedup/sort CSVs, normalize values, **drop server defaults**.
+- **Small surface**: ESM, tree-shakable endpoint groups.
 
 ---
 
-## Endpoints covered
+## Common recipes
 
-- `asset-platforms`
-- `categories`
-- `coins` (detail, list, markets, tickers, history, ohlc, market_chart, market_chart/range)
-- `companies`
-- `contract` (by id + ERC20 subroutes)
-- `derivatives` (+ exchanges subroutes)
-- `exchanges`
-- `global`
-- `indexes`
-- `ping`
-- `search`
-- `simple`
-
-Each group exposes:
-
-- **`schemas`** – Zod request/response schemas
-- **Types** – inferred from schemas in `requests.ts` / `responses.ts`
-
-Import from the **package root** for endpoint namespaces, and from **`zodgecko/runtime`** for runtime utilities.
-
----
-
-## API surface
+### 1) Coin detail (drop path param from query)
 
 ```ts
-// Endpoint namespaces (exported at the root)
-import { coins, exchanges, simple /* ... */ } from "zodgecko";
+import { coins } from "zodgecko";
+import { buildQuery, formatPath } from "zodgecko/runtime";
 
-// Runtime helpers
-import { buildQuery, serverDefaults } from "zodgecko/runtime";
+const path = formatPath("/coins/{id}", { id: "bitcoin" });
+const req = coins.schemas.CoinDetailRequestSchema.parse({
+  localization: false, // default is true → kept as "false"
+});
+// remove path params from query object (nothing to drop here, shown for pattern)
+const qs = new URLSearchParams(buildQuery("/coins/{id}", req)).toString();
 
-// Low-level building blocks (if you need them)
-import * as core from "zodgecko/core"; // tolerantObject, CSList, primitives, etc.
+const res = await fetch(`https://api.coingecko.com/api/v3${path}?${qs}`);
+const body = coins.schemas.CoinDetailResponseSchema.parse(await res.json());
 ```
 
-> `serverDefaults` is a reference table that `buildQuery` uses to know which values to drop for each path.
+### 2) Token price by platform (with path + arrays)
 
-### Ergonomic helpers
+```ts
+import { simple } from "zodgecko";
+import { buildQuery, formatPath } from "zodgecko/runtime";
 
-These sit on top of `buildQuery`:
+const path = formatPath("/simple/token_price/{id}", { id: "ethereum" });
+const req = simple.schemas.SimpleTokenPriceRequestSchema.parse({
+  contract_addresses: [
+    "0x0000000000000000000000000000000000000000",
+    "0x1111111111111111111111111111111111111111",
+  ],
+  vs_currencies: ["usd", "eur"],
+  include_market_cap: true,
+});
 
-- `toURL(base, path, params)` → full URL string with normalized query
-- `qsString(path, params)` → `"a=b&c=d"` query string
-- `dropId(obj)` / `dropParams(obj,[...])` → remove path params before serialization
-- `withDefaults(path, partial)` → fill **missing** fields with documented server defaults (does not affect `buildQuery`)
-- `safeParseRequest(schema, input)` / `explainZodError(error)` → friendlier request parsing
-- `toUnixSeconds`, `ddmmyyyy`, `normalizeCoinId`, `normalizeVsCurrencies` → small coercers
+const qs = new URLSearchParams(buildQuery("/simple/token_price/{id}", req)).toString();
+const res = await fetch(`https://api.coingecko.com/api/v3${path}?${qs}`);
+const data = simple.schemas.SimpleTokenPriceResponseSchema.parse(await res.json());
+```
 
----
+### 3) Friendlier errors
 
-## Error handling tips
+```ts
+import { explainZodError } from "zodgecko/runtime";
+import { coins } from "zodgecko";
 
-- Use `.parse(...)` to throw on invalid data, or `.safeParse(...)` if you prefer a result object.
-- Response schemas are intentionally **tolerant**: unknown fields are allowed so upstream additions don’t break you.
-
----
-
-## Testing & quality
-
-- Full Vitest suite with 100% coverage across runtime logic and schemas
-- Per-endpoint **functional test docs** under `src/endpoints/**/docs/*.functional.testing.md`
-- A central **TESTING.md** explains the test layout, helpers, and fixtures
-
-Run locally:
-
-```bash
-npm run typecheck
-npm run lint
-npm run test:coverage
+const parsed = coins.schemas.MarketsRequestSchema.safeParse({ vs_currency: 123 });
+if (!parsed.success) {
+  console.error(explainZodError(parsed.error)); // neat, readable messages
+}
 ```
 
 ---
 
-## Versioning & stability
+## Supported endpoints (high level)
 
-- Pre-1.0 **beta** builds use `--tag beta`. Breaking changes may occur between betas.
-- Once stable, we’ll follow **SemVer**.
+- **asset-platforms**, **categories**, **coins** (detail, list, markets, tickers, history, ohlc, market_chart, market_chart/range)
+- **companies**, **contract** (by platform + subroutes), **derivatives** (incl. exchanges), **exchanges**
+- **global**, **indexes**, **ping**, **search**, **simple**
+
+Each endpoint group exports a `schemas` object for **requests** and **responses**.
+
+> Full details & per-endpoint notes: see the repo.
 
 ---
 
-## Contributing
+## Runtime helpers
 
-PRs welcome! Please run `typecheck`, `lint`, and the **full test suite** before opening. See **CONTRIBUTING.md** for guidelines.
+From `zodgecko/runtime`:
+
+- `buildQuery(path, params)` → normalized query object (CSV/booleans/numbers/default-dropping)
+- `formatPath("/coins/{id}", { id: "bitcoin" })` → `"/coins/bitcoin"`
+- `toURL(base, path, params)` / `qsString(path, params)` → convenience compilers
+- `withDefaults(path, partial)` → fill **missing** fields with documented server defaults
+- `explainZodError(error)` → readable Zod error messages
 
 ---
 
-## License
+## TypeScript tips
 
-MIT — see **LICENSE**.
+Use schema input types for request literals:
 
-## Note
+```ts
+import type { z } from "zod";
+import { coins } from "zodgecko";
 
-To produce an holistic overview of this repository there is an MS Windows PowerShell script that can be run with:
-
-```powershell
-.\Export-Project.ps1 -OutputFile "project-dump-$(Get-Date -Format yyyyMMdd-HHmm).txt"
+type MarketsIn = z.input<typeof coins.schemas.MarketsRequestSchema>;
+const req: MarketsIn = { vs_currency: "usd" }; // TS checks before runtime parse
 ```
+
+---
+
+## Versioning
+
+- Betas are published with `--tag beta` (e.g. `0.1.2-beta.0`).
+- Breaking changes can occur between betas. Stable 1.0 will follow SemVer.
+
+---
+
+## Links
+
+- **GitHub (docs & issues):** search “zodgecko” on GitHub
+- **Testing guide:** see `TESTING.md` in the repo
+- **Contributing:** see `CONTRIBUTING.md`

@@ -9,13 +9,17 @@
 import type { z } from "zod";
 
 import type {
-  ContractCoinResponseSchema,
-  ContractMarketChartResponseSchema,
-  ContractMarketChartRangeResponseSchema,
+  CoinsByIdContractByAddressResponseSchema,
+  CoinsByIdContractByAddressMarketChartResponseSchema,
+  CoinsByIdContractByAddressMarketChartRangeResponseSchema,
 } from "./schemas.js";
 
-export type ContractCoinResponse = z.infer<typeof ContractCoinResponseSchema>;
-export type ContractMarketChartResponse = z.infer<typeof ContractMarketChartResponseSchema>;
-export type ContractMarketChartRangeResponse = z.infer<
-  typeof ContractMarketChartRangeResponseSchema
+export type CoinsByIdContractByAddressResponse = z.infer<
+  typeof CoinsByIdContractByAddressResponseSchema
+>;
+export type CoinsByIdContractByAddressMarketChartResponse = z.infer<
+  typeof CoinsByIdContractByAddressMarketChartResponseSchema
+>;
+export type CoinsByIdContractByAddressMarketChartRangeResponse = z.infer<
+  typeof CoinsByIdContractByAddressMarketChartRangeResponseSchema
 >;

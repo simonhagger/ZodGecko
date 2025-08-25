@@ -12,7 +12,7 @@ import type { z } from "zod";
 import { coins, buildQuery } from "../../../index.js";
 import { dropPathParams } from "../_utils/index.js";
 
-type CoinDetailInput = z.input<typeof coins.schemas.CoinDetailRequestSchema>;
+type CoinDetailInput = z.input<typeof coins.schemas.CoinsByIdRequestSchema>;
 
 describe("coins.detail – functional", () => {
   it("drops params equal to server defaults", () => {
@@ -27,7 +27,7 @@ describe("coins.detail – functional", () => {
       // dex_pair_format omitted
     };
 
-    expect(() => coins.schemas.CoinDetailRequestSchema.parse(req)).not.toThrow();
+    expect(() => coins.schemas.CoinsByIdRequestSchema.parse(req)).not.toThrow();
 
     const q = dropPathParams("/coins/{id}", req); // ← remove path param for query build
     expect(buildQuery("/coins/{id}", q)).toEqual({});
@@ -40,7 +40,7 @@ describe("coins.detail – functional", () => {
       tickers: false, // default true → keep
     };
 
-    expect(() => coins.schemas.CoinDetailRequestSchema.parse(req)).not.toThrow();
+    expect(() => coins.schemas.CoinsByIdRequestSchema.parse(req)).not.toThrow();
 
     const q = dropPathParams("/coins/{id}", req);
     expect(buildQuery("/coins/{id}", q)).toEqual({

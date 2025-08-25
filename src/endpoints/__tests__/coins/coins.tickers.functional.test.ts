@@ -13,7 +13,7 @@ import { dropId } from "../_utils/index.js";
 
 describe("coins.tickers – functional", () => {
   it("drops default order, normalizes exchange_ids, keeps non-defaults", () => {
-    const req = coins.schemas.CoinTickersRequestSchema.parse({
+    const req = coins.schemas.CoinsByIdTickersRequestSchema.parse({
       id: "bitcoin",
       exchange_ids: ["binance", "kraken", "binance"],
       page: 2,

@@ -45,14 +45,14 @@ describe("exchanges.responses (fixtures)", () => {
   });
 
   it("parses /exchanges/{id}/tickers fixture", () => {
-    const parsed = exchanges.schemas.ExchangeTickersResponseSchema.parse(tickers as unknown);
+    const parsed = exchanges.schemas.ExchangesByIdTickersResponseSchema.parse(tickers as unknown);
     // Envelope should contain a tickers array
     expect(isObjectRecord(parsed)).toBe(true);
     expect(Array.isArray((parsed as Record<string, unknown>).tickers)).toBe(true);
   });
 
   it("parses /exchanges/{id}/volume_chart fixture", () => {
-    const parsed = exchanges.schemas.ExchangeVolumeChartResponseSchema.parse(vol as unknown);
+    const parsed = exchanges.schemas.ExchangesByIdVolumeChartResponseSchema.parse(vol as unknown);
     // Expect array of [timestamp, value] tuples
     expect(Array.isArray(parsed)).toBe(true);
     if (parsed.length > 0) {

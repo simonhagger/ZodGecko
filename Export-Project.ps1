@@ -13,6 +13,11 @@
 #   - lock files (package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb)
 #   - .env* (to avoid secrets)
 # -------------------------------------------------------------------
+
+#--- Example usage: ---
+# .\Export-Project.ps1 -OutputFile "project-dump-$(Get-Date -Format yyyyMMdd-HHmm).txt"
+#----------------------
+
 param(
   [string]$OutputFile = "project-dump.txt",
   [int]$MaxFileSizeMB = 2

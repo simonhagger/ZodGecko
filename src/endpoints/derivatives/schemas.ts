@@ -41,7 +41,7 @@ export const DerivativesExchangesRequestSchema = z
 export const DerivativesExchangesListRequestSchema = z.object({}).strict();
 
 /** @endpoint GET /derivatives/exchanges/{id} */
-export const DerivativesExchangeByIdRequestSchema = z
+export const DerivativesExchangesByIdRequestSchema = z
   .object({
     id: z.string(),
   })
@@ -74,7 +74,7 @@ export const DerivativesResponseSchema = z.array(DerivativeRowSchema);
  * Exchange row used by /derivatives/exchanges and /{id}.
  * Some metrics may be null depending on the venue.
  */
-export const DerivativesExchangeRowSchema = tolerantObject({
+export const DerivativesExchangesRowSchema = tolerantObject({
   id: z.string().optional(),
   name: z.string().optional(),
   year_established: z.number().nullable().optional(),
@@ -91,7 +91,7 @@ export const DerivativesExchangeRowSchema = tolerantObject({
   tickers: z.array(z.unknown()).optional(),
 });
 /** Array of exchange rows. */
-export const DerivativesExchangesResponseSchema = z.array(DerivativesExchangeRowSchema);
+export const DerivativesExchangesResponseSchema = z.array(DerivativesExchangesRowSchema);
 
 /** Minimal listing item for /derivatives/exchanges/list. */
 export const DerivativesExchangesListItemSchema = tolerantObject({
@@ -102,4 +102,4 @@ export const DerivativesExchangesListItemSchema = tolerantObject({
 export const DerivativesExchangesListResponseSchema = z.array(DerivativesExchangesListItemSchema);
 
 /** Detail response for /derivatives/exchanges/{id}. */
-export const DerivativesExchangeByIdResponseSchema = DerivativesExchangeRowSchema;
+export const DerivativesExchangesByIdResponseSchema = DerivativesExchangesRowSchema;

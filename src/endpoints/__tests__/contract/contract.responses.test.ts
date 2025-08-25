@@ -26,12 +26,14 @@ const HasChartArrays = z.object({
 
 describe("contract.responses", () => {
   it("parses market_chart fixture; essential arrays/tuples validate", () => {
-    const parsed = contract.schemas.ContractMarketChartResponseSchema.parse(mcFixture as unknown);
+    const parsed = contract.schemas.CoinsByIdContractByAddressMarketChartResponseSchema.parse(
+      mcFixture as unknown,
+    );
     expect(HasChartArrays.safeParse(parsed).success).toBe(true);
   });
 
   it("parses market_chart.range fixture; essential arrays/tuples validate", () => {
-    const parsed = contract.schemas.ContractMarketChartRangeResponseSchema.parse(
+    const parsed = contract.schemas.CoinsByIdContractByAddressMarketChartRangeResponseSchema.parse(
       rangeFixture as unknown,
     );
     expect(HasChartArrays.safeParse(parsed).success).toBe(true);
@@ -44,7 +46,8 @@ describe("contract.responses", () => {
       total_volumes: [[1710374400000, 54321]],
       some_future_field: { ok: true },
     };
-    const parsed = contract.schemas.ContractMarketChartResponseSchema.parse(payload);
+    const parsed =
+      contract.schemas.CoinsByIdContractByAddressMarketChartResponseSchema.parse(payload);
     expect(
       isObjectRecord(parsed) && Object.prototype.hasOwnProperty.call(parsed, "some_future_field"),
     ).toBe(true);

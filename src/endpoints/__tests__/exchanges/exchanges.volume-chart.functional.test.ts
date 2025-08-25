@@ -14,12 +14,12 @@ import type { z } from "zod";
 import { exchanges, buildQuery } from "../../../index.js";
 import { dropId, expectValid } from "../_utils/index.js";
 
-type VolReqIn = z.input<typeof exchanges.schemas.ExchangeVolumeChartRequestSchema>;
+type VolReqIn = z.input<typeof exchanges.schemas.ExchangesByIdVolumeChartRequestSchema>;
 
 describe("exchanges.volume_chart – functional", () => {
   it("serializes days (number→string) and drops path id", () => {
     const req: VolReqIn = { id: "binance", days: 30 };
-    expectValid(exchanges.schemas.ExchangeVolumeChartRequestSchema, req);
+    expectValid(exchanges.schemas.ExchangesByIdVolumeChartRequestSchema, req);
 
     const q = dropId(req);
     expect(buildQuery("/exchanges/{id}/volume_chart", q)).toEqual({

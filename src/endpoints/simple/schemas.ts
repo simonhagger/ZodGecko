@@ -40,7 +40,7 @@ export const SimplePriceRequestSchema = z
  * @endpoint GET /simple/token_price/{id}
  * @summary Returns the price of tokens for a given platform by contract addresses.
  */
-export const SimpleTokenPriceRequestSchema = z
+export const SimpleTokenPriceByIdRequestSchema = z
   .object({
     id: CoinId,
     contract_addresses: CSList(z.string()),
@@ -57,7 +57,7 @@ export const SimpleTokenPriceRequestSchema = z
  * @endpoint GET /simple/supported_vs_currencies
  * @summary Returns a list of supported vs_currencies.
  */
-export const SupportedVsCurrenciesRequestSchema = z.object({}).strict();
+export const SimpleSupportedVsCurrenciesRequestSchema = z.object({}).strict();
 
 /* ============================================================================
  * Responses
@@ -73,7 +73,7 @@ export const SimplePriceResponseSchema = z.record(z.string(), z.record(z.string(
  * @response GET /simple/token_price/{id}
  * Example: `{ "0x123...": { "usd": 1.23, "eth": 0.0005 }, ... }`
  */
-export const SimpleTokenPriceResponseSchema = z.record(
+export const SimpleTokenPriceByIdResponseSchema = z.record(
   z.string(),
   z.record(z.string(), z.number()),
 );
@@ -82,4 +82,4 @@ export const SimpleTokenPriceResponseSchema = z.record(
  * @response GET /simple/supported_vs_currencies
  * Example: `[ "usd", "eur", "btc", ... ]`
  */
-export const SupportedVsCurrenciesResponseSchema = z.array(VsCurrency);
+export const SimpleSupportedVsCurrenciesResponseSchema = z.array(VsCurrency);

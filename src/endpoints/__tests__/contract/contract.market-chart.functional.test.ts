@@ -11,7 +11,7 @@ import type { z } from "zod";
 import { contract, buildQuery } from "../../../index.js";
 import { expectValid, dropIdAndAddress } from "../_utils/index.js";
 
-type ChartIn = z.input<typeof contract.schemas.ContractMarketChartRequestSchema>;
+type ChartIn = z.input<typeof contract.schemas.CoinsByIdContractByAddressMarketChartRequestSchema>;
 
 describe("contract.market_chart – functional", () => {
   it("normalizes days (number→string)", () => {
@@ -21,7 +21,7 @@ describe("contract.market_chart – functional", () => {
       vs_currency: "usd",
       days: 30,
     };
-    expectValid(contract.schemas.ContractMarketChartRequestSchema, req);
+    expectValid(contract.schemas.CoinsByIdContractByAddressMarketChartRequestSchema, req);
 
     const q = dropIdAndAddress(req);
     expect(buildQuery("/coins/{id}/contract/{contract_address}/market_chart", q)).toEqual({

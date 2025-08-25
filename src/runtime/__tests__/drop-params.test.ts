@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import { dropId, dropParams } from "../../runtime/params.js";
+import { dropId, dropParams } from "../../index.js";
 
 describe("runtime/params helpers", () => {
   it("dropId removes the id key only", () => {

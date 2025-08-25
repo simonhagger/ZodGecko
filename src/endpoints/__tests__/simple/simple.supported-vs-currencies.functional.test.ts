@@ -13,12 +13,12 @@ import type { z } from "zod";
 import { simple, buildQuery } from "../../../index.js";
 import { expectValid } from "../_utils/index.js";
 
-type VsReqIn = z.input<typeof simple.schemas.SupportedVsCurrenciesRequestSchema>;
+type VsReqIn = z.input<typeof simple.schemas.SimpleSupportedVsCurrenciesRequestSchema>;
 
 describe("simple.supported_vs_currencies – functional", () => {
   it("empty request stays empty in the query string", () => {
     const req: VsReqIn = {};
-    expectValid(simple.schemas.SupportedVsCurrenciesRequestSchema, req);
+    expectValid(simple.schemas.SimpleSupportedVsCurrenciesRequestSchema, req);
     expect(buildQuery("/simple/supported_vs_currencies", req)).toEqual({});
   });
 });

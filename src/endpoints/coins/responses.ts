@@ -9,42 +9,44 @@
 import type { z } from "zod";
 
 import type {
-  MarketsResponseSchema,
+  CoinsMarketsResponseSchema,
   CoinsListResponseSchema,
-  CoinDetailSchema,
-  HistoryResponseSchema,
-  CoinTickersResponseSchema,
-  MarketChartResponseSchema,
-  MarketChartRangeResponseSchema,
-  OhlcResponseSchema,
-  MarketsRowSchema,
-  CoinListItemSchema,
+  CoinsByIdResponseSchema,
+  CoinsByIdHistoryResponseSchema,
+  CoinsByIdTickersResponseSchema,
+  CoinsByIdMarketChartResponseSchema,
+  CoinsByIdMarketChartRangeResponseSchema,
+  CoinsByIdOhlcResponseSchema,
+  CoinsMarketsRowSchema,
+  CoinsListItemSchema,
 } from "./schemas.js";
 
 /** Type for `GET /coins/markets` response. */
-export type MarketsResponse = z.infer<typeof MarketsResponseSchema>;
+export type CoinsMarketsResponse = z.infer<typeof CoinsMarketsResponseSchema>;
 /** Item type for /coins/markets row. */
-export type MarketsRow = z.infer<typeof MarketsRowSchema>;
+export type CoinsMarketsRow = z.infer<typeof CoinsMarketsRowSchema>;
 
 /** Type for `GET /coins/list` response. */
 export type CoinsListResponse = z.infer<typeof CoinsListResponseSchema>;
 /** Item type for /coins/list row. */
-export type CoinListItem = z.infer<typeof CoinListItemSchema>;
+export type CoinsListItem = z.infer<typeof CoinsListItemSchema>;
 
 /** Type for `GET /coins/{id}` response. */
-export type CoinDetail = z.infer<typeof CoinDetailSchema>;
+export type CoinsByIdResponse = z.infer<typeof CoinsByIdResponseSchema>;
 
 /** Type for `GET /coins/{id}/history` response. */
-export type HistoryResponse = z.infer<typeof HistoryResponseSchema>;
+export type CoinsByIdHistoryResponse = z.infer<typeof CoinsByIdHistoryResponseSchema>;
 
 /** Type for `GET /coins/{id}/tickers` response. */
-export type CoinTickersResponse = z.infer<typeof CoinTickersResponseSchema>;
+export type CoinsByIdTickersResponse = z.infer<typeof CoinsByIdTickersResponseSchema>;
 
 /** Type for `GET /coins/{id}/market_chart` response. */
-export type MarketChartResponse = z.infer<typeof MarketChartResponseSchema>;
+export type CoinsByIdMarketChartResponse = z.infer<typeof CoinsByIdMarketChartResponseSchema>;
 
 /** Type for `GET /coins/{id}/market_chart/range` response. */
-export type MarketChartRangeResponse = z.infer<typeof MarketChartRangeResponseSchema>;
+export type CoinsByIdMarketChartRangeResponse = z.infer<
+  typeof CoinsByIdMarketChartRangeResponseSchema
+>;
 
 /** Type for `GET /coins/{id}/ohlc` response. */
-export type OhlcResponse = z.infer<typeof OhlcResponseSchema>;
+export type CoinsByIdOhlcResponse = z.infer<typeof CoinsByIdOhlcResponseSchema>;

@@ -11,7 +11,9 @@ import type { z } from "zod";
 import { contract, buildQuery } from "../../../index.js";
 import { expectValid, dropIdAndAddress } from "../_utils/index.js";
 
-type RangeIn = z.input<typeof contract.schemas.ContractMarketChartRangeRequestSchema>;
+type RangeIn = z.input<
+  typeof contract.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema
+>;
 
 describe("contract.market_chart.range – functional", () => {
   it("normalizes numeric from/to to strings", () => {
@@ -22,7 +24,7 @@ describe("contract.market_chart.range – functional", () => {
       from: 1714060800,
       to: 1714588800,
     };
-    expectValid(contract.schemas.ContractMarketChartRangeRequestSchema, req);
+    expectValid(contract.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema, req);
 
     const q = dropIdAndAddress(req);
     expect(buildQuery("/coins/{id}/contract/{contract_address}/market_chart/range", q)).toEqual({

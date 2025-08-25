@@ -12,12 +12,12 @@ import type { z } from "zod";
 import { companies, buildQuery } from "../../../index.js";
 import { expectValid, expectInvalid } from "../_utils/index.js";
 
-type TreasuryReqIn = z.input<typeof companies.schemas.CompaniesTreasuryRequestSchema>;
+type TreasuryReqIn = z.input<typeof companies.schemas.CompaniesPublicTreasuryByIdRequestSchema>;
 
 describe("companies.treasury – functional", () => {
   it("accepts bitcoin and builds an empty query (no query params)", () => {
     const req: TreasuryReqIn = { coin_id: "bitcoin" };
-    expectValid(companies.schemas.CompaniesTreasuryRequestSchema, req);
+    expectValid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, req);
 
     // drop path param for serialization
     const { coin_id: _id, ...q } = req;
@@ -26,6 +26,8 @@ describe("companies.treasury – functional", () => {
   });
 
   it("rejects unsupported coin ids", () => {
-    expectInvalid(companies.schemas.CompaniesTreasuryRequestSchema, { coin_id: "dogecoin" });
+    expectInvalid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, {
+      coin_id: "dogecoin",
+    });
   });
 });

@@ -1,7 +1,0 @@
-{
-  "name": "BTC Perpetual Futures Index",
-  "market": "binance_futures",
-  "last": 60000.12,
-  "symbol": "BTCUSD_PERP",
-  "components": [{ "name": "BTC", "weight": 1.0 }]
-}

@@ -7,8 +7,8 @@
  * - Runtime Zod schemas are exposed under `companies.schemas`.
  */
 
-export type { CompaniesTreasuryRequest } from "./requests.js";
+export type { CompaniesPublicTreasuryByIdRequest } from "./requests.js";
 
-export type { Company, CompaniesTreasuryResponse } from "./responses.js";
+export type { Company, CompaniesPublicTreasuryByIdResponse } from "./responses.js";
 
 export * as schemas from "./schemas.js";

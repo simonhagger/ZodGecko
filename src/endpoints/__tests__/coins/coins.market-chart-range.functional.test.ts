@@ -12,7 +12,9 @@ import type { z } from "zod";
 import { coins, buildQuery } from "../../../index.js";
 import { dropId } from "../_utils/index.js";
 
-type MarketChartRangeRequestInput = z.input<typeof coins.schemas.MarketChartRangeRequestSchema>;
+type MarketChartRangeRequestInput = z.input<
+  typeof coins.schemas.CoinsByIdMarketChartRangeRequestSchema
+>;
 
 describe("coins.market_chart.range – functional", () => {
   it("normalizes numeric from/to to strings; keeps precision when provided", () => {
@@ -24,7 +26,7 @@ describe("coins.market_chart.range – functional", () => {
       precision: "2",
     };
 
-    expect(() => coins.schemas.MarketChartRangeRequestSchema.parse(req)).not.toThrow();
+    expect(() => coins.schemas.CoinsByIdMarketChartRangeRequestSchema.parse(req)).not.toThrow();
 
     // strip path param for query building
     const q = dropId(req);
@@ -40,7 +42,7 @@ describe("coins.market_chart.range – functional", () => {
   it("rejects string unix timestamps", () => {
     // schema should refuse strings for from/to
     expect(() =>
-      coins.schemas.MarketChartRangeRequestSchema.parse({
+      coins.schemas.CoinsByIdMarketChartRangeRequestSchema.parse({
         id: "bitcoin",
         vs_currency: "usd",
         from: "1714060800" as unknown as number,

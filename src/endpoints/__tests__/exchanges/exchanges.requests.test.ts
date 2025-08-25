@@ -20,9 +20,11 @@ import { expectValid, expectInvalid, dropId } from "../_utils/index.js";
 /** Convenience aliases for schema *inputs* (not outputs). */
 type ExchangesReqIn = z.input<typeof exchanges.schemas.ExchangesRequestSchema>;
 type ExchangesListReqIn = z.input<typeof exchanges.schemas.ExchangesListRequestSchema>;
-type ExchangeByIdReqIn = z.input<typeof exchanges.schemas.ExchangeByIdRequestSchema>;
-type ExchangeTickersReqIn = z.input<typeof exchanges.schemas.ExchangeTickersRequestSchema>;
-type ExchangeVolumeChartReqIn = z.input<typeof exchanges.schemas.ExchangeVolumeChartRequestSchema>;
+type ExchangeByIdReqIn = z.input<typeof exchanges.schemas.ExchangesByIdRequestSchema>;
+type ExchangeTickersReqIn = z.input<typeof exchanges.schemas.ExchangesByIdTickersRequestSchema>;
+type ExchangeVolumeChartReqIn = z.input<
+  typeof exchanges.schemas.ExchangesByIdVolumeChartRequestSchema
+>;
 
 describe("exchanges.requests", () => {
   it("GET /exchanges: pagination accepted; numbers→strings in query", () => {
@@ -55,8 +57,7 @@ describe("exchanges.requests", () => {
       include_exchange_logo: true,
       order: "trust_score_desc", // no server-default here → keep
     };
-    const { id: _omit, ...q } = exchanges.schemas.ExchangeTickersRequestSchema.parse(req);
-    void _omit;
+    const q = dropId(exchanges.schemas.ExchangesByIdTickersRequestSchema.parse(req));
     expect(buildQuery("/exchanges/{id}/tickers", q)).toEqual({
       coin_ids: "btc,eth",
       include_exchange_logo: "true",
@@ -67,8 +68,7 @@ describe("exchanges.requests", () => {
 
   it("GET /exchanges/{id}/volume_chart: days numeric → string; id dropped", () => {
     const req: ExchangeVolumeChartReqIn = { id: "kraken", days: 7 };
-    const { id: _drop, ...q } = exchanges.schemas.ExchangeVolumeChartRequestSchema.parse(req);
-    void _drop;
+    const q = dropId(exchanges.schemas.ExchangesByIdVolumeChartRequestSchema.parse(req));
     expect(buildQuery("/exchanges/{id}/volume_chart", q)).toEqual({ days: "7" });
   });
 });

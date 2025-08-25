@@ -13,17 +13,17 @@ import { describe, it, expect } from "vitest";
 import { coins, buildQuery } from "../../../index.js";
 
 describe("coins.requests", () => {
-  const { MarketsRequestSchema } = coins.schemas;
+  const { CoinsMarketsRequestSchema } = coins.schemas;
 
   it("accepts minimal valid request", () => {
-    const req = MarketsRequestSchema.parse({ vs_currency: "usd" });
+    const req = CoinsMarketsRequestSchema.parse({ vs_currency: "usd" });
     // Pagination defaults come from common.ts (per_page=100, page=1)
     expect(req.per_page).toBe(100);
     expect(req.page).toBe(1);
   });
 
   it("normalizes csv inputs via buildQuery (stable, deduped, sorted)", () => {
-    const req = MarketsRequestSchema.parse({
+    const req = CoinsMarketsRequestSchema.parse({
       vs_currency: "usd",
       ids: ["ethereum", "bitcoin", "ethereum"],
     });
@@ -47,13 +47,13 @@ describe("coins.requests", () => {
 
   it("rejects invalid enum for order", () => {
     expect(() =>
-      MarketsRequestSchema.parse({ vs_currency: "usd", order: "not-a-real-order" }),
+      CoinsMarketsRequestSchema.parse({ vs_currency: "usd", order: "not-a-real-order" }),
     ).toThrow();
   });
 
   // extend src/endpoints/coins/__tests__/requests.test.ts
   it("drops default order but keeps non-default order", () => {
-    const minimal = coins.schemas.MarketsRequestSchema.parse({ vs_currency: "usd" });
+    const minimal = coins.schemas.CoinsMarketsRequestSchema.parse({ vs_currency: "usd" });
     const q1 = buildQuery("/coins/markets", { ...minimal, order: "market_cap_desc" });
     expect(q1.order).toBeUndefined();
 

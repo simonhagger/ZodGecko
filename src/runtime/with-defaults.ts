@@ -8,6 +8,7 @@
  * This does NOT affect `buildQuery` behavior; it's a separate convenience.
  */
 
+import type { Endpoint } from "./endpoints.js";
 import { getServerDefaults } from "./server-defaults.js";
 
 /**
@@ -15,7 +16,7 @@ import { getServerDefaults } from "./server-defaults.js";
  * Provided keys are never overwritten.
  */
 export function withDefaults<T extends Record<string, unknown>>(
-  path: string,
+  path: Endpoint,
   partial: T,
 ): T & Readonly<Record<string, unknown>> {
   const defaults = getServerDefaults(path);

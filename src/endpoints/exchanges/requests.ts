@@ -11,9 +11,9 @@ import type { z } from "zod";
 import type {
   ExchangesRequestSchema,
   ExchangesListRequestSchema,
-  ExchangeByIdRequestSchema,
-  ExchangeTickersRequestSchema,
-  ExchangeVolumeChartRequestSchema,
+  ExchangesByIdRequestSchema,
+  ExchangesByIdTickersRequestSchema,
+  ExchangesByIdVolumeChartRequestSchema,
 } from "./schemas.js";
 
 /** Type for `GET /exchanges` request. */
@@ -23,10 +23,10 @@ export type ExchangesRequest = z.infer<typeof ExchangesRequestSchema>;
 export type ExchangesListRequest = z.infer<typeof ExchangesListRequestSchema>;
 
 /** Type for `GET /exchanges/{id}` request. */
-export type ExchangeByIdRequest = z.infer<typeof ExchangeByIdRequestSchema>;
+export type ExchangeByIdRequest = z.infer<typeof ExchangesByIdRequestSchema>;
 
 /** Type for `GET /exchanges/{id}/tickers` request. */
-export type ExchangeTickersRequest = z.infer<typeof ExchangeTickersRequestSchema>;
+export type ExchangeTickersRequest = z.infer<typeof ExchangesByIdTickersRequestSchema>;
 
 /** Type for `GET /exchanges/{id}/volume_chart` request. */
-export type ExchangeVolumeChartRequest = z.infer<typeof ExchangeVolumeChartRequestSchema>;
+export type ExchangeVolumeChartRequest = z.infer<typeof ExchangesByIdVolumeChartRequestSchema>;

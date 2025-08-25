@@ -12,19 +12,19 @@ import type {
   DerivativesResponseSchema,
   DerivativesExchangesResponseSchema,
   DerivativesExchangesListResponseSchema,
-  DerivativesExchangeByIdResponseSchema,
+  DerivativesExchangesByIdResponseSchema,
   DerivativeRowSchema,
-  DerivativesExchangeRowSchema,
+  DerivativesExchangesRowSchema,
   DerivativesExchangesListItemSchema,
 } from "./schemas.js";
 
 /** Type for a single /derivatives row. */
-export type DerivativeRow = z.infer<typeof DerivativeRowSchema>;
+export type DerivativesRow = z.infer<typeof DerivativeRowSchema>;
 /** Type for `GET /derivatives` response. */
 export type DerivativesResponse = z.infer<typeof DerivativesResponseSchema>;
 
 /** Type for a single derivatives exchange row. */
-export type DerivativesExchangeRow = z.infer<typeof DerivativesExchangeRowSchema>;
+export type DerivativesExchangesRow = z.infer<typeof DerivativesExchangesRowSchema>;
 /** Type for `GET /derivatives/exchanges` response. */
 export type DerivativesExchangesResponse = z.infer<typeof DerivativesExchangesResponseSchema>;
 
@@ -36,4 +36,6 @@ export type DerivativesExchangesListResponse = z.infer<
 >;
 
 /** Type for `GET /derivatives/exchanges/{id}` response. */
-export type DerivativesExchangeByIdResponse = z.infer<typeof DerivativesExchangeByIdResponseSchema>;
+export type DerivativesExchangesByIdResponse = z.infer<
+  typeof DerivativesExchangesByIdResponseSchema
+>;

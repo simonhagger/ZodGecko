@@ -28,7 +28,7 @@ import { tolerantObject, NonEmptyString, UrlString, NullableNumber } from "../..
  * @endpoint GET /companies/public_treasury/{coin_id}
  * @summary Companies holding a given coin in treasury.
  */
-export const CompaniesTreasuryRequestSchema = z
+export const CompaniesPublicTreasuryByIdRequestSchema = z
   .object({
     coin_id: z.enum(["bitcoin", "ethereum"]),
   })
@@ -57,4 +57,4 @@ export const CompanySchema = tolerantObject({
  * @endpoint GET /companies/public_treasury/{coin_id}
  * Array of companies with their treasury holdings.
  */
-export const CompaniesTreasuryResponseSchema = z.array(CompanySchema);
+export const CompaniesPublicTreasuryByIdResponseSchema = z.array(CompanySchema);

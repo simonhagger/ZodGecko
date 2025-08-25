@@ -79,7 +79,7 @@ const IdsNamesSymbolsTokensFragment = IdsNamesSymbolsTokens.extend({
  *   - order=market_cap_desc, locale=en, precision=2 (server defaults)
  *   - price_change_percentage (CSV windows via CSList)
  */
-export const MarketsRequestSchema = z
+export const CoinsMarketsRequestSchema = z
   .object({
     vs_currency: VsCurrency,
     ...IdsNamesSymbolsTokensFragment.shape,
@@ -103,7 +103,7 @@ export const CoinsListRequestSchema = z
  * @summary Detailed coin info (flags control sections)
  * @params localization, tickers, market_data, community_data, developer_data, sparkline, dex_pair_format
  */
-export const CoinDetailRequestSchema = z
+export const CoinsByIdRequestSchema = z
   .object({
     id: CoinId,
     localization: z.boolean().optional(),
@@ -117,7 +117,7 @@ export const CoinDetailRequestSchema = z
   .strict();
 
 /** @endpoint GET /coins/{id}/history */
-export const HistoryRequestSchema = z
+export const CoinsByIdHistoryRequestSchema = z
   .object({ id: CoinId, date: DdMmYyyy, localization: z.boolean().optional() })
   .strict();
 
@@ -125,7 +125,7 @@ export const HistoryRequestSchema = z
  * @endpoint GET /coins/{id}/tickers
  * @params exchange_ids (CSV), include_exchange_logo, page, order, depth, dex_pair_format
  */
-export const CoinTickersRequestSchema = z
+export const CoinsByIdTickersRequestSchema = z
   .object({
     id: CoinId,
     exchange_ids: CSList(z.string()).optional(),
@@ -138,7 +138,7 @@ export const CoinTickersRequestSchema = z
   .strict();
 
 /** @endpoint GET /coins/{id}/market_chart */
-export const MarketChartRequestSchema = z
+export const CoinsByIdMarketChartRequestSchema = z
   .object({
     id: CoinId,
     vs_currency: VsCurrency,
@@ -149,7 +149,7 @@ export const MarketChartRequestSchema = z
   .strict();
 
 /** @endpoint GET /coins/{id}/market_chart/range */
-export const MarketChartRangeRequestSchema = z
+export const CoinsByIdMarketChartRangeRequestSchema = z
   .object({
     id: CoinId,
     vs_currency: VsCurrency,
@@ -160,7 +160,7 @@ export const MarketChartRangeRequestSchema = z
   .strict();
 
 /** @endpoint GET /coins/{id}/ohlc */
-export const OhlcRequestSchema = z
+export const CoinsByIdOhlcRequestSchema = z
   .object({ id: CoinId, vs_currency: VsCurrency, days: OhlcDays })
   .strict();
 
@@ -172,7 +172,7 @@ export const OhlcRequestSchema = z
  * Market row for /coins/markets.
  * Tolerant to extra fields; key metrics are optional/nullable per API behavior.
  */
-export const MarketsRowSchema = tolerantObject({
+export const CoinsMarketsRowSchema = tolerantObject({
   id: NonEmptyString,
   symbol: NonEmptyString,
   name: NonEmptyString,
@@ -186,10 +186,10 @@ export const MarketsRowSchema = tolerantObject({
 });
 
 /** Array of market rows. */
-export const MarketsResponseSchema = z.array(MarketsRowSchema);
+export const CoinsMarketsResponseSchema = z.array(CoinsMarketsRowSchema);
 
 /** /coins/list row (tolerant for extra fields like platforms map). */
-export const CoinListItemSchema = tolerantObject({
+export const CoinsListItemSchema = tolerantObject({
   id: NonEmptyString,
   symbol: NonEmptyString,
   name: NonEmptyString,
@@ -197,7 +197,7 @@ export const CoinListItemSchema = tolerantObject({
 });
 
 /** Array of /coins/list rows. */
-export const CoinsListResponseSchema = z.array(CoinListItemSchema);
+export const CoinsListResponseSchema = z.array(CoinsListItemSchema);
 
 /**
  * Detailed coin info.
@@ -206,7 +206,7 @@ export const CoinsListResponseSchema = z.array(CoinListItemSchema);
  */
 const MarketDataQuoteSchema = QuoteMap;
 
-export const CoinDetailSchema = tolerantObject({
+export const CoinsByIdResponseSchema = tolerantObject({
   id: NonEmptyString,
   symbol: NonEmptyString,
   name: NonEmptyString,
@@ -227,7 +227,7 @@ export const CoinDetailSchema = tolerantObject({
 });
 
 /** Historical snapshot for a given date. */
-export const HistoryResponseSchema = tolerantObject({
+export const CoinsByIdHistoryResponseSchema = tolerantObject({
   id: NonEmptyString.optional(),
   symbol: NonEmptyString.optional(),
   name: NonEmptyString.optional(),
@@ -244,16 +244,16 @@ export const HistoryResponseSchema = tolerantObject({
 });
 
 /** Tickers envelope for /coins/{id}/tickers. */
-export const CoinTickersResponseSchema = TickersEnvelope;
+export const CoinsByIdTickersResponseSchema = TickersEnvelope;
 
 /** Market chart (prices, market_caps, total_volumes). */
-export const MarketChartResponseSchema = MarketChart;
+export const CoinsByIdMarketChartResponseSchema = MarketChart;
 
 /** Market chart (range variant). */
-export const MarketChartRangeResponseSchema = MarketChart;
+export const CoinsByIdMarketChartRangeResponseSchema = MarketChart;
 
 /** OHLC array for /coins/{id}/ohlc. */
-export const OhlcResponseSchema = z.array(OhlcTuple);
+export const CoinsByIdOhlcResponseSchema = z.array(OhlcTuple);
 
 /* ============================================================================
  * Examples

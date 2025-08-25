@@ -8,7 +8,9 @@
 
 import type { z } from "zod";
 
-import type { CompaniesTreasuryRequestSchema } from "./schemas.js";
+import type { CompaniesPublicTreasuryByIdRequestSchema } from "./schemas.js";
 
 /** Type for `GET /companies/public_treasury/{coin_id}` request. */
-export type CompaniesTreasuryRequest = z.infer<typeof CompaniesTreasuryRequestSchema>;
+export type CompaniesPublicTreasuryByIdRequest = z.infer<
+  typeof CompaniesPublicTreasuryByIdRequestSchema
+>;

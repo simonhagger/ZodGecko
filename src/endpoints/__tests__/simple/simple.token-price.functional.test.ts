@@ -13,7 +13,7 @@ import type { z } from "zod";
 import { simple, buildQuery } from "../../../index.js";
 import { dropId } from "../_utils/index.js";
 
-type TokenPriceReqIn = z.input<typeof simple.schemas.SimpleTokenPriceRequestSchema>;
+type TokenPriceReqIn = z.input<typeof simple.schemas.SimpleTokenPriceByIdRequestSchema>;
 
 describe("simple.token_price – functional", () => {
   it('drops path id; arrays→CSV; booleans→"true"/"false"', () => {
@@ -29,7 +29,7 @@ describe("simple.token_price – functional", () => {
       include_24hr_change: true,
       include_last_updated_at: false,
     };
-    const parsed = simple.schemas.SimpleTokenPriceRequestSchema.parse(req);
+    const parsed = simple.schemas.SimpleTokenPriceByIdRequestSchema.parse(req);
     const q = dropId(parsed);
     expect(buildQuery("/simple/token_price/{id}", q)).toEqual({
       contract_addresses:

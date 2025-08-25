@@ -12,7 +12,7 @@ import { contract, buildQuery } from "../../../index.js";
 import { expectValid, dropPathParamsTyped } from "../_utils/index.js";
 
 // If your schema is named differently, adjust this alias:
-type DetailIn = z.input<typeof contract.schemas.ContractCoinRequestSchema>;
+type DetailIn = z.input<typeof contract.schemas.CoinsByIdContractByAddressRequestSchema>;
 
 describe("contract.detail – functional", () => {
   it("has no query params; path params dropped", () => {
@@ -20,7 +20,7 @@ describe("contract.detail – functional", () => {
       id: "ethereum",
       contract_address: "0x0000000000000000000000000000000000000000",
     };
-    expectValid(contract.schemas.ContractCoinRequestSchema, req);
+    expectValid(contract.schemas.CoinsByIdContractByAddressRequestSchema, req);
 
     const q = dropPathParamsTyped(req, ["id", "contract_address"] as const);
     expect(buildQuery("/coins/{id}/contract/{contract_address}", q)).toEqual({});

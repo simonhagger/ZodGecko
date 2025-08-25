@@ -14,12 +14,12 @@ import type { z } from "zod";
 import { exchanges, buildQuery } from "../../../index.js";
 import { dropId, expectValid } from "../_utils/index.js";
 
-type ByIdReqIn = z.input<typeof exchanges.schemas.ExchangeByIdRequestSchema>;
+type ByIdReqIn = z.input<typeof exchanges.schemas.ExchangesByIdRequestSchema>;
 
 describe("exchanges.byId – functional", () => {
   it("drops path param before serialization", () => {
     const req: ByIdReqIn = { id: "binance" };
-    expectValid(exchanges.schemas.ExchangeByIdRequestSchema, req);
+    expectValid(exchanges.schemas.ExchangesByIdRequestSchema, req);
 
     const q = dropId(req);
     expect(buildQuery("/exchanges/{id}", q)).toEqual({});

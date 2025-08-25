@@ -23,7 +23,9 @@ const RowHasCore = z.object({
 
 describe("companies.responses", () => {
   it("parses public treasury payload; essentials validate", () => {
-    const rows = companies.schemas.CompaniesTreasuryResponseSchema.parse(fixture as unknown);
+    const rows = companies.schemas.CompaniesPublicTreasuryByIdResponseSchema.parse(
+      fixture as unknown,
+    );
 
     expect(Array.isArray(rows)).toBe(true);
     expect(rows.length).toBeGreaterThan(0);
@@ -50,7 +52,7 @@ describe("companies.responses", () => {
       },
     ];
 
-    const rows = companies.schemas.CompaniesTreasuryResponseSchema.parse(payload);
+    const rows = companies.schemas.CompaniesPublicTreasuryByIdResponseSchema.parse(payload);
     expect(Array.isArray(rows)).toBe(true);
     expect(rows.length).toBe(1);
 

@@ -12,7 +12,7 @@ import type { z } from "zod";
 import { coins, buildQuery } from "../../../index.js";
 import { dropId } from "../_utils/index.js";
 
-type MarketChartRequestInput = z.input<typeof coins.schemas.MarketChartRequestSchema>;
+type MarketChartRequestInput = z.input<typeof coins.schemas.CoinsByIdMarketChartRequestSchema>;
 
 describe("coins.market_chart – functional", () => {
   it("normalizes days (number→string), keeps interval, keeps precision when provided", () => {
@@ -24,7 +24,7 @@ describe("coins.market_chart – functional", () => {
       precision: "2",
     };
 
-    expect(() => coins.schemas.MarketChartRequestSchema.parse(req)).not.toThrow();
+    expect(() => coins.schemas.CoinsByIdMarketChartRequestSchema.parse(req)).not.toThrow();
 
     // strip path param for query building
     const q = dropId(req);

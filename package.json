@@ -41,10 +41,11 @@
     "./endpoints": {
       "types": "./dist/endpoints/index.d.ts",
       "import": "./dist/endpoints/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist",
+    "dist/",
     "README.md",
     "CONTRIBUTING.md",
     "TESTING.md",

@@ -12,7 +12,7 @@ import type {
   DerivativesRequestSchema,
   DerivativesExchangesRequestSchema,
   DerivativesExchangesListRequestSchema,
-  DerivativesExchangeByIdRequestSchema,
+  DerivativesExchangesByIdRequestSchema,
 } from "./schemas.js";
 
 /** Type for `GET /derivatives` request. */
@@ -25,4 +25,4 @@ export type DerivativesExchangesRequest = z.infer<typeof DerivativesExchangesReq
 export type DerivativesExchangesListRequest = z.infer<typeof DerivativesExchangesListRequestSchema>;
 
 /** Type for `GET /derivatives/exchanges/{id}` request. */
-export type DerivativesExchangeByIdRequest = z.infer<typeof DerivativesExchangeByIdRequestSchema>;
+export type DerivativesExchangesByIdRequest = z.infer<typeof DerivativesExchangesByIdRequestSchema>;

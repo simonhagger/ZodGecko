@@ -18,7 +18,7 @@ import { buildQuery, type derivatives } from "../../../index.js";
 
 type ListReqIn = z.input<typeof derivatives.schemas.DerivativesRequestSchema>;
 type ExListReqIn = z.input<typeof derivatives.schemas.DerivativesExchangesListRequestSchema>;
-type ByIdReqIn = z.input<typeof derivatives.schemas.DerivativesExchangeByIdRequestSchema>;
+type ByIdReqIn = z.input<typeof derivatives.schemas.DerivativesExchangesByIdRequestSchema>;
 
 describe("derivatives.sanity", () => {
   it("/derivatives → empty query serializes to {}", () => {

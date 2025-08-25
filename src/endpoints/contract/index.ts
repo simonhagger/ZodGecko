@@ -8,15 +8,15 @@
  */
 
 export type {
-  ContractCoinRequest,
-  ContractMarketChartRequest,
-  ContractMarketChartRangeRequest,
+  CoinsByIdContractByAddressRequest,
+  CoinsByIdContractByAddressMarketChartRequest,
+  CoinsByIdContractByAddressMarketChartRangeRequest,
 } from "./requests.js";
 
 export type {
-  ContractCoinResponse,
-  ContractMarketChartResponse,
-  ContractMarketChartRangeResponse,
+  CoinsByIdContractByAddressResponse,
+  CoinsByIdContractByAddressMarketChartResponse,
+  CoinsByIdContractByAddressMarketChartRangeResponse,
 } from "./responses.js";
 
 export * as schemas from "./schemas.js";

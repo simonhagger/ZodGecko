@@ -12,7 +12,7 @@ import type { z } from "zod";
 import { coins, buildQuery } from "../../../index.js";
 import { dropId } from "../_utils/index.js";
 
-type OhlcRequestInput = z.input<typeof coins.schemas.OhlcRequestSchema>;
+type OhlcRequestInput = z.input<typeof coins.schemas.CoinsByIdOhlcRequestSchema>;
 
 describe("coins.ohlc – functional", () => {
   it("serializes days and vs_currency", () => {
@@ -22,7 +22,7 @@ describe("coins.ohlc – functional", () => {
       days: "7",
     };
 
-    expect(() => coins.schemas.OhlcRequestSchema.parse(req)).not.toThrow();
+    expect(() => coins.schemas.CoinsByIdOhlcRequestSchema.parse(req)).not.toThrow();
 
     // strip path param for query building
     const q = dropId(req);

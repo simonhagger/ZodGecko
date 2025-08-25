@@ -34,7 +34,7 @@ describe("simple.responses (fixtures)", () => {
   });
 
   it("parses /simple/token_price/{id} fixture", () => {
-    const parsed = simple.schemas.SimpleTokenPriceResponseSchema.parse(tokenFx as unknown);
+    const parsed = simple.schemas.SimpleTokenPriceByIdResponseSchema.parse(tokenFx as unknown);
     expect(isObjectRecord(parsed)).toBe(true);
     const firstKey = Object.keys(parsed)[0];
     expect(TokenRowHasUsd.safeParse((parsed as Record<string, unknown>)[firstKey]).success).toBe(
@@ -43,7 +43,7 @@ describe("simple.responses (fixtures)", () => {
   });
 
   it("parses /simple/supported_vs_currencies fixture", () => {
-    const parsed = simple.schemas.SupportedVsCurrenciesResponseSchema.parse(vsFx as unknown);
+    const parsed = simple.schemas.SimpleSupportedVsCurrenciesResponseSchema.parse(vsFx as unknown);
     expect(Array.isArray(parsed)).toBe(true);
     expect(parsed.length).toBeGreaterThan(0);
     expect(typeof parsed[0]).toBe("string");

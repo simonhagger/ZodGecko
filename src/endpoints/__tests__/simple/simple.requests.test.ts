@@ -17,8 +17,8 @@ import { expectValid, expectInvalid, dropId } from "../_utils/index.js";
 
 // Aliases for schema *inputs* (not outputs).
 type PriceReqIn = z.input<typeof simple.schemas.SimplePriceRequestSchema>;
-type TokenPriceReqIn = z.input<typeof simple.schemas.SimpleTokenPriceRequestSchema>;
-type VsReqIn = z.input<typeof simple.schemas.SupportedVsCurrenciesRequestSchema>;
+type TokenPriceReqIn = z.input<typeof simple.schemas.SimpleTokenPriceByIdRequestSchema>;
+type VsReqIn = z.input<typeof simple.schemas.SimpleSupportedVsCurrenciesRequestSchema>;
 
 describe("simple.requests", () => {
   it("GET /simple/price: arrays → CSV; booleans serialize", () => {
@@ -66,7 +66,7 @@ describe("simple.requests", () => {
       include_24hr_change: true,
       include_last_updated_at: false,
     };
-    const parsed = simple.schemas.SimpleTokenPriceRequestSchema.parse(req);
+    const parsed = simple.schemas.SimpleTokenPriceByIdRequestSchema.parse(req);
     const q = dropId(parsed);
     expect(buildQuery("/simple/token_price/{id}", q)).toEqual({
       contract_addresses:
@@ -80,7 +80,7 @@ describe("simple.requests", () => {
 
   it("GET /simple/supported_vs_currencies: no params", () => {
     const req: VsReqIn = {};
-    expectValid(simple.schemas.SupportedVsCurrenciesRequestSchema, req);
+    expectValid(simple.schemas.SimpleSupportedVsCurrenciesRequestSchema, req);
     expect(buildQuery("/simple/supported_vs_currencies", req)).toEqual({});
   });
 });

@@ -10,18 +10,18 @@
 import { describe, it, expect } from "vitest";
 import type { z } from "zod";
 
-import { coins, buildQuery } from "../../../index.js";
+import { coins, buildQuery, type Endpoint } from "../../../index.js";
 import { serverDefaults } from "../../../runtime/server-defaults.js";
 import { expectValid, dropPathParams, dropPathParamsTyped } from "../_utils/index.js";
 
-type MarketsIn = z.input<typeof coins.schemas.MarketsRequestSchema>;
+type MarketsIn = z.input<typeof coins.schemas.CoinsMarketsRequestSchema>;
 type ListIn = z.input<typeof coins.schemas.CoinsListRequestSchema>;
-type DetailIn = z.input<typeof coins.schemas.CoinDetailRequestSchema>;
-type TickersIn = z.input<typeof coins.schemas.CoinTickersRequestSchema>;
-type HistoryIn = z.input<typeof coins.schemas.HistoryRequestSchema>;
-type ChartIn = z.input<typeof coins.schemas.MarketChartRequestSchema>;
-type ChartRangeIn = z.input<typeof coins.schemas.MarketChartRangeRequestSchema>;
-type OhlcIn = z.input<typeof coins.schemas.OhlcRequestSchema>;
+type DetailIn = z.input<typeof coins.schemas.CoinsByIdRequestSchema>;
+type TickersIn = z.input<typeof coins.schemas.CoinsByIdTickersRequestSchema>;
+type HistoryIn = z.input<typeof coins.schemas.CoinsByIdHistoryRequestSchema>;
+type ChartIn = z.input<typeof coins.schemas.CoinsByIdMarketChartRequestSchema>;
+type ChartRangeIn = z.input<typeof coins.schemas.CoinsByIdMarketChartRangeRequestSchema>;
+type OhlcIn = z.input<typeof coins.schemas.CoinsByIdOhlcRequestSchema>;
 
 describe("coins – sanity: server defaults are actually dropped", () => {
   /**
@@ -30,7 +30,7 @@ describe("coins – sanity: server defaults are actually dropped", () => {
    * in the query object.
    */
   function assertDefaultsDrop(
-    endpoint: string,
+    endpoint: Endpoint,
     schema: z.ZodTypeAny,
     base: Record<string, unknown>,
     pathKeys?: readonly string[],
@@ -56,7 +56,7 @@ describe("coins – sanity: server defaults are actually dropped", () => {
 
   it("/coins/markets – defaults drop", () => {
     const base: MarketsIn = { vs_currency: "usd" }; // required
-    assertDefaultsDrop("/coins/markets", coins.schemas.MarketsRequestSchema, base);
+    assertDefaultsDrop("/coins/markets", coins.schemas.CoinsMarketsRequestSchema, base);
   });
 
   it("/coins/list – defaults drop", () => {
@@ -66,28 +66,31 @@ describe("coins – sanity: server defaults are actually dropped", () => {
 
   it("/coins/{id} – defaults drop", () => {
     const base: DetailIn = { id: "bitcoin" }; // path param present
-    assertDefaultsDrop("/coins/{id}", coins.schemas.CoinDetailRequestSchema, base, ["id"] as const);
+    assertDefaultsDrop("/coins/{id}", coins.schemas.CoinsByIdRequestSchema, base, ["id"] as const);
   });
 
   it("/coins/{id}/tickers – defaults drop", () => {
     const base: TickersIn = { id: "bitcoin" }; // path param present
-    assertDefaultsDrop("/coins/{id}/tickers", coins.schemas.CoinTickersRequestSchema, base, [
+    assertDefaultsDrop("/coins/{id}/tickers", coins.schemas.CoinsByIdTickersRequestSchema, base, [
       "id",
     ] as const);
   });
 
   it("/coins/{id}/history – defaults drop", () => {
     const base: HistoryIn = { id: "bitcoin", date: "24-12-2024" };
-    assertDefaultsDrop("/coins/{id}/history", coins.schemas.HistoryRequestSchema, base, [
+    assertDefaultsDrop("/coins/{id}/history", coins.schemas.CoinsByIdHistoryRequestSchema, base, [
       "id",
     ] as const);
   });
 
   it("/coins/{id}/market_chart – defaults drop", () => {
     const base: ChartIn = { id: "bitcoin", vs_currency: "usd", days: 1 };
-    assertDefaultsDrop("/coins/{id}/market_chart", coins.schemas.MarketChartRequestSchema, base, [
-      "id",
-    ] as const);
+    assertDefaultsDrop(
+      "/coins/{id}/market_chart",
+      coins.schemas.CoinsByIdMarketChartRequestSchema,
+      base,
+      ["id"] as const,
+    );
   });
 
   it("/coins/{id}/market_chart/range – defaults drop", () => {
@@ -99,7 +102,7 @@ describe("coins – sanity: server defaults are actually dropped", () => {
     };
     assertDefaultsDrop(
       "/coins/{id}/market_chart/range",
-      coins.schemas.MarketChartRangeRequestSchema,
+      coins.schemas.CoinsByIdMarketChartRangeRequestSchema,
       base,
       ["id"] as const,
     );
@@ -107,6 +110,8 @@ describe("coins – sanity: server defaults are actually dropped", () => {
 
   it("/coins/{id}/ohlc – defaults drop", () => {
     const base: OhlcIn = { id: "bitcoin", vs_currency: "usd", days: "1" };
-    assertDefaultsDrop("/coins/{id}/ohlc", coins.schemas.OhlcRequestSchema, base, ["id"] as const);
+    assertDefaultsDrop("/coins/{id}/ohlc", coins.schemas.CoinsByIdOhlcRequestSchema, base, [
+      "id",
+    ] as const);
   });
 });

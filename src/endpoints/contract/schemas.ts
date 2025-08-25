@@ -31,7 +31,7 @@ import {
  * ========================================================================== */
 
 /** GET /coins/{id}/contract/{contract_address} */
-export const ContractCoinRequestSchema = z
+export const CoinsByIdContractByAddressRequestSchema = z
   .object({
     id: CoinId,
     contract_address: ContractAddress,
@@ -39,7 +39,7 @@ export const ContractCoinRequestSchema = z
   .strict();
 
 /** GET /coins/{id}/contract/{contract_address}/market_chart */
-export const ContractMarketChartRequestSchema = z
+export const CoinsByIdContractByAddressMarketChartRequestSchema = z
   .object({
     id: CoinId,
     contract_address: ContractAddress,
@@ -49,7 +49,7 @@ export const ContractMarketChartRequestSchema = z
   .strict();
 
 /** GET /coins/{id}/contract/{contract_address}/market_chart/range */
-export const ContractMarketChartRangeRequestSchema = z
+export const CoinsByIdContractByAddressMarketChartRangeRequestSchema = z
   .object({
     id: CoinId,
     contract_address: ContractAddress,
@@ -64,17 +64,17 @@ export const ContractMarketChartRangeRequestSchema = z
  * ========================================================================== */
 
 /** Response shape for GET /coins/{id}/contract/{contract_address} */
-export const ContractCoinResponseSchema = tolerantObject({
+export const CoinsByIdContractByAddressResponseSchema = tolerantObject({
   id: z.string(),
   symbol: z.string(),
   name: z.string(),
 });
 
 /** Response shape for GET /coins/{id}/contract/{contract_address}/market_chart */
-export const ContractMarketChartResponseSchema = MarketChart;
+export const CoinsByIdContractByAddressMarketChartResponseSchema = MarketChart;
 
 /** Response shape for GET /coins/{id}/contract/{contract_address}/market_chart/range */
-export const ContractMarketChartRangeResponseSchema = tolerantObject({
+export const CoinsByIdContractByAddressMarketChartRangeResponseSchema = tolerantObject({
   prices: TsSeries.optional(),
   market_caps: TsSeries.optional(),
   total_volumes: TsSeries.optional(),

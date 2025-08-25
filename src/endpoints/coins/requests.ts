@@ -9,36 +9,38 @@
 import type { z } from "zod";
 
 import type {
-  MarketsRequestSchema,
+  CoinsMarketsRequestSchema,
   CoinsListRequestSchema,
-  CoinDetailRequestSchema,
-  HistoryRequestSchema,
-  CoinTickersRequestSchema,
-  MarketChartRequestSchema,
-  MarketChartRangeRequestSchema,
-  OhlcRequestSchema,
+  CoinsByIdRequestSchema,
+  CoinsByIdHistoryRequestSchema,
+  CoinsByIdTickersRequestSchema,
+  CoinsByIdMarketChartRequestSchema,
+  CoinsByIdMarketChartRangeRequestSchema,
+  CoinsByIdOhlcRequestSchema,
 } from "./schemas.js";
 
 /** Type for `GET /coins/markets` request. */
-export type MarketsRequest = z.infer<typeof MarketsRequestSchema>;
+export type CoinsMarketsRequest = z.infer<typeof CoinsMarketsRequestSchema>;
 
 /** Type for `GET /coins/list` request. */
 export type CoinsListRequest = z.infer<typeof CoinsListRequestSchema>;
 
 /** Type for `GET /coins/{id}` request. */
-export type CoinDetailRequest = z.infer<typeof CoinDetailRequestSchema>;
+export type CoinsByIdRequest = z.infer<typeof CoinsByIdRequestSchema>;
 
 /** Type for `GET /coins/{id}/history` request. */
-export type HistoryRequest = z.infer<typeof HistoryRequestSchema>;
+export type CoinsByIdHistoryRequest = z.infer<typeof CoinsByIdHistoryRequestSchema>;
 
 /** Type for `GET /coins/{id}/tickers` request. */
-export type CoinTickersRequest = z.infer<typeof CoinTickersRequestSchema>;
+export type CoinsByIdTickersRequest = z.infer<typeof CoinsByIdTickersRequestSchema>;
 
 /** Type for `GET /coins/{id}/market_chart` request. */
-export type MarketChartRequest = z.infer<typeof MarketChartRequestSchema>;
+export type CoinsByIdMarketChartRequest = z.infer<typeof CoinsByIdMarketChartRequestSchema>;
 
 /** Type for `GET /coins/{id}/market_chart/range` request. */
-export type MarketChartRangeRequest = z.infer<typeof MarketChartRangeRequestSchema>;
+export type CoinsByIdMarketChartRangeRequest = z.infer<
+  typeof CoinsByIdMarketChartRangeRequestSchema
+>;
 
 /** Type for `GET /coins/{id}/ohlc` request. */
-export type OhlcRequest = z.infer<typeof OhlcRequestSchema>;
+export type CoinsByIdOhlcRequest = z.infer<typeof CoinsByIdOhlcRequestSchema>;

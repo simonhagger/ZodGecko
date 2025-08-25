@@ -19,7 +19,7 @@ import { expectValid, expectInvalid, dropId } from "../_utils/index.js";
 type ListReqIn = z.input<typeof derivatives.schemas.DerivativesRequestSchema>;
 type ExReqIn = z.input<typeof derivatives.schemas.DerivativesExchangesRequestSchema>;
 type ExListReqIn = z.input<typeof derivatives.schemas.DerivativesExchangesListRequestSchema>;
-type ByIdReqIn = z.input<typeof derivatives.schemas.DerivativesExchangeByIdRequestSchema>;
+type ByIdReqIn = z.input<typeof derivatives.schemas.DerivativesExchangesByIdRequestSchema>;
 
 describe("derivatives.requests", () => {
   // /derivatives
@@ -62,7 +62,7 @@ describe("derivatives.requests", () => {
   // /derivatives/exchanges/{id}
   it("/derivatives/exchanges/{id} requires id; id is not serialized", () => {
     const req: ByIdReqIn = { id: "binance_futures" };
-    expectValid(derivatives.schemas.DerivativesExchangeByIdRequestSchema, req);
+    expectValid(derivatives.schemas.DerivativesExchangesByIdRequestSchema, req);
 
     const q = dropId(req);
     expect(buildQuery("/derivatives/exchanges/{id}", q)).toEqual({});
@@ -70,6 +70,6 @@ describe("derivatives.requests", () => {
 
   it("/derivatives/exchanges/{id} rejects missing id", () => {
     const bad: unknown = {};
-    expectInvalid(derivatives.schemas.DerivativesExchangeByIdRequestSchema, bad);
+    expectInvalid(derivatives.schemas.DerivativesExchangesByIdRequestSchema, bad);
   });
 });

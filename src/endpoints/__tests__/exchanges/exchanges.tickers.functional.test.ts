@@ -14,7 +14,7 @@ import type { z } from "zod";
 import { exchanges, buildQuery } from "../../../index.js";
 import { dropId, expectValid } from "../_utils/index.js";
 
-type TickersReqIn = z.input<typeof exchanges.schemas.ExchangeTickersRequestSchema>;
+type TickersReqIn = z.input<typeof exchanges.schemas.ExchangesByIdTickersRequestSchema>;
 
 describe("exchanges.tickers – functional", () => {
   it("normalizes CSV, booleans, and pagination; keeps provided order", () => {
@@ -27,7 +27,7 @@ describe("exchanges.tickers – functional", () => {
       order: "volume_desc", // valid enum; kept if provided
     };
     // type-safe input
-    expectValid(exchanges.schemas.ExchangeTickersRequestSchema, req);
+    expectValid(exchanges.schemas.ExchangesByIdTickersRequestSchema, req);
 
     const q = dropId(req);
     expect(buildQuery("/exchanges/{id}/tickers", q)).toEqual({

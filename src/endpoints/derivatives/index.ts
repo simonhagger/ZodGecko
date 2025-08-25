@@ -11,16 +11,16 @@ export type {
   DerivativesRequest,
   DerivativesExchangesRequest,
   DerivativesExchangesListRequest,
-  DerivativesExchangeByIdRequest,
+  DerivativesExchangesByIdRequest,
 } from "./requests.js";
 
 export type {
   DerivativesResponse,
   DerivativesExchangesResponse,
   DerivativesExchangesListResponse,
-  DerivativesExchangeByIdResponse,
-  DerivativeRow,
-  DerivativesExchangeRow,
+  DerivativesExchangesByIdResponse,
+  DerivativesRow,
+  DerivativesExchangesRow,
   DerivativesExchangesListItem,
 } from "./responses.js";
 

@@ -52,7 +52,7 @@ export const ExchangesListRequestSchema = z.object({}).strict();
  * @endpoint GET /exchanges/{id}
  * @summary Exchange details (no query params).
  */
-export const ExchangeByIdRequestSchema = z
+export const ExchangesByIdRequestSchema = z
   .object({
     id: z.string(),
   })
@@ -63,7 +63,7 @@ export const ExchangeByIdRequestSchema = z
  * @summary Exchange tickers with optional filters.
  * @params coin_ids (CSV), include_exchange_logo, page, depth, order
  */
-export const ExchangeTickersRequestSchema = z
+export const ExchangesByIdTickersRequestSchema = z
   .object({
     id: z.string(),
     coin_ids: CSList(z.string()).optional(),
@@ -79,7 +79,7 @@ export const ExchangeTickersRequestSchema = z
  * @summary Exchange volume chart for last N days.
  * @params days (int > 0)
  */
-export const ExchangeVolumeChartRequestSchema = z
+export const ExchangesByIdVolumeChartRequestSchema = z
   .object({
     id: z.string(),
     days: z.number().int().positive(),
@@ -112,6 +112,9 @@ export const ExchangeRowSchema = tolerantObject({
 /** @returns Array<ExchangeRowSchema> for GET /exchanges */
 export const ExchangesResponseSchema = z.array(ExchangeRowSchema);
 
+/** @returns ExchangeRowSchema for GET /exchanges/{id} */
+export const ExchangesByIdResponseSchema = ExchangeRowSchema;
+
 /**
  * Minimal listing item for /exchanges/list.
  */
@@ -124,13 +127,13 @@ export const ExchangesListItemSchema = tolerantObject({
 export const ExchangesListResponseSchema = z.array(ExchangesListItemSchema);
 
 /** Envelope for /exchanges/{id}/tickers (reuses shared TickersEnvelope). */
-export const ExchangeTickersResponseSchema = TickersEnvelope;
+export const ExchangesByIdTickersResponseSchema = TickersEnvelope;
 
 /**
  * Volume chart points for /exchanges/{id}/volume_chart.
  * Array of [timestampMs, volume] tuples.
  */
-export const ExchangeVolumeChartResponseSchema = z.array(z.tuple([z.number(), z.number()]));
+export const ExchangesByIdVolumeChartResponseSchema = z.array(z.tuple([z.number(), z.number()]));
 
 /* ============================================================================
  * Example

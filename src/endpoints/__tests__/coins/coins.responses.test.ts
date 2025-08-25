@@ -18,7 +18,7 @@ describe("coins.responses", () => {
     // @ts-expect-error not in the declared schema, but present at runtime
     withUnknown[0] = { ...withUnknown[0], some_future_field: { hello: "world" } };
 
-    const data = coins.schemas.MarketsResponseSchema.parse(withUnknown);
+    const data = coins.schemas.CoinsMarketsResponseSchema.parse(withUnknown);
     expect(Array.isArray(data)).toBe(true);
     expect(data.length).toBeGreaterThan(0);
 

@@ -10,10 +10,12 @@ import type { z } from "zod";
 
 import type {
   SimplePriceRequestSchema,
-  SimpleTokenPriceRequestSchema,
-  SupportedVsCurrenciesRequestSchema,
+  SimpleTokenPriceByIdRequestSchema,
+  SimpleSupportedVsCurrenciesRequestSchema,
 } from "./schemas.js";
 
 export type SimplePriceRequest = z.infer<typeof SimplePriceRequestSchema>;
-export type SimpleTokenPriceRequest = z.infer<typeof SimpleTokenPriceRequestSchema>;
-export type SupportedVsCurrenciesRequest = z.infer<typeof SupportedVsCurrenciesRequestSchema>;
+export type SimpleTokenPriceByIdRequest = z.infer<typeof SimpleTokenPriceByIdRequestSchema>;
+export type SimpleSupportedVsCurrenciesRequest = z.infer<
+  typeof SimpleSupportedVsCurrenciesRequestSchema
+>;

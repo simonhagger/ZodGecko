@@ -15,9 +15,13 @@ import type { z } from "zod";
 import { contract } from "../../../index.js";
 import { expectValid, expectInvalid } from "../_utils/index.js";
 
-type CoinReqIn = z.input<typeof contract.schemas.ContractCoinRequestSchema>;
-type ChartReqIn = z.input<typeof contract.schemas.ContractMarketChartRequestSchema>;
-type RangeReqIn = z.input<typeof contract.schemas.ContractMarketChartRangeRequestSchema>;
+type CoinReqIn = z.input<typeof contract.schemas.CoinsByIdContractByAddressRequestSchema>;
+type ChartReqIn = z.input<
+  typeof contract.schemas.CoinsByIdContractByAddressMarketChartRequestSchema
+>;
+type RangeReqIn = z.input<
+  typeof contract.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema
+>;
 
 describe("contract.requests", () => {
   it("parses contract coin (id + contract_address)", () => {
@@ -25,7 +29,7 @@ describe("contract.requests", () => {
       id: "ethereum",
       contract_address: "0x0000000000000000000000000000000000000000",
     };
-    expectValid(contract.schemas.ContractCoinRequestSchema, req);
+    expectValid(contract.schemas.CoinsByIdContractByAddressRequestSchema, req);
   });
 
   it("parses market_chart (vs_currency + days)", () => {
@@ -35,7 +39,7 @@ describe("contract.requests", () => {
       vs_currency: "usd",
       days: 30, // number is fine; runtime normalizes to string
     };
-    expectValid(contract.schemas.ContractMarketChartRequestSchema, req);
+    expectValid(contract.schemas.CoinsByIdContractByAddressMarketChartRequestSchema, req);
   });
 
   it("parses market_chart.range (vs_currency + from/to numbers)", () => {
@@ -46,7 +50,7 @@ describe("contract.requests", () => {
       from: 1714060800,
       to: 1714588800,
     };
-    expectValid(contract.schemas.ContractMarketChartRangeRequestSchema, req);
+    expectValid(contract.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema, req);
   });
 
   it("rejects string timestamps for range", () => {
@@ -57,11 +61,11 @@ describe("contract.requests", () => {
       from: "1714060800", // must be number
       to: "1714588800",
     };
-    expectInvalid(contract.schemas.ContractMarketChartRangeRequestSchema, bad);
+    expectInvalid(contract.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema, bad);
   });
 
   it("rejects missing id for coin request", () => {
     const bad: unknown = { contract_address: "0x0" };
-    expectInvalid(contract.schemas.ContractCoinRequestSchema, bad);
+    expectInvalid(contract.schemas.CoinsByIdContractByAddressRequestSchema, bad);
   });
 });

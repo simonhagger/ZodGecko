@@ -8,27 +8,27 @@
  */
 
 export type {
-  MarketsRequest,
+  CoinsMarketsRequest,
   CoinsListRequest,
-  CoinDetailRequest,
-  HistoryRequest,
-  CoinTickersRequest,
-  MarketChartRequest,
-  MarketChartRangeRequest,
-  OhlcRequest,
+  CoinsByIdRequest,
+  CoinsByIdHistoryRequest,
+  CoinsByIdTickersRequest,
+  CoinsByIdMarketChartRequest,
+  CoinsByIdMarketChartRangeRequest,
+  CoinsByIdOhlcRequest,
 } from "./requests.js";
 
 export type {
-  MarketsResponse,
+  CoinsMarketsResponse,
   CoinsListResponse,
-  CoinDetail,
-  HistoryResponse,
-  CoinTickersResponse,
-  MarketChartResponse,
-  MarketChartRangeResponse,
-  OhlcResponse,
-  MarketsRow,
-  CoinListItem,
+  CoinsByIdResponse,
+  CoinsByIdHistoryResponse,
+  CoinsByIdTickersResponse,
+  CoinsByIdMarketChartResponse,
+  CoinsByIdMarketChartRangeResponse,
+  CoinsByIdOhlcResponse,
+  CoinsMarketsRow,
+  CoinsListItem,
 } from "./responses.js";
 
 export * as schemas from "./schemas.js";

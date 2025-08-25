@@ -14,12 +14,12 @@ import type { z } from "zod";
 import { derivatives, buildQuery } from "../../../index.js";
 import { dropId, expectValid } from "../_utils/index.js";
 
-type ByIdReqIn = z.input<typeof derivatives.schemas.DerivativesExchangeByIdRequestSchema>;
+type ByIdReqIn = z.input<typeof derivatives.schemas.DerivativesExchangesByIdRequestSchema>;
 
 describe("derivatives.exchanges.byId – functional", () => {
   it("drops {id} before serialization", () => {
     const req: ByIdReqIn = { id: "binance_futures" };
-    expectValid(derivatives.schemas.DerivativesExchangeByIdRequestSchema, req);
+    expectValid(derivatives.schemas.DerivativesExchangesByIdRequestSchema, req);
     const q = dropId(req);
     expect(buildQuery("/derivatives/exchanges/{id}", q)).toEqual({});
   });

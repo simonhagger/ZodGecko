@@ -14,11 +14,15 @@ import { expectValid, expectInvalid } from "../_utils/index.js";
 
 describe("companies.requests", () => {
   it("parses valid coin ids", () => {
-    expectValid(companies.schemas.CompaniesTreasuryRequestSchema, { coin_id: "bitcoin" });
-    expectValid(companies.schemas.CompaniesTreasuryRequestSchema, { coin_id: "ethereum" });
+    expectValid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, { coin_id: "bitcoin" });
+    expectValid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, {
+      coin_id: "ethereum",
+    });
   });
 
   it("rejects invalid coin ids", () => {
-    expectInvalid(companies.schemas.CompaniesTreasuryRequestSchema, { coin_id: "litecoin" });
+    expectInvalid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, {
+      coin_id: "litecoin",
+    });
   });
 });

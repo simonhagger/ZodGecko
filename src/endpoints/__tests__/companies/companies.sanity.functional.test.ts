@@ -14,7 +14,7 @@ import { companies, buildQuery } from "../../../index.js";
 import { serverDefaults } from "../../../runtime/server-defaults.js";
 import { dropPathParamsTyped, expectValid } from "../_utils/index.js";
 
-type TreasuryReqIn = z.input<typeof companies.schemas.CompaniesTreasuryRequestSchema>;
+type TreasuryReqIn = z.input<typeof companies.schemas.CompaniesPublicTreasuryByIdRequestSchema>;
 
 describe("companies – sanity", () => {
   it("no documented server defaults for /companies/public_treasury/{coin_id}", () => {
@@ -23,7 +23,7 @@ describe("companies – sanity", () => {
 
   it("building a query from a valid request yields empty object", () => {
     const req: TreasuryReqIn = { coin_id: "bitcoin" };
-    expectValid(companies.schemas.CompaniesTreasuryRequestSchema, req);
+    expectValid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, req);
     const q = dropPathParamsTyped(req, ["coin_id"] as const);
     expect(buildQuery("/companies/public_treasury/{coin_id}", q)).toEqual({});
   });

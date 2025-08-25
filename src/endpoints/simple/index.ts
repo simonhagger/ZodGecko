@@ -9,14 +9,14 @@
 
 export type {
   SimplePriceRequest,
-  SimpleTokenPriceRequest,
-  SupportedVsCurrenciesRequest,
+  SimpleTokenPriceByIdRequest,
+  SimpleSupportedVsCurrenciesRequest,
 } from "./requests.js";
 
 export type {
   SimplePriceResponse,
-  SimpleTokenPriceResponse,
-  SupportedVsCurrenciesResponse,
+  SimpleTokenPriceByIdResponse,
+  SimpleSupportedVsCurrenciesResponse,
 } from "./responses.js";
 
 export * as schemas from "./schemas.js";

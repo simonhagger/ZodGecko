@@ -12,7 +12,7 @@ import type { z } from "zod";
 import { coins, buildQuery } from "../../../index.js";
 import { dropId } from "../_utils/index.js";
 
-type HistoryRequestInput = z.input<typeof coins.schemas.HistoryRequestSchema>;
+type HistoryRequestInput = z.input<typeof coins.schemas.CoinsByIdHistoryRequestSchema>;
 
 describe("coins.history – functional", () => {
   it("validates date format and serializes boolean", () => {
@@ -23,7 +23,7 @@ describe("coins.history – functional", () => {
     };
 
     // runtime validation (no unsafe assignment)
-    expect(() => coins.schemas.HistoryRequestSchema.parse(req)).not.toThrow();
+    expect(() => coins.schemas.CoinsByIdHistoryRequestSchema.parse(req)).not.toThrow();
 
     // strip path param for query building
     const q = dropId(req);
@@ -39,6 +39,6 @@ describe("coins.history – functional", () => {
       id: "bitcoin",
       date: "2024-12-24",
     };
-    expect(() => coins.schemas.HistoryRequestSchema.parse(bad)).toThrow();
+    expect(() => coins.schemas.CoinsByIdHistoryRequestSchema.parse(bad)).toThrow();
   });
 });

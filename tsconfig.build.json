@@ -16,7 +16,7 @@
     "stripInternal": true,
 
     // keep test globals out of the build
-    "types": []
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": [

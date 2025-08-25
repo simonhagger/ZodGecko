@@ -16,10 +16,12 @@
  * ⚠️ Keep this list aligned with CoinGecko’s published defaults.
  */
 
-// import { z } from "zod"; // not directly used here, but retained for consistency
+import type { Endpoint } from "./endpoints.js";
 
-/** Generic string-indexed object shape */
-type KV = Record<string, unknown>;
+/** Map of endpoint → (param → default value). Not all endpoints have defaults. */
+type DefaultMap = Partial<Record<Endpoint, Readonly<Record<string, unknown>>>>;
+
+const EMPTY_DEFAULTS: Readonly<Record<string, unknown>> = Object.freeze({});
 
 /**
  * Default query parameter values per endpoint.
@@ -32,7 +34,7 @@ type KV = Record<string, unknown>;
  * serverDefaults["/coins/markets"].per_page; // 100
  * ```
  */
-export const serverDefaults: Record<string, KV> = {
+export const serverDefaults = {
   /** GET /coins/list */
   "/coins/list": {
     include_platform: false,
@@ -84,9 +86,12 @@ export const serverDefaults: Record<string, KV> = {
   },
 
   // Add more endpoints as verified against the API
-} as const;
+} as const satisfies DefaultMap;
 
-// at the bottom of src/runtime/server-defaults.ts
-export function getServerDefaults(path: string): Readonly<Record<string, unknown>> {
-  return serverDefaults[path] ?? {};
+export function getServerDefaults(path: Endpoint): Readonly<Record<string, unknown>> {
+  const entry: unknown = (serverDefaults as Record<string, unknown>)[path];
+  if (entry && typeof entry === "object") {
+    return entry as Readonly<Record<string, unknown>>;
+  }
+  return EMPTY_DEFAULTS;
 }

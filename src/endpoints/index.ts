@@ -15,7 +15,6 @@ export * as contract from "./contract/index.js";
 export * as derivatives from "./derivatives/index.js";
 export * as exchanges from "./exchanges/index.js";
 export * as global from "./global/index.js";
-export * as indexes from "./indexes/index.js";
 export * as ping from "./ping/index.js";
 export * as search from "./search/index.js";
 export * as simple from "./simple/index.js";
