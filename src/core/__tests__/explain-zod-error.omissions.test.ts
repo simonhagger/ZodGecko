@@ -15,13 +15,12 @@ import { z } from "zod";
 import { explainZodError } from "../parse-utils.js";
 
 // Helper: build a ZodError from a *partial* issue to exercise fallback branches.
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 function msgFrom(issue: Record<string, unknown>): string {
   // @ts-expect-error test-only: constructing minimal issue objects for coverage
   const err = new z.ZodError([issue]);
   return explainZodError(err);
 }
-/* eslint-enable @typescript-eslint/ban-ts-comment */
 
 describe("explainZodError – omissions (synthetic)", () => {
   it("invalid_type without expected/received → no extra lines", () => {

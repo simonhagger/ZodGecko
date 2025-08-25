@@ -20,7 +20,6 @@ import { explainZodError } from "../parse-utils.js";
 
 // Minimal helper to build a ZodError from a single synthetic issue.
 function makeErr(issue: unknown): z.ZodError {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error - constructor expects ZodIssue[]; this is test-only input
   return new z.ZodError([issue]);
 }

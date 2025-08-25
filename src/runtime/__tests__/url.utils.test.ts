@@ -1,13 +1,8 @@
 import { describe, it, expect } from "vitest";
 
+import { joinBaseAndPath, formatPath, type PathParams } from "../../core/url.js";
 import { buildQuery } from "../../runtime/query.js";
-import {
-  qsString,
-  toURL,
-  joinBaseAndPath,
-  formatPath,
-  type PathParams,
-} from "../../runtime/url.js";
+import { qsString, toURL } from "../url.js";
 
 describe("runtime/url helpers", () => {
   it("qsString produces stable, alphabetized query", () => {

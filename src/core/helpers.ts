@@ -34,7 +34,6 @@ export function dropParams<T extends Record<string, unknown>, K extends readonly
 ): Omit<T, K[number]> {
   const result = { ...obj };
   for (const k of keys) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete (result as Record<string, unknown>)[k as string];
   }
   return result;

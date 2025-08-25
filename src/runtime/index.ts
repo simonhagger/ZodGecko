@@ -6,8 +6,16 @@
  *
  */
 export { buildQuery } from "./query.js";
-export * from "./server-defaults.js";
-export * from "./url.js";
-export * from "./with-defaults.js";
-export * from "./endpoints.js";
-export * from "./validate.js";
+export { SERVER_DEFAULTS, getServerDefaults } from "./server-defaults.js";
+export { DEFAULT_BASE, toURL, qsString } from "./url.js";
+export { withDefaults } from "./with-defaults.js";
+export {
+  type Endpoint,
+  ALL_ENDPOINTS,
+  type RequestSchemaOf,
+  type ResponseSchemaOf,
+  getRequestSchema,
+  getResponseSchema,
+  getSchemas,
+} from "./endpoints.js";
+export { validateRequest, validateResponse, type ValidationResult } from "./validate.js";

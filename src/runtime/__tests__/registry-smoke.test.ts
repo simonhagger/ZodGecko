@@ -10,7 +10,7 @@ import { REQ_FACTORY, RESP_FACTORY } from "../../endpoints/__tests__/_utils/endp
 import { ALL_ENDPOINTS, getSchemas, type Endpoint } from "../../runtime/endpoints.js";
 import { validateRequest, validateResponse } from "../../runtime/validate.js";
 
-const hasPathParams = (ep: string) => /\{[^}]+\}/.test(ep);
+const hasPathParams = (ep: string): boolean => /\{[^}]+\}/.test(ep);
 
 describe("endpoint registry – smoke", () => {
   describe("schema resolution", () => {

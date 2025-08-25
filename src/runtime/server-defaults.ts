@@ -31,10 +31,10 @@ const EMPTY_DEFAULTS: Readonly<Record<string, unknown>> = Object.freeze({});
  *
  * @example
  * ```ts
- * serverDefaults["/coins/markets"].per_page; // 100
+ * SERVER_DEFAULTS["/coins/markets"].per_page; // 100
  * ```
  */
-export const serverDefaults = {
+export const SERVER_DEFAULTS = {
   /** GET /coins/list */
   "/coins/list": {
     include_platform: false,
@@ -89,7 +89,7 @@ export const serverDefaults = {
 } as const satisfies DefaultMap;
 
 export function getServerDefaults(path: Endpoint): Readonly<Record<string, unknown>> {
-  const entry: unknown = (serverDefaults as Record<string, unknown>)[path];
+  const entry: unknown = (SERVER_DEFAULTS as Record<string, unknown>)[path];
   if (entry && typeof entry === "object") {
     return entry as Readonly<Record<string, unknown>>;
   }

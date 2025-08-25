@@ -96,7 +96,7 @@ const data = simple.schemas.SimpleTokenPriceResponseSchema.parse(await res.json(
 ### 3) Friendlier errors
 
 ```ts
-import { explainZodError } from "zodgecko/runtime";
+import { explainZodError } from "zodgecko/core";
 import { coins } from "zodgecko";
 
 const parsed = coins.schemas.MarketsRequestSchema.safeParse({ vs_currency: 123 });

@@ -21,8 +21,8 @@
 import type { z } from "zod";
 
 import { type Endpoint, getSchemas } from "./endpoints.js"; // ← import directly
-import { dropPathParamsByTemplate } from "./url.js";
 import { explainZodError } from "../core/parse-utils.js"; // ← narrow import; avoid barrel cycles
+import { dropPathParamsByTemplate } from "../core/url.js";
 
 /** Friendly result type returned by validate helpers. */
 export type ValidationResult<T> =

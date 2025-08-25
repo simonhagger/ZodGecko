@@ -10,8 +10,11 @@
 import { describe, it, expect } from "vitest";
 import type { z } from "zod";
 
-import { coins, buildQuery, type Endpoint } from "../../../index.js";
-import { serverDefaults } from "../../../runtime/server-defaults.js";
+// import { coins, buildQuery, type Endpoint, getSchemas } from "../../../index.js";
+import { getSchemas, type Endpoint } from "../../../runtime/endpoints.js";
+import { buildQuery } from "../../../runtime/query.js";
+import { SERVER_DEFAULTS } from "../../../runtime/server-defaults.js";
+import type { coins } from "../../index.js";
 import { expectValid, dropPathParams, dropPathParamsTyped } from "../_utils/index.js";
 
 type MarketsIn = z.input<typeof coins.schemas.CoinsMarketsRequestSchema>;
@@ -31,17 +34,16 @@ describe("coins – sanity: server defaults are actually dropped", () => {
    */
   function assertDefaultsDrop(
     endpoint: Endpoint,
-    schema: z.ZodTypeAny,
     base: Record<string, unknown>,
     pathKeys?: readonly string[],
   ): void {
     const defaults =
-      (serverDefaults as Record<string, Record<string, unknown> | undefined>)[endpoint] ?? {};
+      (SERVER_DEFAULTS as Record<string, Record<string, unknown> | undefined>)[endpoint] ?? {};
     // Merge base + defaults (defaults can be overridden by base, but here we want equality-to-default)
     const req = { ...defaults, ...base };
 
     // Validate (runtime) without assigning the result
-    expectValid(schema, req);
+    expectValid(getSchemas(endpoint).req, req);
 
     // Remove path params before building the query
     const q = pathKeys ? dropPathParamsTyped(req, pathKeys) : dropPathParams(endpoint, req);
@@ -56,41 +58,32 @@ describe("coins – sanity: server defaults are actually dropped", () => {
 
   it("/coins/markets – defaults drop", () => {
     const base: MarketsIn = { vs_currency: "usd" }; // required
-    assertDefaultsDrop("/coins/markets", coins.schemas.CoinsMarketsRequestSchema, base);
+    assertDefaultsDrop("/coins/markets", base);
   });
 
   it("/coins/list – defaults drop", () => {
     const base: ListIn = {}; // no required params
-    assertDefaultsDrop("/coins/list", coins.schemas.CoinsListRequestSchema, base);
+    assertDefaultsDrop("/coins/list", base);
   });
 
   it("/coins/{id} – defaults drop", () => {
     const base: DetailIn = { id: "bitcoin" }; // path param present
-    assertDefaultsDrop("/coins/{id}", coins.schemas.CoinsByIdRequestSchema, base, ["id"] as const);
+    assertDefaultsDrop("/coins/{id}", base, ["id"] as const);
   });
 
   it("/coins/{id}/tickers – defaults drop", () => {
     const base: TickersIn = { id: "bitcoin" }; // path param present
-    assertDefaultsDrop("/coins/{id}/tickers", coins.schemas.CoinsByIdTickersRequestSchema, base, [
-      "id",
-    ] as const);
+    assertDefaultsDrop("/coins/{id}/tickers", base, ["id"] as const);
   });
 
   it("/coins/{id}/history – defaults drop", () => {
     const base: HistoryIn = { id: "bitcoin", date: "24-12-2024" };
-    assertDefaultsDrop("/coins/{id}/history", coins.schemas.CoinsByIdHistoryRequestSchema, base, [
-      "id",
-    ] as const);
+    assertDefaultsDrop("/coins/{id}/history", base, ["id"] as const);
   });
 
   it("/coins/{id}/market_chart – defaults drop", () => {
     const base: ChartIn = { id: "bitcoin", vs_currency: "usd", days: 1 };
-    assertDefaultsDrop(
-      "/coins/{id}/market_chart",
-      coins.schemas.CoinsByIdMarketChartRequestSchema,
-      base,
-      ["id"] as const,
-    );
+    assertDefaultsDrop("/coins/{id}/market_chart", base, ["id"] as const);
   });
 
   it("/coins/{id}/market_chart/range – defaults drop", () => {
@@ -100,18 +93,11 @@ describe("coins – sanity: server defaults are actually dropped", () => {
       from: 1714060800,
       to: 1714588800,
     };
-    assertDefaultsDrop(
-      "/coins/{id}/market_chart/range",
-      coins.schemas.CoinsByIdMarketChartRangeRequestSchema,
-      base,
-      ["id"] as const,
-    );
+    assertDefaultsDrop("/coins/{id}/market_chart/range", base, ["id"] as const);
   });
 
   it("/coins/{id}/ohlc – defaults drop", () => {
     const base: OhlcIn = { id: "bitcoin", vs_currency: "usd", days: "1" };
-    assertDefaultsDrop("/coins/{id}/ohlc", coins.schemas.CoinsByIdOhlcRequestSchema, base, [
-      "id",
-    ] as const);
+    assertDefaultsDrop("/coins/{id}/ohlc", base, ["id"] as const);
   });
 });
