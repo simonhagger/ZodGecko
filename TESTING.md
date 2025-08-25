@@ -60,9 +60,9 @@ Why: avoids branded type friction and keeps ESLint happy (`no-unsafe-*`).
 
 ```ts
 import type { z } from "zod";
-type SUReqOut = z.output<typeof status_updates.schemas.StatusUpdatesRequestSchema>;
+type CLReqOut = z.output<typeof coins.schemas.CoinsListRequestSchema>;
 
-const parsed: SUReqOut = status_updates.schemas.StatusUpdatesRequestSchema.parse({});
+const parsed: CLReqOut = coins.schemas.CoinsListRequestSchema.parse({});
 ```
 
 Otherwise, parse inline inside an assertion to avoid temporary variables.
@@ -232,8 +232,10 @@ Pick the one that matches the route; for some endpoints include both.
 expect(buildQuery("/ping", {})).toEqual({});
 
 // B) Endpoint contract: schema defaults surface after parse
-const parsed = status_updates.schemas.StatusUpdatesRequestSchema.parse({});
-expect(buildQuery("/status_updates", parsed)).toEqual({ page: "1", per_page: "100" });
+type CLReqOut = z.output<typeof coins.schemas.CoinsListRequestSchema>;
+
+const parsed: CLReqOut = coins.schemas.CoinsListRequestSchema.parse({});
+expect(buildQuery("/coins/list", parsed)).toEqual({ include_platform: false });
 ```
 
 ---
@@ -272,7 +274,7 @@ npm run test:coverage
 
 # Focus by filename or title substring
 npx vitest run src/endpoints/__tests__/simple/simple.price.functional.test.ts
-npx vitest run -t "status_updates parsed {}"
+npx vitest run -t "coins parsed {}"
 ```
 
 ---

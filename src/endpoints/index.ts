@@ -19,4 +19,3 @@ export * as indexes from "./indexes/index.js";
 export * as ping from "./ping/index.js";
 export * as search from "./search/index.js";
 export * as simple from "./simple/index.js";
-export * as status_updates from "./status_updates/index.js";

@@ -82,9 +82,8 @@ export const serverDefaults = {
     sparkline: false,
     locale: "en",
   },
-  "/status_updates": {
-    per_page: 100,
-    page: 1,
+  "/coins/list": {
+    include_platform: false,
   },
   // ...
 } as const;
@@ -109,6 +108,8 @@ const qs = new URLSearchParams(buildQuery("/coins/markets", req)).toString();
 const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?${qs}`);
 const data = coins.schemas.MarketsResponseSchema.parse(await res.json());
 ```
+
+Also available: `toURL`, `qsString`, `withDefaults`, and helpers `dropId` / `dropParams` for path-param removal.
 
 ---
 

@@ -12,6 +12,7 @@
  *  - Drop params that match documented server defaults (per-endpoint)
  */
 
+import type { EndpointSet } from "../index.js";
 import { serverDefaults } from "./server-defaults.js";
 
 type QueryPrimitive = string | number | boolean | null | undefined;
@@ -70,7 +71,7 @@ function normalizeDefault(v: unknown): string | undefined {
  * @returns A normalized, stable set of query params
  */
 export function buildQuery<T extends Record<string, unknown>>(
-  endpoint: string,
+  endpoint: EndpointSet,
   params: T,
 ): Record<string, string> {
   const out: Record<string, string> = {};

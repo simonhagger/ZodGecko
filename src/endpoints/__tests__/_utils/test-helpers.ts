@@ -6,7 +6,7 @@
 /* c8 ignore file */
 import type { z } from "zod";
 
-import { buildQuery, serverDefaults } from "../../../index.js";
+import { buildQuery, serverDefaults, type EndpointSet } from "../../../index.js";
 
 // Generic: recursively mark all properties optional (for building partial fixtures)
 export type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
@@ -105,7 +105,7 @@ export function isPlainObject(v: unknown): v is Record<string, unknown> {
 }
 
 /** Assert that a route has no defaults and serializes an empty query from `{}`. */
-export function expectNoDefaultsAndEmptyQuery(endpoint: string): void {
+export function expectNoDefaultsAndEmptyQuery(endpoint: EndpointSet): void {
   expect(serverDefaults[endpoint]).toBeUndefined();
   expect(buildQuery(endpoint, {})).toEqual({});
 }

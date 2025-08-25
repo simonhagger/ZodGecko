@@ -85,3 +85,8 @@ export const serverDefaults: Record<string, KV> = {
 
   // Add more endpoints as verified against the API
 } as const;
+
+// at the bottom of src/runtime/server-defaults.ts
+export function getServerDefaults(path: string): Readonly<Record<string, unknown>> {
+  return serverDefaults[path] ?? {};
+}

@@ -74,7 +74,6 @@ If an endpoint has **no defaults**, `buildQuery` keeps everything (after normali
 - `ping`
 - `search`
 - `simple`
-- `status_updates`
 
 Each group exposes:
 
@@ -99,6 +98,17 @@ import * as core from "zodgecko/core"; // tolerantObject, CSList, primitives, et
 ```
 
 > `serverDefaults` is a reference table that `buildQuery` uses to know which values to drop for each path.
+
+### Ergonomic helpers
+
+These sit on top of `buildQuery`:
+
+- `toURL(base, path, params)` → full URL string with normalized query
+- `qsString(path, params)` → `"a=b&c=d"` query string
+- `dropId(obj)` / `dropParams(obj,[...])` → remove path params before serialization
+- `withDefaults(path, partial)` → fill **missing** fields with documented server defaults (does not affect `buildQuery`)
+- `safeParseRequest(schema, input)` / `explainZodError(error)` → friendlier request parsing
+- `toUnixSeconds`, `ddmmyyyy`, `normalizeCoinId`, `normalizeVsCurrencies` → small coercers
 
 ---
 
