@@ -5,7 +5,7 @@ import { buildQuery } from "../../runtime/query.js";
 
 describe("buildQuery edge primitives", () => {
   it("drops non-finite numbers (NaN/Infinity)", () => {
-    const qsObj = buildQuery("/unknown/endpoint", {
+    const qsObj = buildQuery("/coins/markets", {
       vs_currency: "usd",
       n1: NaN,
       n2: Infinity,
@@ -16,14 +16,13 @@ describe("buildQuery edge primitives", () => {
   });
 
   it("drops values of unsupported types (objects/functions)", () => {
-    const qsObj = buildQuery("/unknown/endpoint", {
+    const qsObj = buildQuery("/coins/markets", {
       vs_currency: "usd",
       o: { x: 1 } as unknown as string,
       f: ((): unknown => 1) as unknown as string,
     });
     expect(qsObj).toEqual({ vs_currency: "usd" });
   });
-
   it("keeps params not in defaults when endpoint DOES have defaults", () => {
     // /coins/markets has defaults for per_page/page/order/locale/sparkline,
     // but NOT for precision → must be kept even if equal to schema default.

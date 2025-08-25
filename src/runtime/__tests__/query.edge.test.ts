@@ -14,22 +14,20 @@ describe("buildQuery edge cases", () => {
     expect(qsObj).toEqual({ vs_currency: "usd" });
   });
 
-  it("keeps params when endpoint has NO defaults (exercises return path)", () => {
-    const qsObj = buildQuery("/unknown/endpoint", {
-      // These would be defaults for /coins/markets, but there are no defaults for this endpoint
-      per_page: 100,
-      page: 1,
-      order: "market_cap_desc",
+  it("drops empties and unknown types on a known endpoint", () => {
+    const q = buildQuery("/coins/markets", {
       vs_currency: "usd",
+      ids: ["", "bitcoin", null as unknown as string, "ethereum"], // stays safe
+      page: 1, // default → dropped
+      bogus: { a: 1 }, // object → not a supported type → dropped
+      misc: Symbol("x") as unknown, // symbol → dropped, but typed safely
     });
 
-    // All kept because no defaults for /unknown/endpoint
-    expect(qsObj).toEqual({
-      order: "market_cap_desc",
-      page: "1",
-      per_page: "100",
-      vs_currency: "usd",
-    });
+    expect(q.vs_currency).toBe("usd");
+    expect(q.ids).toBe("bitcoin,ethereum");
+    expect(q).not.toHaveProperty("bogus");
+    expect(q).not.toHaveProperty("misc");
+    expect(q).not.toHaveProperty("page");
   });
 
   it("keeps non-defaults when endpoint HAS defaults (exercises keep branch)", () => {

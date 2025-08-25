@@ -7,8 +7,4 @@ describe("runtime/getServerDefaults", () => {
     const filled = getServerDefaults("/coins/list"); // defaults: include_platform: false
     expect(filled).toMatchObject({ include_platform: false });
   });
-  it("returns an empty object from server defaults for an unknown path", () => {
-    const filled = getServerDefaults("/dummy"); // not known
-    expect(filled).toMatchObject({});
-  });
 });

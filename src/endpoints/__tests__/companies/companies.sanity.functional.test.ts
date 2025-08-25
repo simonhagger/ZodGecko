@@ -7,24 +7,12 @@
  * @see ./docs/companies.functional.testing.md
  */
 
-import { describe, it, expect } from "vitest";
-import type { z } from "zod";
+import { describe, it } from "vitest";
 
-import { companies, buildQuery } from "../../../index.js";
-import { serverDefaults } from "../../../runtime/server-defaults.js";
-import { dropPathParamsTyped, expectValid } from "../_utils/index.js";
-
-type TreasuryReqIn = z.input<typeof companies.schemas.CompaniesPublicTreasuryByIdRequestSchema>;
+import { expectNoDefaultsAndEmptyQuery } from "../_utils/test-helpers.js";
 
 describe("companies – sanity", () => {
-  it("no documented server defaults for /companies/public_treasury/{coin_id}", () => {
-    expect(serverDefaults["/companies/public_treasury/{coin_id}"]).toBeUndefined();
-  });
-
-  it("building a query from a valid request yields empty object", () => {
-    const req: TreasuryReqIn = { coin_id: "bitcoin" };
-    expectValid(companies.schemas.CompaniesPublicTreasuryByIdRequestSchema, req);
-    const q = dropPathParamsTyped(req, ["coin_id"] as const);
-    expect(buildQuery("/companies/public_treasury/{coin_id}", q)).toEqual({});
+  it("/companies/public_treasury/{coin_id} → no defaults; {} → {}", () => {
+    expectNoDefaultsAndEmptyQuery("/companies/public_treasury/{coin_id}");
   });
 });

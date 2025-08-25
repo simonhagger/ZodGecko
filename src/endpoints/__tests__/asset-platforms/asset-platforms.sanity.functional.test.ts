@@ -7,13 +7,12 @@
  * @see ./docs/asset-platforms.functional.testing.md
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
 
-import { buildQuery, serverDefaults } from "../../../index.js";
+import { expectNoDefaultsAndEmptyQuery } from "../_utils/test-helpers.js";
 
-describe("asset-platforms – sanity", () => {
-  it("has no server defaults and serializes to an empty query", () => {
-    expect(serverDefaults["/asset_platforms"]).toBeUndefined();
-    expect(buildQuery("/asset_platforms", {})).toEqual({});
+describe("asset_platforms – sanity", () => {
+  it("/asset_platforms → no defaults; {} → {}", () => {
+    expectNoDefaultsAndEmptyQuery("/asset_platforms");
   });
 });

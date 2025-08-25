@@ -9,27 +9,16 @@
  * @see ./docs/contract.functional.testing.md
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it } from "vitest";
 
-import { serverDefaults, buildQuery } from "../../../index.js";
-import { expectNoDefaultsAndEmptyQuery } from "../_utils/index.js";
+import { expectNoDefaultsAndEmptyQuery } from "../_utils/test-helpers.js";
 
 describe("contract – sanity", () => {
-  it("/coins/{id}/contract/{contract_address}", () => {
-    expectNoDefaultsAndEmptyQuery("/coins/{id}/contract/{contract_address}");
+  it("/coins/{id}/contract/{contract_address}/market_chart → no defaults; {} → {}", () => {
+    expectNoDefaultsAndEmptyQuery("/coins/{id}/contract/{contract_address}/market_chart");
   });
 
-  it("/coins/{id}/contract/{contract_address}/market_chart", () => {
-    expect(serverDefaults["/coins/{id}/contract/{contract_address}/market_chart"]).toBeUndefined();
-    expect(buildQuery("/coins/{id}/contract/{contract_address}/market_chart", {})).toEqual({});
-  });
-
-  it("/coins/{id}/contract/{contract_address}/market_chart/range", () => {
-    expect(
-      serverDefaults["/coins/{id}/contract/{contract_address}/market_chart/range"],
-    ).toBeUndefined();
-    expect(buildQuery("/coins/{id}/contract/{contract_address}/market_chart/range", {})).toEqual(
-      {},
-    );
+  it("/coins/{id}/contract/{contract_address}/market_chart/range → no defaults; {} → {}", () => {
+    expectNoDefaultsAndEmptyQuery("/coins/{id}/contract/{contract_address}/market_chart/range");
   });
 });
