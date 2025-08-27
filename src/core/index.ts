@@ -20,11 +20,5 @@ export {
   ensureLeadingSlash,
   isAbsoluteUrl,
 } from "./url.js";
-// export {
-// //   type QueryPrimitive,
-// //   type QueryValue,
-// //   normalizePrimitive,
-// //   normalizeValue,
-// //   normalizeDefault,
-// //   normalizeQuery,
-// } from "./query.js";
+// Pure query utilities (stable, framework-agnostic)
+export { normalizeQuery, queryString, queryParams, normalizeDefault } from "./query.js";

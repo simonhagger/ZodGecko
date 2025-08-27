@@ -59,7 +59,8 @@ export default [
         "warn",
         { allowExpressions: true, allowHigherOrderFunctions: true },
       ],
-      "@typescript-eslint/consistent-type-imports": "error",
+      // Keep type-only imports clean (prevents value edges)
+      "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/no-floating-promises": "error",
 
@@ -79,17 +80,13 @@ export default [
         { js: "always", mjs: "always", ts: "never", tsx: "never" },
       ],
       "import/no-cycle": ["error", { maxDepth: 1 }],
+      // Barrels are for consumers only – never import them within src/**
       "no-restricted-imports": [
         "error",
         {
-          paths: [
-            {
-              name: "zodgecko",
-              message: "Do not import the root barrel from internal files.",
-            },
-          ],
           patterns: [
-            { group: ["*/src/index", "**/src/index"], message: "No internal root-barrel imports." },
+            "**/src/index", // internal root barrel
+            "zodgecko", // package name (from internal files)
           ],
         },
       ],

@@ -55,6 +55,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "check:deps": "madge --circular src",
     "clean": "rimraf dist .tsbuildinfo",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",

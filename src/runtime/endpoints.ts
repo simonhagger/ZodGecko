@@ -1,16 +1,15 @@
 /**
  * @file Runtime endpoint registry (string-literal union + helpers)
- * @summary Central list of supported CoinGecko API paths used by runtime helpers,
- *          tests, and docs. Keeps path strings typo-free and discoverable.
+ * @summary Central list of supported CoinGecko API paths used by runtime helpers, tests, and docs.
  * @remarks
  * - Keep this list in sync with the endpoints you actually expose.
  * - Templated segments use `{param}` braces (e.g. `/coins/{id}`).
- * - This is synced to the order here: https://docs.coingecko.com/v3.0.1/reference/endpoint-overview
+ * - Order mirrors the API docs: https://docs.coingecko.com/v3.0.1/reference/endpoint-overview
  */
 
-import type { z } from "zod";
+import type { ZodType } from "zod";
 
-// ✅ import directly from endpoint modules to avoid barrels/cycles
+// Import directly from endpoint modules to avoid barrels/cycles.
 import * as assetPlatformsNS from "../endpoints/asset-platforms/index.js";
 import * as categoriesNS from "../endpoints/categories/index.js";
 import * as coinsNS from "../endpoints/coins/index.js";
@@ -23,196 +22,207 @@ import * as pingNS from "../endpoints/ping/index.js";
 import * as searchNS from "../endpoints/search/index.js";
 import * as simpleNS from "../endpoints/simple/index.js";
 
-/** Internal: shape stored per endpoint in the registry. */
-type Entry = { req: z.ZodTypeAny; res: z.ZodTypeAny };
+/** Schema accessors stored per endpoint (lazy to avoid eager module eval). */
+/** @internal – do not export or re-export */
+type SchemaThunks = {
+  req: () => ZodType<unknown>;
+  res: () => ZodType<unknown>;
+};
 
 /**
- * Central mapping from endpoint → { req, res } schemas.
+ * Central mapping from endpoint → schema thunks.
+ * Values are thunks so modules aren’t dereferenced at import time.
  */
-export const ENDPOINTS = {
-  // --- ping endpoint
+const ENDPOINTS = {
+  // --- ping
   "/ping": {
-    req: pingNS.schemas.PingRequestSchema,
-    res: pingNS.schemas.PingResponseSchema,
+    req: () => pingNS.schemas.PingRequestSchema,
+    res: () => pingNS.schemas.PingResponseSchema,
   },
-  // --- simple endpoint
+
+  // --- simple
   "/simple/price": {
-    req: simpleNS.schemas.SimplePriceRequestSchema,
-    res: simpleNS.schemas.SimplePriceResponseSchema,
+    req: () => simpleNS.schemas.SimplePriceRequestSchema,
+    res: () => simpleNS.schemas.SimplePriceResponseSchema,
   },
   "/simple/token_price/{id}": {
-    req: simpleNS.schemas.SimpleTokenPriceByIdRequestSchema,
-    res: simpleNS.schemas.SimpleTokenPriceByIdResponseSchema,
+    req: () => simpleNS.schemas.SimpleTokenPriceByIdRequestSchema,
+    res: () => simpleNS.schemas.SimpleTokenPriceByIdResponseSchema,
   },
   "/simple/supported_vs_currencies": {
-    req: simpleNS.schemas.SimpleSupportedVsCurrenciesRequestSchema,
-    res: simpleNS.schemas.SimpleSupportedVsCurrenciesResponseSchema,
+    req: () => simpleNS.schemas.SimpleSupportedVsCurrenciesRequestSchema,
+    res: () => simpleNS.schemas.SimpleSupportedVsCurrenciesResponseSchema,
   },
 
-  // --- coins endpoint (including specialist endpoints)
+  // --- coins (incl. specialist endpoints)
   "/coins/list": {
-    req: coinsNS.schemas.CoinsListRequestSchema,
-    res: coinsNS.schemas.CoinsListResponseSchema,
+    req: () => coinsNS.schemas.CoinsListRequestSchema,
+    res: () => coinsNS.schemas.CoinsListResponseSchema,
   },
   "/coins/markets": {
-    req: coinsNS.schemas.CoinsMarketsRequestSchema,
-    res: coinsNS.schemas.CoinsMarketsResponseSchema,
+    req: () => coinsNS.schemas.CoinsMarketsRequestSchema,
+    res: () => coinsNS.schemas.CoinsMarketsResponseSchema,
   },
   "/coins/{id}": {
-    req: coinsNS.schemas.CoinsByIdRequestSchema,
-    res: coinsNS.schemas.CoinsByIdResponseSchema,
+    req: () => coinsNS.schemas.CoinsByIdRequestSchema,
+    res: () => coinsNS.schemas.CoinsByIdResponseSchema,
   },
   "/coins/{id}/tickers": {
-    req: coinsNS.schemas.CoinsByIdTickersRequestSchema,
-    res: coinsNS.schemas.CoinsByIdTickersResponseSchema,
+    req: () => coinsNS.schemas.CoinsByIdTickersRequestSchema,
+    res: () => coinsNS.schemas.CoinsByIdTickersResponseSchema,
   },
   "/coins/{id}/history": {
-    req: coinsNS.schemas.CoinsByIdHistoryRequestSchema,
-    res: coinsNS.schemas.CoinsByIdHistoryResponseSchema,
+    req: () => coinsNS.schemas.CoinsByIdHistoryRequestSchema,
+    res: () => coinsNS.schemas.CoinsByIdHistoryResponseSchema,
   },
   "/coins/{id}/market_chart": {
-    req: coinsNS.schemas.CoinsByIdMarketChartRequestSchema,
-    res: coinsNS.schemas.CoinsByIdMarketChartResponseSchema,
+    req: () => coinsNS.schemas.CoinsByIdMarketChartRequestSchema,
+    res: () => coinsNS.schemas.CoinsByIdMarketChartResponseSchema,
   },
   "/coins/{id}/market_chart/range": {
-    req: coinsNS.schemas.CoinsByIdMarketChartRangeRequestSchema,
-    res: coinsNS.schemas.CoinsByIdMarketChartRangeResponseSchema,
+    req: () => coinsNS.schemas.CoinsByIdMarketChartRangeRequestSchema,
+    res: () => coinsNS.schemas.CoinsByIdMarketChartRangeResponseSchema,
   },
   "/coins/{id}/ohlc": {
-    req: coinsNS.schemas.CoinsByIdOhlcRequestSchema,
-    res: coinsNS.schemas.CoinsByIdOhlcResponseSchema,
+    req: () => coinsNS.schemas.CoinsByIdOhlcRequestSchema,
+    res: () => coinsNS.schemas.CoinsByIdOhlcResponseSchema,
   },
-  // contract endpoints
+
+  // --- contract
   "/coins/{id}/contract/{contract_address}": {
-    req: contractNS.schemas.CoinsByIdContractByAddressRequestSchema,
-    res: contractNS.schemas.CoinsByIdContractByAddressResponseSchema,
+    req: () => contractNS.schemas.CoinsByIdContractByAddressRequestSchema,
+    res: () => contractNS.schemas.CoinsByIdContractByAddressResponseSchema,
   },
   "/coins/{id}/contract/{contract_address}/market_chart": {
-    req: contractNS.schemas.CoinsByIdContractByAddressMarketChartRequestSchema,
-    res: contractNS.schemas.CoinsByIdContractByAddressMarketChartResponseSchema,
+    req: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartRequestSchema,
+    res: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartResponseSchema,
   },
   "/coins/{id}/contract/{contract_address}/market_chart/range": {
-    req: contractNS.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema,
-    res: contractNS.schemas.CoinsByIdContractByAddressMarketChartRangeResponseSchema,
+    req: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema,
+    res: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartRangeResponseSchema,
   },
-  // categories endpoints
+
+  // --- categories
   "/coins/categories/list": {
-    req: categoriesNS.schemas.CoinsCategoriesListRequestSchema,
-    res: categoriesNS.schemas.CoinsCategoriesListResponseSchema,
+    req: () => categoriesNS.schemas.CoinsCategoriesListRequestSchema,
+    res: () => categoriesNS.schemas.CoinsCategoriesListResponseSchema,
   },
   "/coins/categories": {
-    req: categoriesNS.schemas.CoinsCategoriesRequestSchema,
-    res: categoriesNS.schemas.CoinsCategoriesResponseSchema,
+    req: () => categoriesNS.schemas.CoinsCategoriesRequestSchema,
+    res: () => categoriesNS.schemas.CoinsCategoriesResponseSchema,
   },
 
-  // --- exchanges endpoints
+  // --- exchanges
   "/exchanges": {
-    req: exchangesNS.schemas.ExchangesRequestSchema,
-    res: exchangesNS.schemas.ExchangesResponseSchema,
+    req: () => exchangesNS.schemas.ExchangesRequestSchema,
+    res: () => exchangesNS.schemas.ExchangesResponseSchema,
   },
   "/exchanges/list": {
-    req: exchangesNS.schemas.ExchangesListRequestSchema,
-    res: exchangesNS.schemas.ExchangesListResponseSchema,
+    req: () => exchangesNS.schemas.ExchangesListRequestSchema,
+    res: () => exchangesNS.schemas.ExchangesListResponseSchema,
   },
   "/exchanges/{id}": {
-    req: exchangesNS.schemas.ExchangesByIdRequestSchema,
-    res: exchangesNS.schemas.ExchangesByIdResponseSchema,
+    req: () => exchangesNS.schemas.ExchangesByIdRequestSchema,
+    res: () => exchangesNS.schemas.ExchangesByIdResponseSchema,
   },
   "/exchanges/{id}/tickers": {
-    req: exchangesNS.schemas.ExchangesByIdTickersRequestSchema,
-    res: exchangesNS.schemas.ExchangesByIdTickersResponseSchema,
+    req: () => exchangesNS.schemas.ExchangesByIdTickersRequestSchema,
+    res: () => exchangesNS.schemas.ExchangesByIdTickersResponseSchema,
   },
   "/exchanges/{id}/volume_chart": {
-    req: exchangesNS.schemas.ExchangesByIdVolumeChartRequestSchema,
-    res: exchangesNS.schemas.ExchangesByIdVolumeChartResponseSchema,
+    req: () => exchangesNS.schemas.ExchangesByIdVolumeChartRequestSchema,
+    res: () => exchangesNS.schemas.ExchangesByIdVolumeChartResponseSchema,
   },
-  // --- derivatives endpoints
+
+  // --- derivatives
   "/derivatives": {
-    req: derivativesNS.schemas.DerivativesRequestSchema,
-    res: derivativesNS.schemas.DerivativesResponseSchema,
+    req: () => derivativesNS.schemas.DerivativesRequestSchema,
+    res: () => derivativesNS.schemas.DerivativesResponseSchema,
   },
   "/derivatives/exchanges": {
-    req: derivativesNS.schemas.DerivativesExchangesRequestSchema,
-    res: derivativesNS.schemas.DerivativesExchangesResponseSchema,
+    req: () => derivativesNS.schemas.DerivativesExchangesRequestSchema,
+    res: () => derivativesNS.schemas.DerivativesExchangesResponseSchema,
   },
   "/derivatives/exchanges/{id}": {
-    req: derivativesNS.schemas.DerivativesExchangesByIdRequestSchema,
-    res: derivativesNS.schemas.DerivativesExchangesByIdResponseSchema,
+    req: () => derivativesNS.schemas.DerivativesExchangesByIdRequestSchema,
+    res: () => derivativesNS.schemas.DerivativesExchangesByIdResponseSchema,
   },
   "/derivatives/exchanges/list": {
-    req: derivativesNS.schemas.DerivativesExchangesListRequestSchema,
-    res: derivativesNS.schemas.DerivativesExchangesListResponseSchema,
+    req: () => derivativesNS.schemas.DerivativesExchangesListRequestSchema,
+    res: () => derivativesNS.schemas.DerivativesExchangesListResponseSchema,
   },
-  // exchange rates endpoints NOT YET IMPLEMENTED
-  // "/exchange_rates": {
-  //   req: exchangeRates.schemas.ExchangeRatesRequestSchema,
-  //   res: exchangeRates.schemas.ExchangeRatesResponseSchema,
-  // },
-  // --- asset-platforms endpoint
+
+  // --- asset platforms
   "/asset_platforms": {
-    req: assetPlatformsNS.schemas.AssetPlatformsRequestSchema,
-    res: assetPlatformsNS.schemas.AssetPlatformsResponseSchema,
+    req: () => assetPlatformsNS.schemas.AssetPlatformsRequestSchema,
+    res: () => assetPlatformsNS.schemas.AssetPlatformsResponseSchema,
   },
-  // token lists endpoints NOT YET IMPLEMENTED
-  // "/token_lists/{asset_platform_id}/all.json": {
-  //   req: tokenLists.schemas.TokenListsByAssetPlatformIdRequestSchema,
-  //   res: tokenLists.schemas.TokenListsByAssetPlatformIdResponseSchema,
-  // },
-  // --- search endpoints
+
+  // --- search
   "/search": {
-    req: searchNS.schemas.SearchRequestSchema,
-    res: searchNS.schemas.SearchResponseSchema,
+    req: () => searchNS.schemas.SearchRequestSchema,
+    res: () => searchNS.schemas.SearchResponseSchema,
   },
   "/search/trending": {
-    req: searchNS.schemas.SearchTrendingRequestSchema,
-    res: searchNS.schemas.SearchTrendingResponseSchema,
+    req: () => searchNS.schemas.SearchTrendingRequestSchema,
+    res: () => searchNS.schemas.SearchTrendingResponseSchema,
   },
-  // --- global endpoints
+
+  // --- global
   "/global": {
-    req: globalNS.schemas.GlobalRequestSchema,
-    res: globalNS.schemas.GlobalResponseSchema,
+    req: () => globalNS.schemas.GlobalRequestSchema,
+    res: () => globalNS.schemas.GlobalResponseSchema,
   },
   "/global/decentralized_finance_defi": {
-    req: globalNS.schemas.GlobalDefiRequestSchema,
-    res: globalNS.schemas.GlobalDefiResponseSchema,
+    req: () => globalNS.schemas.GlobalDefiRequestSchema,
+    res: () => globalNS.schemas.GlobalDefiResponseSchema,
   },
-  // companies (public treasury) endpoints
-  "/companies/public_treasury/{coin_id}": {
-    req: companiesNS.schemas.CompaniesPublicTreasuryByIdRequestSchema,
-    res: companiesNS.schemas.CompaniesPublicTreasuryByIdResponseSchema,
-  },
-} as const satisfies Record<string, Entry>;
 
+  // --- companies (public treasury)
+  "/companies/public_treasury/{coin_id}": {
+    req: () => companiesNS.schemas.CompaniesPublicTreasuryByIdRequestSchema,
+    res: () => companiesNS.schemas.CompaniesPublicTreasuryByIdResponseSchema,
+  },
+} as const satisfies Record<string, SchemaThunks>;
+
+/** Union of all endpoint keys. */
 export type Endpoint = keyof typeof ENDPOINTS;
 
-// Optional: a frozen runtime list if you need to iterate in code/tests
+/** Frozen list of endpoints for iteration in code/tests. */
 export const ALL_ENDPOINTS = Object.freeze(Object.keys(ENDPOINTS) as Endpoint[]);
 
 /** Zod request schema type for a given endpoint key. */
-export type RequestSchemaOf<E extends Endpoint> = (typeof ENDPOINTS)[E]["req"];
+export type RequestSchemaOf<E extends Endpoint> = ReturnType<(typeof ENDPOINTS)[E]["req"]>;
 /** Zod response schema type for a given endpoint key. */
-export type ResponseSchemaOf<E extends Endpoint> = (typeof ENDPOINTS)[E]["res"];
+export type ResponseSchemaOf<E extends Endpoint> = ReturnType<(typeof ENDPOINTS)[E]["res"]>;
 
-/** Get the request schema for a specific endpoint key. */
-export function getRequestSchema<E extends Endpoint>(ep: E): RequestSchemaOf<E> {
-  return ENDPOINTS[ep].req as RequestSchemaOf<E>;
+/**
+ * Get the request schema for a specific endpoint.
+ * @param endpoint - Endpoint key (e.g. "/coins/{id}")
+ * @returns The Zod schema for the request payload.
+ */
+export function getRequestSchema(endpoint: Endpoint): ZodType<unknown> {
+  return ENDPOINTS[endpoint].req();
 }
 
-/** Get the response schema for a specific endpoint key. */
-export function getResponseSchema<E extends Endpoint>(ep: E): ResponseSchemaOf<E> {
-  return ENDPOINTS[ep].res as ResponseSchemaOf<E>;
+/**
+ * Get the response schema for a specific endpoint.
+ * @param endpoint - Endpoint key (e.g. "/coins/{id}")
+ * @returns The Zod schema for the response payload.
+ */
+export function getResponseSchema(endpoint: Endpoint): ZodType<unknown> {
+  return ENDPOINTS[endpoint].res();
 }
 
-/** Convenience: get both schemas at once with precise typing. */
-export function getSchemas<E extends Endpoint>(
-  ep: E,
-): {
-  req: RequestSchemaOf<E>;
-  res: ResponseSchemaOf<E>;
+/**
+ * Get both request and response schemas for a specific endpoint.
+ * @param endpoint - Endpoint key (e.g. "/coins/{id}")
+ * @returns An object with `{ request, response }` Zod schemas.
+ */
+export function getSchemas(endpoint: Endpoint): {
+  req: ZodType<unknown>;
+  res: ZodType<unknown>;
 } {
-  const entry = ENDPOINTS[ep];
-  return {
-    req: entry.req as RequestSchemaOf<E>,
-    res: entry.res as ResponseSchemaOf<E>,
-  };
+  const entry = ENDPOINTS[endpoint];
+  return { req: entry.req(), res: entry.res() };
 }

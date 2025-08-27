@@ -84,7 +84,7 @@ export const DerivativesExchangesRowSchema = tolerantObject({
   image: z.string().optional(),
   // Metrics
   open_interest_btc: z.number().nullable().optional(),
-  trade_volume_24h_btc: z.number().nullable().optional(),
+  trade_volume_24h_btc: z.string().nullable().optional(),
   number_of_perpetual_pairs: z.number().nullable().optional(),
   number_of_futures_pairs: z.number().nullable().optional(),
   // Present on /{id}:

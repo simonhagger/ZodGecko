@@ -77,6 +77,11 @@ export const SERVER_DEFAULTS = {
     // dex_pair_format: "contract_address", // enable only if confirmed
   },
 
+  /** GET /coins/{id}/history */
+  "/coins/{id}/history": {
+    localization: true,
+  },
+
   /** GET /coins/{id}/tickers */
   "/coins/{id}/tickers": {
     order: "trust_score_desc",
