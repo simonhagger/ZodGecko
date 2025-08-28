@@ -5,7 +5,8 @@ const endpointsTs = readFileSync("src/runtime/endpoints.ts", "utf8");
 const paths = [...endpointsTs.matchAll(/"(\/[^"]+)"\s*:\s*\{/g)].map((m) => m[1]).sort();
 
 const docsMd = readFileSync("docs/endpoints.md", "utf8"); // adjust if different
-const listed = [...docsMd.matchAll(/^\s*-\s*`([^`]+)`/gm)].map((m) => m[1]).sort();
+const listedRaw = [...docsMd.matchAll(/^\s*-\s*`([^`]+)`/gm)].map((m) => m[1]);
+const listed = listedRaw.filter((s) => s.startsWith("/")).sort();
 
 const onlyInCode = paths.filter((p) => !listed.includes(p));
 const onlyInDocs = listed.filter((p) => !paths.includes(p));

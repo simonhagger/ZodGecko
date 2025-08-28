@@ -10,6 +10,43 @@ Each group’s barrel should export:
 - `export * as schemas from "./schemas.js"` — the Zod **request/response** schemas used at runtime.
 - `export type { ... }` — request/response **type aliases** inferred from those schemas.
 
+## Supported endpoints
+
+The supported endpoints are currently a subset of the CoinGecko v3.0.1 public demo plan: `https://docs.coingecko.com/v3.0.1/reference/endpoint-overview` with a view to increasing coverage in future versions.
+
+- `/asset_platforms`
+- `/coins/categories`
+- `/coins/categories/list`
+- `/coins/list`
+- `/coins/markets`
+- `/coins/{id}`
+- `/coins/{id}/contract/{contract_address}`
+- `/coins/{id}/contract/{contract_address}/market_chart`
+- `/coins/{id}/contract/{contract_address}/market_chart/range`
+- `/coins/{id}/history`
+- `/coins/{id}/market_chart`
+- `/coins/{id}/market_chart/range`
+- `/coins/{id}/ohlc`
+- `/coins/{id}/tickers`
+- `/companies/public_treasury/{coin_id}`
+- `/derivatives`
+- `/derivatives/exchanges`
+- `/derivatives/exchanges/list`
+- `/derivatives/exchanges/{id}`
+- `/exchanges`
+- `/exchanges/list`
+- `/exchanges/{id}`
+- `/exchanges/{id}/tickers`
+- `/exchanges/{id}/volume_chart`
+- `/global`
+- `/global/decentralized_finance_defi`
+- `/ping`
+- `/search`
+- `/search/trending`
+- `/simple/price`
+- `/simple/supported_vs_currencies`
+- `/simple/token_price/{id}`
+
 **Import examples**
 
 ```ts

@@ -24,7 +24,7 @@ export const DdMmYyyy = z
   .describe("Date formatted as dd-mm-yyyy for /history");
 
 /**
- * HttpUrlString — accepts only http(s) URLs.
+ * HttpUrl — accepts only http(s) URLs.
  * CoinGecko often returns empty strings; we map "" -> undefined and make it optional.
  * (Replacement for deprecated .url() in Zod v4)
  */
@@ -33,12 +33,26 @@ const HttpUrl = z
   .trim()
   .regex(/^https?:\/\/\S+$/i, "Expected an http(s) URL");
 
+/**
+ * UrlString — accepts only http(s) URLs or empty strings.
+ * CoinGecko often returns empty strings; we map "" -> undefined and make it optional.
+ * (Replacement for deprecated .url() in Zod v4)
+ */
 export const UrlString = HttpUrl.or(z.literal("")) // tolerate empty string from API
   .transform((s) => (s === "" ? undefined : s))
   .optional();
 
 /** Non-empty string */
 export const NonEmptyString = z.string().min(1);
+
+/** Nullable string */
+export const NullableString = z.string().nullable();
+
+/** Default true boolean */
+export const DefaultTrueBoolean = z.boolean().default(true);
+
+/** Default false boolean */
+export const DefaultFalseBoolean = z.boolean().default(false);
 
 /** Number that may arrive as string; coerced to number */
 export const CoercedNumber = z.preprocess(
@@ -48,6 +62,12 @@ export const CoercedNumber = z.preprocess(
 
 /** Number that may be null */
 export const NullableNumber = z.number().nullable();
+
+/** Vs Quote (number) that may be null */
+export const VsQuote = z.record(z.string(), z.number().nullable());
+
+/** Vs Quote (string) that may be null */
+export const VsQuoteString = z.record(z.string(), z.string().nullable());
 
 /** Create a nominal (branded) type on top of a Zod schema. */
 export type Brand<T, B extends string> = T & { readonly __brand: B };

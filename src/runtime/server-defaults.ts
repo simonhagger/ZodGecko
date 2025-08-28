@@ -34,28 +34,27 @@ const EMPTY_DEFAULTS: Readonly<Record<string, unknown>> = Object.freeze({});
  * SERVER_DEFAULTS["/coins/markets"].per_page; // 100
  * ```
  */
-export const SERVER_DEFAULTS = {
-  /** GET /coins/list */
-  "/coins/list": {
-    include_platform: false,
+export const SERVER_DEFAULTS: DefaultMap = {
+  /**
+   * Ping Endpoints
+   */
+
+  /** GET /ping */
+  "/ping": {
+    // No defaults for this endpoint, included for completeness
   },
 
-  /** GET /coins/markets */
-  "/coins/markets": {
-    per_page: 100,
-    page: 1,
-    order: "market_cap_desc",
-    locale: "en",
-    sparkline: false,
-  },
+  /**
+   * Simple Endpoints
+   */
 
   /** GET /simple/price */
   "/simple/price": {
+    include_tokens: "top",
     include_market_cap: false,
     include_24hr_vol: false,
     include_24hr_change: false,
     include_last_updated_at: false,
-    include_tokens: "top",
   },
 
   /** GET /simple/token_price/{id} */
@@ -66,6 +65,31 @@ export const SERVER_DEFAULTS = {
     include_last_updated_at: false,
   },
 
+  /** GET /simple/supported_vs_currencies */
+  "/simple/supported_vs_currencies": {
+    // No defaults for this endpoint, included for completeness
+  },
+
+  /**
+   * Coins Endpoints
+   */
+
+  /** GET /coins/list */
+  "/coins/list": {
+    include_platform: false,
+  },
+
+  /** GET /coins/markets */
+  "/coins/markets": {
+    include_tokens: "top",
+    order: "market_cap_desc",
+    per_page: 100,
+    page: 1,
+    sparkline: false,
+    price_change_percentage: "24h",
+    locale: "en",
+  },
+
   /** GET /coins/{id} */
   "/coins/{id}": {
     localization: true,
@@ -74,7 +98,16 @@ export const SERVER_DEFAULTS = {
     community_data: true,
     developer_data: true,
     sparkline: false,
-    // dex_pair_format: "contract_address", // enable only if confirmed
+    dex_pair_format: "contract_address",
+  },
+
+  /** GET /coins/{id}/tickers */
+  "/coins/{id}/tickers": {
+    include_exchange_logo: false,
+    page: 1,
+    order: "trust_score_desc",
+    depth: false,
+    dex_pair_format: "contract_address",
   },
 
   /** GET /coins/{id}/history */
@@ -82,12 +115,38 @@ export const SERVER_DEFAULTS = {
     localization: true,
   },
 
-  /** GET /coins/{id}/tickers */
-  "/coins/{id}/tickers": {
-    order: "trust_score_desc",
-    include_exchange_logo: false,
-    depth: false,
-    // page default is implied but not formally documented
+  /** GET /coins/{id}/market_chart */
+  "/coins/{id}/market_chart": {
+    // No defaults for this endpoint, included for completeness
+  },
+
+  /** GET /coins/{id}/market_chart/range */
+  "/coins/{id}/market_chart/range": {
+    // No defaults for this endpoint, included for completeness
+  },
+
+  /** GET /coins/{id}/ohlc */
+  "/coins/{id}/ohlc": {
+    // No defaults for this endpoint, included for completeness
+  },
+
+  /**
+   * Contract Endpoints
+   */
+
+  /** GET /coins/{id}/contract/{contract_address} */
+  "/coins/{id}/contract/{contract_address}": {
+    // No defaults for this endpoint, included for completeness
+  },
+
+  /** GET coins/{id}/contract/{contract_address}/market_chart */
+  "/coins/{id}/contract/{contract_address}/market_chart": {
+    // No defaults for this endpoint, included for completeness
+  },
+
+  /** GET coins/{id}/contract/{contract_address}/market_chart/range */
+  "/coins/{id}/contract/{contract_address}/market_chart/range": {
+    // No defaults for this endpoint, included for completeness
   },
 
   // Add more endpoints as verified against the API

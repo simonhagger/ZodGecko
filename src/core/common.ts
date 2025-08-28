@@ -17,13 +17,23 @@ import { NonEmptyString, UrlString, brand } from "./primitives.js";
  *    These are small branded strings used widely across the API.
  * ========================================================================== */
 
+/** Branded strings for strong typing of Coin IDs */
 export const CoinId = brand(NonEmptyString, "CoinId");
+/** Branded strings for strong typing of Coin Names */
+export const CoinName = brand(NonEmptyString, "CoinName");
+/** Branded strings for strong typing of Coin Symbols */
+export const CoinSymbol = brand(NonEmptyString, "CoinSymbol");
+/**
+ * Branded string for strong typing of the "vs_currency" parameter.
+ */
 export const VsCurrency = brand(z.string().min(1), "VsCurrency");
 
-/** Other IDs & path params (not branded unless useful in your codebase) */
-export const AssetPlatformId = z.string().min(1);
-export const ExchangeId = z.string().min(1);
-export const MarketId = z.string().min(1);
+/** UnBranded string for strong typing of the "asset_platform_id" parameter. */
+export const AssetPlatformId = brand(z.string().min(1), "AssetPlatformId");
+/** UnBranded string for strong typing of the "exchange_id" parameter. */
+export const ExchangeId = brand(z.string().min(1), "ExchangeId");
+/** UnBranded string for strong typing of the "market_id" parameter. */
+export const MarketId = brand(z.string().min(1), "MarketId");
 
 /** Contract address (EVM heuristic); falls back to string for non-EVM chains */
 export const ContractAddress = z
@@ -32,7 +42,22 @@ export const ContractAddress = z
   .or(z.string());
 
 /** DEX pair formatting choice used by tickers endpoints */
-export const DexPairFormat = z.enum(["contract_address", "symbol"]);
+export const DexPairFormat = z.enum(["contract_address", "symbol"]).default("contract_address");
+
+/** "1".."365", digits only, no leading/trailing spaces (trimmed) expressed as a string */
+export const OneToThreeSixtyFiveString = z
+  .string()
+  .trim()
+  .refine((s) => /^(?:[1-9]\d{0,2})$/.test(s), {
+    message: "Must be an integer string (no signs, no decimals, no leading zeros).",
+  })
+  .refine(
+    (s) => {
+      const n = Number(s);
+      return n >= 1 && n <= 365;
+    },
+    { message: "Must be between 1 and 365." },
+  );
 
 /* ============================================================================
  * 2) Lightweight helpers (DX)
@@ -84,21 +109,27 @@ export const Pagination = z.object({
   ...PageOnly.shape, // reuses PageOnly for consistency
 });
 
+/** Include 7 day sparkline data */
+export const Sparkline = z.boolean().default(false);
+
 /** Selector block used by /simple/* and /coins/markets */
 export const IncludeTokens = z.enum(["top", "all"]).default("top");
-export const IdsNamesSymbolsTokens = z.object({
+
+/**
+ * Selector block for coin IDs, names, and symbols.
+ */
+export const IdsNamesSymbols = z.object({
   ids: CSList(z.string()).optional(),
   names: CSList(z.string()).optional(),
   symbols: CSList(z.string()).optional(),
-  include_tokens: IncludeTokens,
 });
-export type IdsNamesSymbolsTokens = z.infer<typeof IdsNamesSymbolsTokens>;
+/**
+ * Inferred type for coin IDs, names, and symbols.
+ */
+export type IdsNamesSymbols = z.infer<typeof IdsNamesSymbols>;
 
 /** Comma-list aliases for readability in request schemas */
 export const VsCurrencyList = CSList(VsCurrency);
-// export const CoinIdList = CSList(z.string());
-// export const NamesList = CSList(z.string());
-// export const SymbolsList = CSList(z.string());
 
 /* ============================================================================
  * 4) Enums (locales, precision, ordering, windows, intervals)
@@ -146,41 +177,32 @@ export const MarketsLocale = z
   .default("en");
 
 /** Precision string accepted by several endpoints (NOTE: values are strings, not numbers) */
-export const PrecisionString = z
-  .enum([
-    "full",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "11",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-    "17",
-    "18",
-  ])
-  .default("2");
+export const PrecisionString = z.enum([
+  "full",
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
+  "15",
+  "16",
+  "17",
+  "18",
+]);
 
 /** Ordering for /coins/markets */
 export const MarketsOrder = z
-  .enum([
-    "market_cap_desc",
-    "market_cap_asc",
-    "volume_desc",
-    "volume_asc",
-    // If you’re on the newer spec, uncomment the ID sorts below:
-    // "id_asc","id_desc",
-  ])
+  .enum(["market_cap_desc", "market_cap_asc", "volume_desc", "volume_asc", "id_asc", "id_desc"])
   .default("market_cap_desc");
 
 /** Ordering for tickers */
@@ -205,23 +227,29 @@ export const PriceChangeWindows = z
   .enum(["1h", "24h", "7d", "14d", "30d", "200d", "1y"])
   .default("24h");
 
-/** OHLC window (days) and chart interval */
+/** OHLC window options (days) string of numerical equivalents */
 export const OhlcDays = z.enum(["1", "7", "14", "30", "90", "180", "365"]).default("30");
+
+/** OHLC window (days) and chart interval literally only a single string option */
 export const DailyInterval = z.enum(["daily"]);
 
 /* ============================================================================
  * 5) Time & numeric helpers reused in responses
  * ========================================================================== */
 
-/** Timestamps used in chart/series endpoints */
+/** Unix Milliseconds Timestamp used in chart/series endpoints */
 export const UnixMs = z.number().int().nonnegative(); // ms epoch (commonly used in arrays)
+
+/** Unix Seconds Timestamp used in chart/series endpoints */
 export const UnixSec = z.number().int().nonnegative(); // seconds epoch (used in /range params)
 
-/** Quote maps like { usd: 123, eur: 456 } */
-export const QuoteMap = z.record(z.string(), z.number());
+/** Quote maps like { usd: 123, eur: 456 | null } */
+export const QuoteMap = z.record(z.string(), z.number().nullable());
 
 /** Timeseries tuples */
 export const TsPoint = z.tuple([UnixMs, z.number()]);
+
+/** Timeseries array of tuples */
 export const TsSeries = z.array(TsPoint);
 
 /** OHLC tuple used by /ohlc */
