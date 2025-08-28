@@ -11,12 +11,15 @@ export default defineConfig({
 
     // Never crawl these paths for tests
     exclude: [
-      "node_modules",
-      "dist",
-      "coverage",
+      "node_modules/**",
+      "dist/**",
+      "coverage/**",
+      "docs/**",
+      "scripts/**",
+      "examples/**",
       // editor/ci noise
-      ".idea",
-      ".vscode",
+      ".idea/**",
+      ".vscode/**",
       // type-only or build artifacts
       "**/*.d.ts",
       // docs, fixtures and test helpers

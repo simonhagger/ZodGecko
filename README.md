@@ -207,5 +207,3 @@ const params: MarketsIn = { vs_currency: "usd" }; // TS checks before runtime pa
 ## Links
 
 - **GitHub (docs & issues):** [https://github.com/simonhagger/ZodGecko](https://github.com/simonhagger/ZodGecko)
-- **Testing guide:** see `TESTING.md` in the repo
-- **Contributing:** see `CONTRIBUTING.md`

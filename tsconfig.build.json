@@ -25,8 +25,11 @@
     "**/*.spec.*",
     "**/fixtures/**",
     "**/docs/**",
-    "dist",
-    "node_modules",
-    "coverage"
+    "dist/**",
+    "scripts/**",
+    "examples/**",
+    "docs/**",
+    "node_modules/**",
+    "coverage/**"
   ]
 }
