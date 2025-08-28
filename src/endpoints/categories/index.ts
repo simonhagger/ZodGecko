@@ -7,12 +7,6 @@
  * - Runtime Zod schemas are exposed under `categories.schemas`.
  */
 
-export type { CoinsCategoriesListRequest, CoinsCategoriesRequest } from "./requests.js";
-export type {
-  CoinsCategoriesListResponse,
-  CoinsCategoriesResponse,
-  CoinsCategoriesListItem,
-  CoinsCategoryRow,
-} from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

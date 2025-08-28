@@ -7,16 +7,6 @@
  * - Runtime Zod schemas are exposed under `contract.schemas`.
  */
 
-export type {
-  CoinsByIdContractByAddressRequest,
-  CoinsByIdContractByAddressMarketChartRequest,
-  CoinsByIdContractByAddressMarketChartRangeRequest,
-} from "./requests.js";
-
-export type {
-  CoinsByIdContractByAddressResponse,
-  CoinsByIdContractByAddressMarketChartResponse,
-  CoinsByIdContractByAddressMarketChartRangeResponse,
-} from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

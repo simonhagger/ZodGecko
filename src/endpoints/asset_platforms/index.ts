@@ -7,6 +7,6 @@
  * - Runtime Zod schemas are exposed under `assetPlatforms.schemas`.
  */
 
-export type { AssetPlatformsRequest } from "./requests.js";
-export type { AssetPlatformsResponse } from "./responses.js";
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

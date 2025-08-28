@@ -6,5 +6,5 @@
  */
 
 export * as schemas from "./schemas.js";
-export type { GlobalRequest, GlobalDefiRequest } from "./requests.js";
-export type { GlobalResponse, GlobalDefiResponse } from "./responses.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

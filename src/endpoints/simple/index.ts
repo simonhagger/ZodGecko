@@ -7,16 +7,6 @@
  * - Runtime Zod schemas are exposed under `simple.schemas`.
  */
 
-export type {
-  SimplePriceRequest,
-  SimpleTokenPriceByIdRequest,
-  SimpleSupportedVsCurrenciesRequest,
-} from "./requests.js";
-
-export type {
-  SimplePriceResponse,
-  SimpleTokenPriceByIdResponse,
-  SimpleSupportedVsCurrenciesResponse,
-} from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

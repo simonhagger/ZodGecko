@@ -7,21 +7,6 @@
  * - Runtime Zod schemas are exposed under `derivatives.schemas`.
  */
 
-export type {
-  DerivativesRequest,
-  DerivativesExchangesRequest,
-  DerivativesExchangesListRequest,
-  DerivativesExchangesByIdRequest,
-} from "./requests.js";
-
-export type {
-  DerivativesResponse,
-  DerivativesExchangesResponse,
-  DerivativesExchangesListResponse,
-  DerivativesExchangesByIdResponse,
-  DerivativesRow,
-  DerivativesExchangesRow,
-  DerivativesExchangesListItem,
-} from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

@@ -1,0 +1,360 @@
+[
+  {
+    "ep": "/asset_platforms",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/categories",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/categories/list",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/list",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [
+      "include_platform=false"
+    ],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/markets",
+    "reqPath": [],
+    "reqQuery": [
+      "vs_currency"
+    ],
+    "optWithDefault": [
+      "include_tokens=top",
+      "locale=en",
+      "order=market_cap_desc",
+      "page=1",
+      "per_page=100",
+      "price_change_percentage=24h",
+      "sparkline=false"
+    ],
+    "optOther": [
+      "category",
+      "ids",
+      "names",
+      "precision",
+      "symbols"
+    ]
+  },
+  {
+    "ep": "/coins/{id}",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [
+      "community_data=true",
+      "developer_data=true",
+      "dex_pair_format=contract_address",
+      "localization=true",
+      "market_data=true",
+      "sparkline=false",
+      "tickers=true"
+    ],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/{id}/contract/{contract_address}",
+    "reqPath": [
+      "id",
+      "contract_address"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/{id}/contract/{contract_address}/market_chart",
+    "reqPath": [
+      "id",
+      "contract_address"
+    ],
+    "reqQuery": [
+      "days",
+      "vs_currency"
+    ],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/{id}/contract/{contract_address}/market_chart/range",
+    "reqPath": [
+      "id",
+      "contract_address"
+    ],
+    "reqQuery": [
+      "from",
+      "to",
+      "vs_currency"
+    ],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/{id}/history",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "date"
+    ],
+    "optWithDefault": [
+      "localization=true"
+    ],
+    "optOther": []
+  },
+  {
+    "ep": "/coins/{id}/market_chart",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "days",
+      "vs_currency"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "interval",
+      "precision"
+    ]
+  },
+  {
+    "ep": "/coins/{id}/market_chart/range",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "from",
+      "to",
+      "vs_currency"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "precision"
+    ]
+  },
+  {
+    "ep": "/coins/{id}/ohlc",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "vs_currency"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "days"
+    ]
+  },
+  {
+    "ep": "/coins/{id}/tickers",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [
+      "depth=false",
+      "dex_pair_format=contract_address",
+      "include_exchange_logo=false",
+      "order=trust_score_desc",
+      "page=1"
+    ],
+    "optOther": [
+      "exchange_ids"
+    ]
+  },
+  {
+    "ep": "/companies/public_treasury/{coin_id}",
+    "reqPath": [
+      "coin_id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/derivatives",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/derivatives/exchanges",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": [
+      "order",
+      "page",
+      "per_page"
+    ]
+  },
+  {
+    "ep": "/derivatives/exchanges/list",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/derivatives/exchanges/{id}",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/exchanges",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": [
+      "page",
+      "per_page"
+    ]
+  },
+  {
+    "ep": "/exchanges/list",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/exchanges/{id}",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/exchanges/{id}/tickers",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": [
+      "coin_ids",
+      "depth",
+      "include_exchange_logo",
+      "order",
+      "page"
+    ]
+  },
+  {
+    "ep": "/exchanges/{id}/volume_chart",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "days"
+    ],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/global",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/global/decentralized_finance_defi",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/ping",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/search",
+    "reqPath": [],
+    "reqQuery": [
+      "query"
+    ],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/search/trending",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/simple/price",
+    "reqPath": [],
+    "reqQuery": [
+      "vs_currencies"
+    ],
+    "optWithDefault": [
+      "include_24hr_change=false",
+      "include_24hr_vol=false",
+      "include_last_updated_at=false",
+      "include_market_cap=false",
+      "include_tokens=top"
+    ],
+    "optOther": [
+      "ids",
+      "names",
+      "precision",
+      "symbols"
+    ]
+  },
+  {
+    "ep": "/simple/supported_vs_currencies",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "ep": "/simple/token_price/{id}",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "contract_addresses",
+      "vs_currencies"
+    ],
+    "optWithDefault": [
+      "include_24hr_change=false",
+      "include_24hr_vol=false",
+      "include_last_updated_at=false",
+      "include_market_cap=false"
+    ],
+    "optOther": [
+      "precision"
+    ]
+  }
+]

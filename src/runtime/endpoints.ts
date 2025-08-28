@@ -10,17 +10,17 @@
 import type { ZodType } from "zod";
 
 // Import directly from endpoint modules to avoid barrels/cycles.
-import * as assetPlatformsNS from "../endpoints/asset-platforms/index.js";
-import * as categoriesNS from "../endpoints/categories/index.js";
-import * as coinsNS from "../endpoints/coins/index.js";
-import * as companiesNS from "../endpoints/companies/index.js";
-import * as contractNS from "../endpoints/contract/index.js";
-import * as derivativesNS from "../endpoints/derivatives/index.js";
-import * as exchangesNS from "../endpoints/exchanges/index.js";
-import * as globalNS from "../endpoints/global/index.js";
-import * as pingNS from "../endpoints/ping/index.js";
-import * as searchNS from "../endpoints/search/index.js";
-import * as simpleNS from "../endpoints/simple/index.js";
+import * as asset_platforms from "../endpoints/asset_platforms/index.js";
+import * as categories from "../endpoints/categories/index.js";
+import * as coins from "../endpoints/coins/index.js";
+import * as companies from "../endpoints/companies/index.js";
+import * as contract from "../endpoints/contract/index.js";
+import * as derivatives from "../endpoints/derivatives/index.js";
+import * as exchanges from "../endpoints/exchanges/index.js";
+import * as global from "../endpoints/global/index.js";
+import * as ping from "../endpoints/ping/index.js";
+import * as search from "../endpoints/search/index.js";
+import * as simple from "../endpoints/simple/index.js";
 
 /** Schema accessors stored per endpoint (lazy to avoid eager module eval). */
 /** @internal – do not export or re-export */
@@ -36,152 +36,152 @@ type SchemaThunks = {
 const ENDPOINTS = {
   // --- ping
   "/ping": {
-    req: () => pingNS.schemas.PingRequestSchema,
-    res: () => pingNS.schemas.PingResponseSchema,
+    req: () => ping.schemas.PingRequestSchema,
+    res: () => ping.schemas.PingResponseSchema,
   },
 
   // --- simple
   "/simple/price": {
-    req: () => simpleNS.schemas.SimplePriceRequestSchema,
-    res: () => simpleNS.schemas.SimplePriceResponseSchema,
+    req: () => simple.schemas.SimplePriceRequestSchema,
+    res: () => simple.schemas.SimplePriceResponseSchema,
   },
   "/simple/token_price/{id}": {
-    req: () => simpleNS.schemas.SimpleTokenPriceByIdRequestSchema,
-    res: () => simpleNS.schemas.SimpleTokenPriceByIdResponseSchema,
+    req: () => simple.schemas.SimpleTokenPriceByIdRequestSchema,
+    res: () => simple.schemas.SimpleTokenPriceByIdResponseSchema,
   },
   "/simple/supported_vs_currencies": {
-    req: () => simpleNS.schemas.SimpleSupportedVsCurrenciesRequestSchema,
-    res: () => simpleNS.schemas.SimpleSupportedVsCurrenciesResponseSchema,
+    req: () => simple.schemas.SimpleSupportedVsCurrenciesRequestSchema,
+    res: () => simple.schemas.SimpleSupportedVsCurrenciesResponseSchema,
   },
 
   // --- coins (incl. specialist endpoints)
   "/coins/list": {
-    req: () => coinsNS.schemas.CoinsListRequestSchema,
-    res: () => coinsNS.schemas.CoinsListResponseSchema,
+    req: () => coins.schemas.CoinsListRequestSchema,
+    res: () => coins.schemas.CoinsListResponseSchema,
   },
   "/coins/markets": {
-    req: () => coinsNS.schemas.CoinsMarketsRequestSchema,
-    res: () => coinsNS.schemas.CoinsMarketsResponseSchema,
+    req: () => coins.schemas.CoinsMarketsRequestSchema,
+    res: () => coins.schemas.CoinsMarketsResponseSchema,
   },
   "/coins/{id}": {
-    req: () => coinsNS.schemas.CoinsByIdRequestSchema,
-    res: () => coinsNS.schemas.CoinsByIdResponseSchema,
+    req: () => coins.schemas.CoinsByIdRequestSchema,
+    res: () => coins.schemas.CoinsByIdResponseSchema,
   },
   "/coins/{id}/tickers": {
-    req: () => coinsNS.schemas.CoinsByIdTickersRequestSchema,
-    res: () => coinsNS.schemas.CoinsByIdTickersResponseSchema,
+    req: () => coins.schemas.CoinsByIdTickersRequestSchema,
+    res: () => coins.schemas.CoinsByIdTickersResponseSchema,
   },
   "/coins/{id}/history": {
-    req: () => coinsNS.schemas.CoinsByIdHistoryRequestSchema,
-    res: () => coinsNS.schemas.CoinsByIdHistoryResponseSchema,
+    req: () => coins.schemas.CoinsByIdHistoryRequestSchema,
+    res: () => coins.schemas.CoinsByIdHistoryResponseSchema,
   },
   "/coins/{id}/market_chart": {
-    req: () => coinsNS.schemas.CoinsByIdMarketChartRequestSchema,
-    res: () => coinsNS.schemas.CoinsByIdMarketChartResponseSchema,
+    req: () => coins.schemas.CoinsByIdMarketChartRequestSchema,
+    res: () => coins.schemas.CoinsByIdMarketChartResponseSchema,
   },
   "/coins/{id}/market_chart/range": {
-    req: () => coinsNS.schemas.CoinsByIdMarketChartRangeRequestSchema,
-    res: () => coinsNS.schemas.CoinsByIdMarketChartRangeResponseSchema,
+    req: () => coins.schemas.CoinsByIdMarketChartRangeRequestSchema,
+    res: () => coins.schemas.CoinsByIdMarketChartRangeResponseSchema,
   },
   "/coins/{id}/ohlc": {
-    req: () => coinsNS.schemas.CoinsByIdOhlcRequestSchema,
-    res: () => coinsNS.schemas.CoinsByIdOhlcResponseSchema,
+    req: () => coins.schemas.CoinsByIdOhlcRequestSchema,
+    res: () => coins.schemas.CoinsByIdOhlcResponseSchema,
   },
 
   // --- contract
   "/coins/{id}/contract/{contract_address}": {
-    req: () => contractNS.schemas.CoinsByIdContractByAddressRequestSchema,
-    res: () => contractNS.schemas.CoinsByIdContractByAddressResponseSchema,
+    req: () => contract.schemas.CoinsByIdContractByAddressRequestSchema,
+    res: () => contract.schemas.CoinsByIdContractByAddressResponseSchema,
   },
   "/coins/{id}/contract/{contract_address}/market_chart": {
-    req: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartRequestSchema,
-    res: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartResponseSchema,
+    req: () => contract.schemas.CoinsByIdContractByAddressMarketChartRequestSchema,
+    res: () => contract.schemas.CoinsByIdContractByAddressMarketChartResponseSchema,
   },
   "/coins/{id}/contract/{contract_address}/market_chart/range": {
-    req: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema,
-    res: () => contractNS.schemas.CoinsByIdContractByAddressMarketChartRangeResponseSchema,
+    req: () => contract.schemas.CoinsByIdContractByAddressMarketChartRangeRequestSchema,
+    res: () => contract.schemas.CoinsByIdContractByAddressMarketChartRangeResponseSchema,
   },
 
   // --- categories
   "/coins/categories/list": {
-    req: () => categoriesNS.schemas.CoinsCategoriesListRequestSchema,
-    res: () => categoriesNS.schemas.CoinsCategoriesListResponseSchema,
+    req: () => categories.schemas.CoinsCategoriesListRequestSchema,
+    res: () => categories.schemas.CoinsCategoriesListResponseSchema,
   },
   "/coins/categories": {
-    req: () => categoriesNS.schemas.CoinsCategoriesRequestSchema,
-    res: () => categoriesNS.schemas.CoinsCategoriesResponseSchema,
+    req: () => categories.schemas.CoinsCategoriesRequestSchema,
+    res: () => categories.schemas.CoinsCategoriesResponseSchema,
   },
 
   // --- exchanges
   "/exchanges": {
-    req: () => exchangesNS.schemas.ExchangesRequestSchema,
-    res: () => exchangesNS.schemas.ExchangesResponseSchema,
+    req: () => exchanges.schemas.ExchangesRequestSchema,
+    res: () => exchanges.schemas.ExchangesResponseSchema,
   },
   "/exchanges/list": {
-    req: () => exchangesNS.schemas.ExchangesListRequestSchema,
-    res: () => exchangesNS.schemas.ExchangesListResponseSchema,
+    req: () => exchanges.schemas.ExchangesListRequestSchema,
+    res: () => exchanges.schemas.ExchangesListResponseSchema,
   },
   "/exchanges/{id}": {
-    req: () => exchangesNS.schemas.ExchangesByIdRequestSchema,
-    res: () => exchangesNS.schemas.ExchangesByIdResponseSchema,
+    req: () => exchanges.schemas.ExchangesByIdRequestSchema,
+    res: () => exchanges.schemas.ExchangesByIdResponseSchema,
   },
   "/exchanges/{id}/tickers": {
-    req: () => exchangesNS.schemas.ExchangesByIdTickersRequestSchema,
-    res: () => exchangesNS.schemas.ExchangesByIdTickersResponseSchema,
+    req: () => exchanges.schemas.ExchangesByIdTickersRequestSchema,
+    res: () => exchanges.schemas.ExchangesByIdTickersResponseSchema,
   },
   "/exchanges/{id}/volume_chart": {
-    req: () => exchangesNS.schemas.ExchangesByIdVolumeChartRequestSchema,
-    res: () => exchangesNS.schemas.ExchangesByIdVolumeChartResponseSchema,
+    req: () => exchanges.schemas.ExchangesByIdVolumeChartRequestSchema,
+    res: () => exchanges.schemas.ExchangesByIdVolumeChartResponseSchema,
   },
 
   // --- derivatives
   "/derivatives": {
-    req: () => derivativesNS.schemas.DerivativesRequestSchema,
-    res: () => derivativesNS.schemas.DerivativesResponseSchema,
+    req: () => derivatives.schemas.DerivativesRequestSchema,
+    res: () => derivatives.schemas.DerivativesResponseSchema,
   },
   "/derivatives/exchanges": {
-    req: () => derivativesNS.schemas.DerivativesExchangesRequestSchema,
-    res: () => derivativesNS.schemas.DerivativesExchangesResponseSchema,
+    req: () => derivatives.schemas.DerivativesExchangesRequestSchema,
+    res: () => derivatives.schemas.DerivativesExchangesResponseSchema,
   },
   "/derivatives/exchanges/{id}": {
-    req: () => derivativesNS.schemas.DerivativesExchangesByIdRequestSchema,
-    res: () => derivativesNS.schemas.DerivativesExchangesByIdResponseSchema,
+    req: () => derivatives.schemas.DerivativesExchangesByIdRequestSchema,
+    res: () => derivatives.schemas.DerivativesExchangesByIdResponseSchema,
   },
   "/derivatives/exchanges/list": {
-    req: () => derivativesNS.schemas.DerivativesExchangesListRequestSchema,
-    res: () => derivativesNS.schemas.DerivativesExchangesListResponseSchema,
+    req: () => derivatives.schemas.DerivativesExchangesListRequestSchema,
+    res: () => derivatives.schemas.DerivativesExchangesListResponseSchema,
   },
 
   // --- asset platforms
   "/asset_platforms": {
-    req: () => assetPlatformsNS.schemas.AssetPlatformsRequestSchema,
-    res: () => assetPlatformsNS.schemas.AssetPlatformsResponseSchema,
+    req: () => asset_platforms.schemas.AssetPlatformsRequestSchema,
+    res: () => asset_platforms.schemas.AssetPlatformsResponseSchema,
   },
 
   // --- search
   "/search": {
-    req: () => searchNS.schemas.SearchRequestSchema,
-    res: () => searchNS.schemas.SearchResponseSchema,
+    req: () => search.schemas.SearchRequestSchema,
+    res: () => search.schemas.SearchResponseSchema,
   },
   "/search/trending": {
-    req: () => searchNS.schemas.SearchTrendingRequestSchema,
-    res: () => searchNS.schemas.SearchTrendingResponseSchema,
+    req: () => search.schemas.SearchTrendingRequestSchema,
+    res: () => search.schemas.SearchTrendingResponseSchema,
   },
 
   // --- global
   "/global": {
-    req: () => globalNS.schemas.GlobalRequestSchema,
-    res: () => globalNS.schemas.GlobalResponseSchema,
+    req: () => global.schemas.GlobalRequestSchema,
+    res: () => global.schemas.GlobalResponseSchema,
   },
   "/global/decentralized_finance_defi": {
-    req: () => globalNS.schemas.GlobalDefiRequestSchema,
-    res: () => globalNS.schemas.GlobalDefiResponseSchema,
+    req: () => global.schemas.GlobalDefiRequestSchema,
+    res: () => global.schemas.GlobalDefiResponseSchema,
   },
 
   // --- companies (public treasury)
   "/companies/public_treasury/{coin_id}": {
-    req: () => companiesNS.schemas.CompaniesPublicTreasuryByIdRequestSchema,
-    res: () => companiesNS.schemas.CompaniesPublicTreasuryByIdResponseSchema,
+    req: () => companies.schemas.CompaniesPublicTreasuryByIdRequestSchema,
+    res: () => companies.schemas.CompaniesPublicTreasuryByIdResponseSchema,
   },
 } as const satisfies Record<string, SchemaThunks>;
 

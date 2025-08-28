@@ -7,7 +7,6 @@
  * - Runtime Zod schemas are exposed under `ping.schemas`.
  */
 
-export type { PingRequest } from "./requests.js";
-export type { PingResponse } from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

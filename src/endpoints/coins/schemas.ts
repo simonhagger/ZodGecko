@@ -302,7 +302,8 @@ const BrandedIdsNamesSymbolsAsCSV = IdsNamesSymbols.extend({
 
 /**
  * @endpoint GET /coins/list
- * @summary Definitive list of coins from CoinGecko
+ * @summary This endpoint allows you to query all the supported coins on CoinGecko with coins ID, name and symbol
+ * @description Fetches a list of all coins supported by CoinGecko. Each coin includes its unique identifier, symbol, and name.
  * @params
  *   - include_platform (boolean) default=false
  */
@@ -312,7 +313,8 @@ export const CoinsListRequestSchema = z
 
 /**
  * @endpoint GET /coins/markets
- * @summary Market rows for multiple coins
+ * @summary This endpoint allows you to query all the supported coins with price, market cap, volume and market related data
+ * @description Fetches market data (price, market cap, volume) for multiple coins listed on CoinGecko. You can filter results by currency, coin IDs, categories, and other parameters. Results are paginated and can be sorted by various metrics.
  * @params
  *   - vs_currency (required string)
  *   - ids|names|symbols (CSV via CSList) see: /coins/list
@@ -343,7 +345,8 @@ export const CoinsMarketsRequestSchema = z
 
 /**
  * @endpoint GET /coins/{id}
- * @summary Detailed coin info (flags control sections)
+ * @summary This endpoint allows you to query all the metadata (image, websites, socials, description, contract address, etc.) and market data (price, ATH, exchange tickers, etc.) of a coin from the CoinGecko coin page based on a particular coin ID
+ * @description Fetches comprehensive information about a specific coin, including its market data, community statistics, developer activity, and public interest metrics. Various boolean flags allow you to include or exclude specific sections of data in the response.
  * @params
  *  - localization (optional boolean) default=true
  *  - tickers (optional boolean) default=true
@@ -351,7 +354,7 @@ export const CoinsMarketsRequestSchema = z
  *  - community_data (optional boolean) default=true
  *  - developer_data (optional boolean) default=true
  *  - sparkline (optional boolean) default=false
- *  - dex_pair_format (optional string) ["contract_address", "symbol"]
+ *  - dex_pair_format (optional string ["contract_address", "symbol"])
  */
 export const CoinsByIdRequestSchema = z
   .object({
@@ -368,7 +371,8 @@ export const CoinsByIdRequestSchema = z
 
 /**
  * @endpoint GET /coins/{id}/tickers
- * @summary Coin tickers on CEX and DEX data for a given id
+ * @summary This endpoint allows you to query the coin tickers on both centralized exchange (CEX) and decentralized exchange (DEX) based on a particular coin ID
+ * @description Fetches ticker information for a specific coin, including data from both centralized exchanges (CEX) and decentralized exchanges (DEX). You can filter results by exchange IDs, include exchange logos, and control pagination and sorting of the returned tickers. Additional options allow you to include depth data and specify the format for DEX pairings.
  * @params
  *  - exchange_ids (optional string | CSList<ExchangeId>) see: /exchanges/list
  *  - include_exchange_logo (optional boolean) default=false
@@ -391,26 +395,26 @@ export const CoinsByIdTickersRequestSchema = z
 
 /**
  * @endpoint GET /coins/{id}/history
- * @summary Historical coin data for a given id
+ * @summary This endpoint allows you to query the historical data (price, market cap, 24hrs volume, ...) at a given date for a coin based on a particular coin ID
+ * @description Get historical data (name, price, market, stats) at a given date for a coin
  * @params
  *   - date (required string) format: "dd-mm-yyyy"
  *   - localization (optional boolean) default=true
  */
-
 export const CoinsByIdHistoryRequestSchema = z
   .object({ id: CoinId, date: DdMmYyyy, localization: DefaultTrueBoolean })
   .strict();
 
 /**
  * @endpoint GET /coins/{id}/market_chart
- * @summary This endpoint allows you to get the historical chart data of a coin including time in UNIX, price, market cap and 24hr volume based on particular coin ID.
+ * @summary This endpoint allows you to get the historical chart data of a coin including time in UNIX, price, market cap and 24hr volume based on particular coin ID
+ * @description Get historical market data include price, market cap, and 24h volume within a range of days.
  * @params
  *   - vs_currency (required string) see: /simple/supported_vs_currencies
  *   - days (required string) NOTE: limited to ["1".."365"] inclusive on free endpoints
  *   - interval (optional string ["daily"]) NOTE: default is empty for auto granularity
  *   - precision (optional string ["0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","full"]) NOTE: default is empty for auto precision
  */
-
 export const CoinsByIdMarketChartRequestSchema = z
   .object({
     id: CoinId,
@@ -424,6 +428,7 @@ export const CoinsByIdMarketChartRequestSchema = z
 /**
  * @endpoint GET /coins/{id}/market_chart/range
  * @summary This endpoint allows you to get the historical chart data of a coin within certain time range in UNIX along with price, market cap and 24hr volume based on particular coin ID.
+ * @description Get historical market data include price, market cap, and 24h volume within a range of days.
  * @params
  *   - vs_currency (required string) see: /simple/supported_vs_currencies
  *   - from (required integer) NOTE: starting date as a Unix Timestamp
@@ -442,7 +447,8 @@ export const CoinsByIdMarketChartRangeRequestSchema = z
 
 /**
  * @endpoint GET /coins/{id}/ohlc
- * @summary OHLC data for a given coin
+ * @summary This endpoint allows you to get the OHLC chart (Open, High, Low, Close) of a coin based on particular coin ID
+ * @description Get Open High Low Close (OHLC) data for a given coin.
  * @params
  *   - vs_currency (required string) see: /simple/supported_vs_currencies
  *   - days (required string ["1","7","14","30","90","180","365"])

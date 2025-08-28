@@ -6,16 +6,6 @@
  * (Includes /search and /search/trending; no standalone `trending/` export.)
  */
 
-export type { SearchRequest, SearchTrendingRequest } from "./requests.js";
-export type {
-  SearchResponse,
-  SearchTrendingResponse,
-  SearchCoin,
-  SearchExchange,
-  SearchCategory,
-  SearchNft,
-  SearchTrendingItem,
-  SearchTrendingCoin,
-} from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";

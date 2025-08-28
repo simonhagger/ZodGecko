@@ -7,7 +7,7 @@
  *   - `schemas`: runtime Zod schemas
  *   - `requests`/`responses`: TypeScript types (via `export type`)
  */
-export * as assetPlatforms from "./asset-platforms/index.js";
+export * as asset_platforms from "./asset_platforms/index.js";
 export * as categories from "./categories/index.js";
 export * as coins from "./coins/index.js";
 export * as companies from "./companies/index.js";

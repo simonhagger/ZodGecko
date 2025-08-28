@@ -7,22 +7,6 @@
  * - Runtime Zod schemas are exposed under `exchanges.schemas`.
  */
 
-export type {
-  ExchangesRequest,
-  ExchangesListRequest,
-  ExchangeByIdRequest,
-  ExchangeTickersRequest,
-  ExchangeVolumeChartRequest,
-} from "./requests.js";
-
-export type {
-  ExchangesResponse,
-  ExchangesListResponse,
-  ExchangeByIdResponse,
-  ExchangeTickersResponse,
-  ExchangeVolumeChartResponse,
-  ExchangeRow,
-  ExchangesListItem,
-} from "./responses.js";
-
 export * as schemas from "./schemas.js";
+export * as requests from "./requests.js";
+export * as responses from "./responses.js";
