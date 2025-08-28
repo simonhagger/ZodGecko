@@ -23,4 +23,6 @@ export type CoinsCategoriesResponse = z.infer<typeof CoinsCategoriesResponseSche
 
 /** Item types (useful in app code/tests). */
 export type CoinsCategoriesListItem = z.infer<typeof CoinsCategoriesListItemSchema>;
+
+/** Item type for a single coin category. */
 export type CoinsCategoryRow = z.infer<typeof CoinsCategoryRowSchema>;

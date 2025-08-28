@@ -71,6 +71,8 @@ export const VsQuoteString = z.record(z.string(), z.string().nullable());
 
 /** Create a nominal (branded) type on top of a Zod schema. */
 export type Brand<T, B extends string> = T & { readonly __brand: B };
+
+/** Create a branded type on top of a Zod schema. Identify a string by it's brand */
 export const brand = <T, B extends string>(
   schema: z.ZodType<T>,
   _brand: B,

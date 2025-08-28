@@ -87,8 +87,9 @@ export const CSList = <T extends z.ZodTypeAny>(inner?: T): z.ZodType<string> =>
 export const tolerantObject = <T extends z.ZodRawShape>(shape: T): z.ZodTypeAny =>
   z.object(shape).catchall(z.unknown());
 
-/** RecordBy — typed Record where key schema MUST be string/number/symbol in Zod v4 */
+/** ZodRecordKey — typed Record where key schema MUST be string/number/symbol in Zod v4 */
 export type ZodRecordKey = z.ZodString | z.ZodNumber | z.ZodSymbol;
+/** RecordBy — typed Record where key schema is a ZodRecordKey and value schema is a ZodTypeAny in Zod v4 */
 export const RecordBy = <K extends ZodRecordKey, V extends z.ZodTypeAny>(
   k: K,
   v: V,
@@ -98,7 +99,7 @@ export const RecordBy = <K extends ZodRecordKey, V extends z.ZodTypeAny>(
  * 3) Common request fragments
  * ========================================================================== */
 
-// ** Page selector **/
+/** Page selector - Zod object that represents a positive whole number (with a default of 1)*/
 export const PageOnly = z.object({
   page: z.number().int().positive().default(1),
 });
@@ -299,6 +300,7 @@ export const Ticker = z
   })
   .catchall(z.unknown());
 
+/** Tickers envelope used in coin/exchange tickers */
 export const TickersEnvelope = z
   .object({
     name: z.string().optional(),
@@ -310,6 +312,7 @@ export const TickersEnvelope = z
  * 7) Headers & meta
  * ========================================================================== */
 
+/** Rate-limit headers returned by CoinGecko API */
 export const RateLimitHeaders = z
   .object({
     "x-cgpro-api-limit": z.string().optional(),
@@ -318,5 +321,5 @@ export const RateLimitHeaders = z
   })
   .catchall(z.unknown());
 
-// Define the TypeScript type for parsed headers
+/**  Define the TypeScript type for parsed headers */
 export type RateLimitHeadersType = z.infer<typeof RateLimitHeaders>;

@@ -12,8 +12,15 @@
  *  - ⚠️ Do NOT consult server defaults (runtime concern)
  */
 
+/** Query input object which is a record keyed by string with an unknown value type. */
 export type QueryInput = Record<string, unknown>;
 
+/** Query encoding options.
+ * @property array - How to encode arrays (default: "comma").
+ * @property encode - Optional custom encoder function.
+ * @property skipNull - Whether to skip null values (default: true).
+ * @property skipUndefined - Whether to skip undefined values (default: true).
+ */
 export type QueryEncodeOptions = {
   array?: "repeat" | "comma" | "bracket";
   encode?: (value: unknown) => string; // e.g., Dates → ISO
@@ -21,10 +28,22 @@ export type QueryEncodeOptions = {
   skipUndefined?: boolean;
 };
 
+/** Query primitive value type.
+ * @type string | number | boolean | null | undefined
+ */
 export type QueryPrimitive = string | number | boolean | null | undefined;
+
+/**
+ * Query value type.
+ * @type QueryPrimitive | QueryPrimitive[]
+ */
 export type QueryValue = QueryPrimitive | QueryPrimitive[];
 
-/** Normalize a single primitive into a query-safe string, or `undefined` to drop. */
+/**
+ * Normalize a single primitive into a query-safe string, or `undefined` to drop.
+ * @param v The value to normalize.
+ * @returns A normalized string representation of the value, or undefined if invalid.
+ */
 export function normalizePrimitive(v: QueryPrimitive): string | undefined {
   if (v === undefined || v === null) return undefined;
   switch (typeof v) {
@@ -41,7 +60,12 @@ export function normalizePrimitive(v: QueryPrimitive): string | undefined {
   }
 }
 
-/** Apply optional encoder before normalization (keeps this module pure). */
+/**
+ * Apply optional encoder before normalization (keeps this module pure).
+ * @param v The value to encode.
+ * @param encode Optional encoder function.
+ * @returns The encoded value, or the original value if no encoder is provided or it fails.
+ */
 function applyEncode(v: QueryPrimitive, encode?: (value: unknown) => string): QueryPrimitive {
   if (!encode) return v;
   try {
@@ -55,8 +79,11 @@ function applyEncode(v: QueryPrimitive, encode?: (value: unknown) => string): Qu
 }
 
 /**
- * Normalize an arbitrary query value (scalar or array) to a **string**.
+ * Normalize a query value (scalar or array) to a **string**.
  * Arrays are de-duped and sorted for stability.
+ * @param value The query value to normalize.
+ * @param encode Optional encoder function.
+ * @returns A normalized string representation of the value, or undefined if invalid.
  */
 export function normalizeValue(
   value: QueryValue,
@@ -74,8 +101,10 @@ export function normalizeValue(
 }
 
 /**
- * Return a flat, stable list of [key, value] pairs according to the policy.
- * No URLSearchParams here—pure data.
+ * Normalize a query object according to the specified options.
+ * @param obj The query object to normalize.
+ * @param opts Optional encoding options.
+ * @returns A normalized array of [key, value] pairs.
  */
 export function normalizeQuery(obj: QueryInput, opts?: QueryEncodeOptions): [string, string][] {
   const arrayMode = opts?.array ?? "comma";
@@ -122,16 +151,33 @@ export function normalizeQuery(obj: QueryInput, opts?: QueryEncodeOptions): [str
   return out;
 }
 
+/**
+ * Convert a query object into a canonical "a=1&b=2" string.
+ * @param obj The query object to convert.
+ * @param opts Optional encoding options.
+ * @returns A canonical query string.
+ */
 export function queryString(obj: QueryInput, opts?: QueryEncodeOptions): string {
   const pairs = normalizeQuery(obj, opts);
   return pairs.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&");
 }
 
+/**
+ * Convert a query object into URLSearchParams.
+ * @param obj The query object to convert.
+ * @param opts Optional encoding options.
+ * @returns A URLSearchParams object representing the query.
+ */
 export function queryParams(obj: QueryInput, opts?: QueryEncodeOptions): URLSearchParams {
   return new URLSearchParams(normalizeQuery(obj, opts));
 }
 
-/** Normalize a server-default-like value using the same core rules (pure). */
+/**
+ * Normalize a default-like value using the same core rules (pure).
+ * @param v The value to normalize.
+ * @param opts Optional encoding options.
+ * @returns A normalized string representation of the value, or undefined if invalid.
+ */
 export function normalizeDefault(
   v: unknown,
   opts?: Pick<QueryEncodeOptions, "encode">,

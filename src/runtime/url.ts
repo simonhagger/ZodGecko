@@ -23,6 +23,7 @@ import { buildQuery } from "./query.js";
 // Import only what's used
 import { joinBaseAndPath } from "../core/url.js";
 
+/** Default base URL for CoinGecko API v3 */
 export const DEFAULT_BASE = "https://api.coingecko.com/api/v3";
 
 /**

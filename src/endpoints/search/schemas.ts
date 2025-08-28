@@ -10,7 +10,7 @@
 
 import { z } from "zod";
 
-import { tolerantObject, UrlString } from "../../index.js";
+import { NullableNumber, NullableString, tolerantObject, UrlString } from "../../index.js";
 
 /* ============================================================================
  * Requests
@@ -33,37 +33,44 @@ export const SearchRequestSchema = z
 export const SearchTrendingRequestSchema = z.object({}).strict();
 
 /* ============================================================================
- * Responses — /search
+ * Responses
  * ========================================================================== */
 
+/*
+ * Endpoint: /search
+ */
+
+/** Search response object when a coin is found */
 export const SearchCoinSchema = tolerantObject({
   id: z.string(),
   name: z.string(),
   symbol: z.string(),
-  market_cap_rank: z.number().nullable().optional(),
+  market_cap_rank: NullableNumber.optional(),
   thumb: UrlString.optional(),
   large: UrlString.optional(),
-  // sometimes: slug, api_symbol, score
   slug: z.string().optional(),
   api_symbol: z.string().optional(),
-  score: z.number().nullable().optional(),
+  score: NullableNumber.optional(),
 });
 
+/** Search response object when an exchange is found */
 export const SearchExchangeSchema = tolerantObject({
   id: z.string(),
   name: z.string(),
   market_type: z.string().optional(), // e.g. "spot"
   thumb: UrlString.optional(),
   large: UrlString.optional(),
-  year_established: z.number().nullable().optional(),
-  country: z.string().nullable().optional(),
+  year_established: NullableNumber.optional(),
+  country: NullableString.optional(),
 });
 
+/** Search response object when a category is found */
 export const SearchCategorySchema = tolerantObject({
   id: z.string(),
   name: z.string(),
 });
 
+/** Search response object when an NFT is found */
 export const SearchNftSchema = tolerantObject({
   id: z.string(),
   name: z.string(),
@@ -71,39 +78,47 @@ export const SearchNftSchema = tolerantObject({
   thumb: UrlString.optional(),
 });
 
-/** Wrapper for GET /search response. */
+/**
+ * @endpoint GET /search
+ * @description Schema for GET /search response.
+ */
 export const SearchResponseSchema = z
   .object({
     coins: z.array(SearchCoinSchema),
     exchanges: z.array(SearchExchangeSchema),
-    categories: z.array(SearchCategorySchema).optional(),
-    nfts: z.array(SearchNftSchema).optional(),
+    categories: z.array(SearchCategorySchema),
+    nfts: z.array(SearchNftSchema),
   })
   .catchall(z.unknown());
 
-/* ============================================================================
- * Responses — /search/trending
- * ========================================================================== */
+/*
+ * Endpoint: /search/trending
+ */
 
+/** Schema for GET /search/trending response. Coin related schema */
 export const SearchTrendingCoinSchema = tolerantObject({
   id: z.string(),
-  coin_id: z.number().nullable().optional(),
+  coin_id: NullableNumber.optional(),
   name: z.string(),
   symbol: z.string(),
-  market_cap_rank: z.number().nullable().optional(),
+  market_cap_rank: NullableNumber.optional(),
   thumb: UrlString.optional(),
   small: UrlString.optional(),
   large: UrlString.optional(),
   slug: z.string().optional(),
-  price_btc: z.number().nullable().optional(),
-  score: z.number().nullable().optional(),
+  price_btc: NullableNumber.optional(),
+  score: NullableNumber.optional(),
 });
 
+/** Wrapper for each item in the `coins` array in GET /search/trending response. */
 export const SearchTrendingItemSchema = tolerantObject({
   item: SearchTrendingCoinSchema,
 });
 
-/** Wrapper for GET /search/trending response. */
+/**
+ * @endpoint GET /search/trending
+ * @description Schema for GET /search/trending response.
+ */
 export const SearchTrendingResponseSchema = z
   .object({
     coins: z.array(SearchTrendingItemSchema),

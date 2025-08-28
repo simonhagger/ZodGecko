@@ -152,6 +152,11 @@ export const SERVER_DEFAULTS: DefaultMap = {
   // Add more endpoints as verified against the API
 } as const satisfies DefaultMap;
 
+/**
+ * @description Get server defaults for a given endpoint path. Returns an empty object if no defaults are defined for the endpoint.
+ * @param path The endpoint path (e.g., `"/coins/markets"`).
+ * @returns A read-only record of parameter → default value.
+ */
 export function getServerDefaults(path: Endpoint): Readonly<Record<string, unknown>> {
   const entry: unknown = (SERVER_DEFAULTS as Record<string, unknown>)[path];
   if (entry && typeof entry === "object") {

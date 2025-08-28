@@ -26,6 +26,8 @@ export const GlobalResponseSchema = tolerantObject({
     updated_at: z.number().optional(),
   }),
 });
+
+/** Type for `GET /global` response. */
 export type GlobalResponse = z.infer<typeof GlobalResponseSchema>;
 
 /** GET /global/decentralized_finance_defi */
@@ -40,4 +42,6 @@ export const GlobalDefiResponseSchema = tolerantObject({
     top_coin_defi_dominance: z.number().optional(),
   }),
 });
+
+/** Type for `GET /global/decentralized_finance_defi` response. */
 export type GlobalDefiResponse = z.infer<typeof GlobalDefiResponseSchema>;
