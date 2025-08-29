@@ -4,41 +4,136 @@ This project aims to be **predictable, type-safe, and tolerant**:
 
 - **Requests**: strict validation with Zod; deterministic query serialization.
 - **Responses**: tolerant parsing (unknown fields preserved where appropriate).
-- **Runtime**: stable CSVs, boolean/number normalization, no surprises.
+- **Runtime**: stable booleans/numbers/CSVs, no surprises.
 
-This doc defines the shared rules, helpers, layout, and _fixtures policy_ used across all endpoint tests. Per-endpoint docs should focus on behavior and link back here for conventions.
+This doc defines the **shared conventions** for testing across the codebase. Endpoint- or feature-specific notes should link here for rules and patterns.
 
 ---
 
-## Layout & naming
+## Structure & layout
+
+> Paths below reflect the current repository structure.
 
 ```
 src/
+  core/
+    __tests__/                  # core unit tests (helpers/primitives/query utils)
+      common.cslist.test.ts
+      common.utils.test.ts
+      ddmmyyyy.test.ts
+      explain-zod-error*.test.ts
+      parse-utils*.test.ts
+      primitives.urlstring.test.ts
+      test-helpers.ts
+
   endpoints/
+    __tests__/                  # functional harness + shared test utils/fixtures
+      _utils/
+        assertions.ts           # common assertion helpers (defaults, required, path params, etc.)
+        defaults.ts             # server default helpers for tests
+        fixtures.ts             # fixture loaders and helpers
+        harness.ts              # EndpointHarness (harness implementation)
+        index.ts                # re-exports for convenience
+        normalize.ts            # CSV/boolean/number normalization helpers
+        path.ts                 # path param helpers (drop id/address)
+        schema.ts               # schema-introspection helpers
+      endpoints.functional.test.ts                # single, over-arching functional suite
+      endpoints.functional.test.requirements.md   # documentation of harness expectations
+      fixtures/                                    # shared JSON fixtures for many endpoints
+        asset_platforms.response.json
+        coins.by-id.*.json
+        coins.categories*.json
+        ... (see repo)
+
+    asset_platforms/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    categories/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    coins/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    companies/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    contract/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    derivatives/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    exchanges/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    global/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    ping/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    search/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    simple/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+
+  runtime/
     __tests__/
-      _utils/                      # shared helpers (no tests inside)
-      _shared/                     # shared data/fixtures across endpoints (optional)
-        fixtures/                  # only if multiple endpoints reuse the same data
-      <endpoint>/
-        docs/                      # per-endpoint functional notes
-        fixtures/                  # JSON fixtures for this endpoint
-        <endpoint>.requests.test.ts
-        <endpoint>.responses.test.ts
-        <endpoint>.<route>.functional.test.ts  # 1+ per route
-        <endpoint>.sanity.functional.test.ts   # tiny contract checks
+      drop-params.test.ts
+      format-path.test.ts
+      public-api.smoke.test.ts
+      query.*.test.ts
+      server-defaults.test.ts
+      url.utils.test.ts
+      validate.test.ts
+      with-defaults.test.ts
+    endpoints.ts                # registry of ALL_ENDPOINTS + schema accessors
+    index.ts
+    query.ts
+    server-defaults.ts
+    url.ts
+    validate.ts
+    with-defaults.ts
 ```
 
-- Files inside `_utils` and `_shared` are **ignored by Vitest** (configured).
-- Keep **fixtures** beside the tests that use them (under `<endpoint>/fixtures/`) unless multiple endpoints need the same payload—then place in `_shared/fixtures/`.
-- Per-endpoint docs link back to this page for conventions; they only describe that endpoint’s behavior.
+**Key points**
+
+- **Harness-first**: functional testing is centralized in `src/endpoints/__tests__/endpoints.functional.test.ts`, driven by the implementation in `_utils/harness.ts`.
+- **Local unit tests** live in `src/core/__tests__` and `src/runtime/__tests__`.
+- **Shared fixtures** are under `src/endpoints/__tests__/fixtures/`.
 
 ---
 
 ## Golden rules
 
-1. **Schema first.** Always type request literals as the **schema input** and validate with the schema before building the query.
-2. **Serializer is pure.** `buildQuery(path, obj)` never invents values; it serializes what you give it. Defaults live in schemas.
-3. **Responses are tolerant** unless the API truly guarantees a closed shape. Prefer “allow unknown” objects where reasonable.
+1. **Schema first.** Type request literals as the **schema input** and validate with the schema before building the query.
+2. **Serializer is pure.** `buildQuery(path, obj)` never invents values; defaults are applied at the schema parse stage, not by serialization.
+3. **Responses are tolerant** unless the API guarantees a closed shape. Prefer tolerant objects where reasonable.
+4. **Harness-driven.** Endpoint functional testing runs through the shared harness to ensure consistency and coverage.
 
 ---
 
@@ -48,221 +143,236 @@ src/
 
 ```ts
 import type { z } from "zod";
+import { coins } from "../../.."; // example import from package barrel
+
 type ReqIn = z.input<typeof coins.schemas.CoinDetailRequestSchema>;
 
 const req: ReqIn = { localization: false, tickers: true };
 const parsed = coins.schemas.CoinDetailRequestSchema.parse(req);
 ```
 
-Why: avoids branded type friction and keeps ESLint happy (`no-unsafe-*`).
-
-### Use schema **output** when you must keep a parsed variable
+### Use schema **output** for parsed variables
 
 ```ts
 import type { z } from "zod";
-type CLReqOut = z.output<typeof coins.schemas.CoinsListRequestSchema>;
+import { coins } from "../../..";
 
-const parsed: CLReqOut = coins.schemas.CoinsListRequestSchema.parse({});
+type Out = z.output<typeof coins.schemas.CoinsListRequestSchema>;
+
+const parsed: Out = coins.schemas.CoinsListRequestSchema.parse({});
 ```
 
-Otherwise, parse inline inside an assertion to avoid temporary variables.
+Prefer inline parsing unless the parsed value must be reused.
 
 ---
 
-## Path params
+## Harness approach
 
-**Do not** serialize path params. Use helpers:
+- The canonical suite is `src/endpoints/__tests__/endpoints.functional.test.ts`.
+- The harness implementation lives in `src/endpoints/__tests__/_utils/harness.ts` and is consumed by the suite.
+- Common helpers are in `_utils/` (see **Structure & layout** above).
+
+**The harness verifies**
+
+- Request serialization (`buildQuery`) normalization of arrays → CSV (sorted/de-duped), booleans → strings, numbers → strings.
+- Application of schema defaults (after `parse()`), versus serializer baseline (no defaults injected).
+- Response parsing + tolerant preservation of unknown fields.
+- Path param handling (e.g., `id`, `contract_address`) via `_utils/path.ts` helpers.
+- Required/optional param behavior using assertion helpers from `_utils/assertions.ts`.
+
+---
+
+## Standard helper patterns (as used in this repo)
+
+> Import paths below assume you are inside `src/endpoints/__tests__`. Adjust `../` as needed when used elsewhere.
+
+### 1) Access schemas for an endpoint
 
 ```ts
-import { dropId, dropIdAndAddress } from "../_utils";
-const q1 = dropId({ id: "bitcoin", tickers: true });
-const q2 = dropIdAndAddress({ id: "ethereum", contract_address: "0x...", vs_currency: "usd" });
+import { getSchemas } from "../../runtime"; // re-exported in src/runtime/index.ts
+
+const EP = "/coins/{id}/history" as const;
+const { req, res } = getSchemas(EP); // req = request Zod schema, res = response Zod schema
 ```
 
-(Prefer helpers over destructuring like `{ id: _id, ...q }` to avoid lint churn.)
+### 2) Enumerate required query keys
 
----
+```ts
+import { getRequiredKeysFromSchema } from "./_utils/schema";
 
-## Query serialization rules
+const required = getRequiredKeysFromSchema(req); // string[] of required top-level query keys
+```
 
-`buildQuery()` applies consistent normalization **to the object you pass**:
+### 3) Drop path params before serialization
 
-- **Arrays → CSV**: dedupe + sort (stable), e.g. `['b','a','a'] → 'a,b'`.
-- **Booleans → strings**: `'true' | 'false'`.
-- **Numbers → strings** (finite only); drop `NaN`/`±Infinity`.
-- **Drop empties/unknowns**: `[]`, `""` (or whitespace-only), objects/functions → dropped.
-- **Defaults**:
-  - If a **schema** sets a default (e.g., pagination `page=1`, `per_page=100`), that value appears **after `parse()`**.
-  - Don’t “invent” defaults in tests. Either:
-    - assert the **serializer baseline** (`{}` stays `{}`) **without** parsing, or
-    - assert the **endpoint contract** (parse first → defaults) **when the schema defines them**.
+```ts
+import { dropId, dropIdAndAddress } from "./_utils/path";
+
+const withPath = { id: "bitcoin", tickers: true };
+const q = dropId(withPath); // => { tickers: true }
+```
+
+### 4) Build a normalized query string object
+
+```ts
+import { buildQuery } from "../../runtime";
+
+const parsed = req.parse({ vs_currency: "usd", ids: ["eth", "btc", "eth"] });
+const qs = buildQuery(EP, parsed);
+// Arrays → CSV (sorted/deduped), booleans → "true"|"false", numbers → strings, empties dropped
+```
+
+### 5) Assert defaults/required behavior (composed assertions)
+
+```ts
+import {
+  expectNoDefaults,
+  expectNoDefaultsKeepOthers,
+  expectKeepsOnlyNonDefaults,
+  expectMissingRequiredFails,
+  expectDropsPathParams,
+} from "./_utils";
+
+// No defaults injected if you serialize without parsing
+expectNoDefaults(EP, {});
+
+// Keep provided non-defaults; do not inject server defaults
+expectNoDefaultsKeepOthers(EP, { page: 2 });
+
+// After parse, only non-default keys should remain in the query
+expectKeepsOnlyNonDefaults(EP, { order: "market_cap_desc" });
+
+// Missing required key should fail validation
+expectMissingRequiredFails(EP, "vs_currency");
+
+// Path params are removed before serialization
+expectDropsPathParams(EP, { id: "bitcoin", tickers: true });
+```
+
+> The exact assertion names are exported via `src/endpoints/__tests__/_utils/index.ts`. If you add new assertions in `assertions.ts`, re-export them there.
+
+### 6) Server defaults helpers
+
+```ts
+import { serverDefaultsFor } from "./_utils/defaults";
+
+const defs = serverDefaultsFor(EP); // Record<string, unknown> of defaults for EP
+```
+
+### 7) Fixtures (shared)
+
+```ts
+import coinsById from "./fixtures/coins.by-id.response.json" with { type: "json" };
+const parsed = res.parse(coinsById as unknown);
+```
+
+### 8) Safe object checks & tiny guards
+
+```ts
+import { isObjectRecord } from "./_utils";
+import { z } from "zod";
+
+const RowHasId = z.object({ id: z.string().min(1) });
+const first = (parsed as unknown[])[0];
+expect(RowHasId.safeParse(first).success).toBe(true);
+expect(isObjectRecord(first) && Object.hasOwn(first, "some_future_field")).toBe(true);
+```
 
 ---
 
 ## Fixtures
 
-**Where they live**
+- Shared fixtures live under `src/endpoints/__tests__/fixtures/` and are imported with ESM JSON assertions:
 
-- Per-endpoint: `src/endpoints/__tests__/<endpoint>/fixtures/`
-- Shared across endpoints (rare): `src/endpoints/__tests__/_shared/fixtures/`
+```ts
+import coinsById from "../fixtures/coins.by-id.response.json" with { type: "json" };
+```
 
-**File format**
+Guidelines:
 
-- Use **JSON** fixtures (`.json`) for stability and portability.
-- Import via ESM with import assertions:
+- Keep fixtures **tiny** and **stable**; prefer fixed values and small arrays.
+- **Never mutate fixtures** in tests. If you need a variant, create a separate fixture or build a small inline payload.
+- To prove tolerance, add an extra **top-level** field where the schema is tolerant (avoid breaking constrained maps).
 
-  ```ts
-  import priceFx from "./fixtures/simple.price.response.json" with { type: "json" };
-  ```
+Naming examples:
 
-**Size & stability**
-
-- Keep fixtures **tiny**: only the minimum fields required for the schema to parse and for the test to prove intent.
-- Prefer **stable values** (fixed timestamps, small numbers) over live-like noise.
-- **Never mutate fixtures** in tests. If you need a variant, either:
-  - create a separate fixture file; or
-  - build a small **inline payload** directly in the test.
-
-**Tolerance assertions**
-
-- To prove “unknown fields are preserved”, add an **extra top-level key** (or envelope-level key) where the schema is tolerant.
-- Avoid inserting unknown keys _inside_ maps that the schema constrains to specific types (e.g., numeric maps) – the parser should reject those.
-- Use the safe pattern to check for unknown key survival:
-
-  ```ts
-  import { isObjectRecord } from "../_utils";
-  const parsed = someSchema.parse(fixture as unknown);
-  const obj = parsed as Record<string, unknown>;
-  expect(
-    isObjectRecord(obj) && Object.prototype.hasOwnProperty.call(obj, "some_future_field"),
-  ).toBe(true);
-  ```
-
-**Naming**
-
-- Prefer `<endpoint>.<route>.response.json` for clarity, e.g.:
-  - `simple.price.response.json`
-  - `simple.token-price.response.json`
-  - `status-updates.response.json`
-  - `indexes.list.response.json`
-
-- Use one fixture per **distinct response shape**. If the same shape serves multiple routes, a single shared fixture is fine.
-
-**When to use inline payloads**
-
-- When testing **rejection** (invalid enums, wrong types) – easier to read inline.
-- When proving tolerance with a minimal constructed object.
-- When the payload is too trivial to justify a file (e.g., an array of strings).
+- `simple.price.response.json`
+- `coins.by-id.response.json`
+- `exchanges.list.response.json`
 
 ---
 
-## Requests tests
+## Query serialization rules (contract)
 
-- Validate **happy path** and **strictness** (reject unknown keys / invalid enums).
-- Assert **serialized** shape (CSV + booleans + numbers).
-- For routes with path params, **drop** them before serialization.
+`buildQuery()` normalization:
+
+- **Arrays → CSV**: de-duplicate + sort.
+- **Booleans → strings**: `"true" | "false"`.
+- **Numbers → strings** (finite only); drop `NaN`/`±Infinity`.
+- **Drop empties/unknowns**: `[]`, `""`/whitespace-only, objects/functions.
+- **Defaults**:
+  - Schema-level defaults appear **after `parse()`**.
+  - The serializer never injects values on its own.
+
+---
+
+## Patterns
+
+### Requests checks (via harness)
+
+- Happy path + strictness (reject unknown keys / invalid enums).
+- Serialized shape (CSV/boolean/number) and dropping of empties.
+- Remove path params before serialization using `_utils/path.ts` helpers.
+
+### Responses checks (via harness)
+
+- Parse fixture with schema.
+- Assert essentials with tiny Zod guards.
+- Prove unknown key preservation safely (use `isObjectRecord` helper from `_utils` before property checks).
 
 Example:
 
 ```ts
-import { describe, it, expect } from "vitest";
-import type { z } from "zod";
-import { simple, buildQuery } from "../../../index.js";
-import { dropId, expectValid, expectInvalid } from "../_utils";
-
-type PriceIn = z.input<typeof simple.schemas.SimplePriceRequestSchema>;
-
-describe("simple.requests", () => {
-  it("CSV + booleans", () => {
-    const req: PriceIn = {
-      ids: ["eth", "btc", "eth"],
-      vs_currencies: ["usd", "eur"],
-      include_24hr_vol: true,
-    };
-    const parsed = simple.schemas.SimplePriceRequestSchema.parse(req);
-    expect(buildQuery("/simple/price", parsed)).toEqual({
-      ids: "bitcoin,ethereum",
-      vs_currencies: "eur,usd",
-      include_24hr_vol: "true",
-    });
-  });
-
-  it("strictness", () => {
-    expectInvalid(simple.schemas.SimplePriceRequestSchema, { ids: [], vs_currencies: ["usd"] });
-  });
-});
-```
-
----
-
-## Responses tests
-
-Pattern: **parse with schema → assert essentials via tiny Zod guards → prove unknown preservation** without unsafe property access.
-
-```ts
 import { z } from "zod";
-import { isObjectRecord } from "../_utils";
+import { isObjectRecord } from "./_utils";
 
-// local guards to avoid reading unknown directly
 const RowHasId = z.object({ id: z.string().min(1) });
 
 const parsed = assetPlatforms.schemas.AssetPlatformsResponseSchema.parse(fixture as unknown);
 const first = (parsed as unknown[])[0];
 expect(RowHasId.safeParse(first).success).toBe(true);
-
-// unknowns preserved?
 expect(
   isObjectRecord(first) && Object.prototype.hasOwnProperty.call(first, "some_future_field"),
 ).toBe(true);
 ```
 
-Guidelines:
+### Sanity patterns
 
-- Keep fixtures **small** and stable. Don’t mutate fixtures in tests.
-- To assert tolerance, prefer adding an **extra top-level** key or use a tiny inline payload.
-
----
-
-## Sanity tests (two tiny patterns)
-
-Pick the one that matches the route; for some endpoints include both.
-
-```ts
-// A) Serializer baseline: NO defaults
-expect(buildQuery("/ping", {})).toEqual({});
-
-// B) Endpoint contract: schema defaults surface after parse
-type CLReqOut = z.output<typeof coins.schemas.CoinsListRequestSchema>;
-
-const parsed: CLReqOut = coins.schemas.CoinsListRequestSchema.parse({});
-expect(buildQuery("/coins/list", parsed)).toEqual({ include_platform: false });
-```
+- **Serializer baseline**: `buildQuery("/ping", {})` → `{}`.
+- **Endpoint contract**: parse-first to surface schema defaults, then serialize.
 
 ---
 
-## Helpers (from `__tests__/_utils`)
+## Helpers (from `src/endpoints/__tests__/_utils`)
 
-- `expectValid(schema, value)` / `expectInvalid(schema, value)`
-  One-liners that keep tests readable; they also encode our “schema-first” rule.
-- `dropId(value)` / `dropIdAndAddress(value)`
-  Remove path params before serialization (typed; avoids `any`/unsafe access).
-- `isObjectRecord(v: unknown): v is Record<string, unknown>`
-  Safe guard for unknown → object before `hasOwnProperty` checks.
-- _(Optional)_ `invalidEnumValue<T extends string>()`
-  Utility to generate a value that’s guaranteed not to be in a known enum (when you want to assert failures without using `any`).
+- `assertions.ts` — composed assertions around defaults, required params, path params, etc.
+- `defaults.ts` — server default utilities for tests.
+- `fixtures.ts` — fixture loaders/generators.
+- `path.ts` — helpers to drop path params before serialization.
+- `schema.ts` — helpers like `getRequiredKeysFromSchema`.
+- `normalize.ts` — CSV/boolean/number normalization helpers.
 
-> If you add new helpers, keep them generic and re-usable. Avoid endpoint-specific logic in `_utils`.
+Keep helpers generic and re-usable. Avoid endpoint-specific logic here.
 
 ---
 
-## DRY & consistency checklist
+## Adding or modifying endpoints (playbook)
 
-- ✅ Use **schema input** types for request literals; **output** types for parsed variables.
-- ✅ Use **helpers** for path params and common assertions.
-- ✅ Keep **sanity** tests minimal; don’t duplicate functional scenarios there.
-- ✅ Responses: **Zod guard + `isObjectRecord`** instead of direct property access on `unknown`.
-- ✅ Per-endpoint markdown: focus on **behaviors**; link to this `TESTING.md` for conventions.
-- ✅ **Fixtures** are tiny, stable, never mutated; unknowns tested at tolerant levels.
+1. Define/adjust request & response schemas under `src/endpoints/<group>/`.
+2. Ensure the functional harness suite covers the endpoint.
+3. Add/update minimal fixtures in `src/endpoints/__tests__/fixtures/`.
+4. Add endpoint-local tests **only** for peculiar edge cases not captured by the harness.
+5. If behavior differs materially, add notes to `endpoints.functional.test.requirements.md`.
 
 ---
 
@@ -272,27 +382,17 @@ expect(buildQuery("/coins/list", parsed)).toEqual({ include_platform: false });
 # All with coverage
 npm run test:coverage
 
-# Focus by filename or title substring
-npx vitest run src/endpoints/__tests__/simple/simple.price.functional.test.ts
+# Focus the main functional suite
+npx vitest run src/endpoints/__tests__/endpoints.functional.test.ts
+
+# Focus by test title
 npx vitest run -t "coins parsed {}"
 ```
 
 ---
 
-## Adding a new endpoint (playbook)
-
-1. **Schemas** (requests/responses) using core fragments (`CSList`, `Pagination`, tolerant object helpers).
-2. **Requests test**: happy path + strictness + serialization.
-3. **Responses test**: parse fixture(s) + essential field guard + unknown preservation.
-4. **Functional tests**: one per route (path-param drop, CSV/boolean/number rules, default-dropping).
-5. **Sanity**: serializer baseline and/or endpoint contract (see above).
-6. **Docs**: create `<endpoint>.functional.testing.md` describing only that endpoint’s behaviors; link to `TESTING.md`.
-7. **Fixtures**: add minimal JSON under `<endpoint>/fixtures/` (or `_shared/fixtures/` if reused). Import with `with { type: "json" }`. Keep small and stable.
-
----
-
 ## Troubleshooting
 
-- **“Unsafe assignment/member access”**: parse inline or annotate with `z.output<...>`; use `isObjectRecord` before property checks.
-- **“Why did `{}` become `{ page: '1' }`?”** You parsed it. Defaults are schema-level; calling `buildQuery` **without** parse keeps `{}` as `{}`.
-- **CSV order changed**: expected; CSVs are sorted and de-duplicated by design.
+- **Unsafe assignment/member access**: parse inline or annotate with `z.output<...>`; use `isObjectRecord` before property access.
+- **Why did `{}` become `{ page: '1' }`?** You parsed it. Defaults are schema-level; calling `buildQuery` without parse keeps `{}` as `{}`.
+- **CSV order changed**: expected — arrays are sorted and de-duplicated before CSV serialization.

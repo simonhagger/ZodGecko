@@ -25,6 +25,7 @@ import {
   VsCurrency,
   UnixSec,
 } from "../../index.js";
+import { buildCoinResponseShape } from "../_shared/coin.js";
 
 /* ============================================================================
  * Requests
@@ -64,10 +65,8 @@ export const CoinsByIdContractByAddressMarketChartRangeRequestSchema = z
  * ========================================================================== */
 
 /** Response shape for GET /coins/{id}/contract/{contract_address} */
-export const CoinsByIdContractByAddressResponseSchema = tolerantObject({
-  id: z.string(),
-  symbol: z.string(),
-  name: z.string(),
+export const CoinsByIdContractByAddressResponseSchema = buildCoinResponseShape({
+  includeTickers: false, // contract route typically excludes tickers
 });
 
 /** Response shape for GET /coins/{id}/contract/{contract_address}/market_chart */
@@ -75,7 +74,7 @@ export const CoinsByIdContractByAddressMarketChartResponseSchema = MarketChart;
 
 /** Response shape for GET /coins/{id}/contract/{contract_address}/market_chart/range */
 export const CoinsByIdContractByAddressMarketChartRangeResponseSchema = tolerantObject({
-  prices: TsSeries.optional(),
-  market_caps: TsSeries.optional(),
-  total_volumes: TsSeries.optional(),
+  prices: TsSeries,
+  market_caps: TsSeries,
+  total_volumes: TsSeries,
 });

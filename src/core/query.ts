@@ -66,12 +66,16 @@ export function normalizePrimitive(v: QueryPrimitive): string | undefined {
  * @param encode Optional encoder function.
  * @returns The encoded value, or the original value if no encoder is provided or it fails.
  */
-function applyEncode(v: QueryPrimitive, encode?: (value: unknown) => string): QueryPrimitive {
+export function applyEncode(
+  v: QueryPrimitive,
+  encode?: (value: unknown) => string,
+): QueryPrimitive {
   if (!encode) return v;
   try {
     // If encoder returns a non-empty string, use it; otherwise let normalize drop it.
     const out = encode(v);
-    return (typeof out === "string" ? out : String(out)) as QueryPrimitive;
+    return String(out) as QueryPrimitive;
+    // return (typeof out === "string" ? out : String(out)) as QueryPrimitive;
   } catch {
     // Be conservative: if encoder throws, fall back to original value.
     return v;
@@ -119,8 +123,14 @@ export function normalizeQuery(obj: QueryInput, opts?: QueryEncodeOptions): [str
     const raw = obj[key];
 
     // Respect skip flags early for scalars and arrays.
-    if (raw === undefined && skipUndefined) continue;
-    if (raw === null && skipNull) continue;
+    if (raw === undefined) {
+      if (!skipUndefined) out.push([key, "undefined"]);
+      continue;
+    }
+    if (raw === null) {
+      if (!skipNull) out.push([key, "null"]);
+      continue;
+    }
 
     if (Array.isArray(raw)) {
       // Normalize each element, then de-dup + sort for stability.
@@ -169,7 +179,12 @@ export function queryString(obj: QueryInput, opts?: QueryEncodeOptions): string 
  * @returns A URLSearchParams object representing the query.
  */
 export function queryParams(obj: QueryInput, opts?: QueryEncodeOptions): URLSearchParams {
-  return new URLSearchParams(normalizeQuery(obj, opts));
+  console.log(`queryParams received: ${JSON.stringify(obj)}, ${JSON.stringify(opts)}`);
+  const ret = normalizeQuery(obj, opts);
+  console.log(`queryParams return value from normalizeQuery: ${JSON.stringify(ret)}`);
+  const searchParams = new URLSearchParams(ret);
+  console.log(`queryParams return value after URLSearchParams: ${JSON.stringify(searchParams)}`);
+  return searchParams;
 }
 
 /**

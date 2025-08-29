@@ -21,7 +21,7 @@
 
 import { z } from "zod";
 
-import { tolerantObject } from "../../index.js";
+import { NonEmptyString, tolerantObject } from "../../index.js";
 
 /** @endpoint GET /coins/categories/list */
 export const CoinsCategoriesListRequestSchema = z.object({}).strict();
@@ -59,8 +59,8 @@ export const CoinsCategoriesListResponseSchema = z.array(CoinsCategoriesListItem
  * });
  */
 export const CoinsCategoryRowSchema = tolerantObject({
-  id: z.string().optional(),
-  name: z.string().optional(),
+  id: NonEmptyString,
+  name: NonEmptyString.optional(),
   market_cap: z.number().optional(),
   market_cap_change_24h: z.number().optional(),
   content: z.unknown().optional(),

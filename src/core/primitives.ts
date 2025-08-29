@@ -12,8 +12,8 @@ import { z } from "zod";
 export const ISODateTime = z
   .string()
   .regex(
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/,
-    "Expected an ISO-8601 UTC datetime like 2024-01-01T00:00:00Z",
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/,
+    "Expected an ISO-8601 UTC datetime like 2024-01-01T00:00:00Z or 2024-01-01T00:00:00+00:00",
   )
   .describe("ISO-8601 UTC datetime");
 

@@ -18,7 +18,7 @@
  *   single object that included the path keys).
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 
 import { type Endpoint, getSchemas } from "./endpoints.js"; // ← import directly
 import { explainZodError } from "../core/parse-utils.js"; // ← narrow import; avoid barrel cycles
@@ -41,7 +41,13 @@ export function validateRequest<E extends Endpoint>(
   opts?: { dropPathParams?: boolean },
 ): ValidationResult<unknown> {
   const { req } = getSchemas(endpoint);
-
+  if (!req) {
+    return {
+      ok: false,
+      error: new z.ZodError([]),
+      message: `Invalid endpoint: ${endpoint}`,
+    };
+  }
   // Validate the full shape first (including path params like {id})
   const parsed = req.safeParse(input);
   if (!parsed.success) {
@@ -69,7 +75,15 @@ export function validateResponse<E extends Endpoint>(
   input: unknown,
 ): ValidationResult<unknown> {
   const { res } = getSchemas(endpoint);
+  if (!res) {
+    return {
+      ok: false,
+      error: new z.ZodError([]),
+      message: `Invalid endpoint: ${endpoint}`,
+    };
+  }
   const parsed = res.safeParse(input);
+  console.log(`Response validation for ${endpoint}: ${JSON.stringify(parsed)}`);
   if (parsed.success) return { ok: true, data: parsed.data };
   return {
     ok: false,

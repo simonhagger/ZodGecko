@@ -19,8 +19,9 @@ describe("runtime/url helpers", () => {
       vs_currency: "usd",
       page: 1,
     });
+    const href: string = typeof url === "string" ? url : String(url.href);
     // page dropped by defaults; URL should still be well-formed
-    expect(url).toBe("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd");
+    expect(href).toBe("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd");
   });
 
   it("matches direct buildQuery serialization", () => {

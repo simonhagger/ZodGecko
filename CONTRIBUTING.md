@@ -1,114 +1,225 @@
 # Contributing to ZodGecko
 
-Thanks for helping improve ZodGecko! This doc is for **repo contributors** (kept out of the npm package).
-
-## Quick Start
-
-```bash
-# install
-pnpm i    # or: npm i / yarn
-
-# typecheck + unit tests + examples build + doc checks
-npm run verify:docs
-```
-
-### Useful scripts
-
-- `npm run docs:inventory` — generate `docs/endpoint-inventory.md` + JSON sidecar.
-- `npm run check:inventory` — verify the inventory matches the code.
-- `npm run check:deps` — circular dependency check.
-- `npm run check:tsdoc` — TSDoc coverage check.
-- `npm run check:zod` — zod usage/version sanity checks.
-- `npm run check:examples` — typecheck examples (see `examples/basic-usage.ts`).
-
-### Focused debug
-
-```bash
-# verbose across all endpoints
-npx tsx scripts/generate-endpoint-inventory-docs.ts --debug
-
-# verbose for one endpoint
-npx tsx scripts/generate-endpoint-inventory-docs.ts --endpoint="/coins/{id}/history"
-```
-
-> On some npm versions (especially Windows), pass flags directly via `npx tsx` to avoid npm swallowing them.
+First off, thanks for taking the time to contribute! 🎉
+This library is a **hobby project** maintained on a best-efforts basis.
+Contributions are welcome—please follow the guidelines below to keep things consistent.
 
 ---
 
-## Source of Truth: Endpoint Catalogue
+## Getting Started
 
-The **only** canonical list of supported endpoints and their shapes is:
+1. **Fork** the repo and clone it locally.
 
-- `docs/endpoint-inventory.md` (human-readable)
-- `docs/endpoint-inventory.json` (machine-readable)
+2. Install dependencies:
 
-These are **generated from code** (request schemas + `SERVER_DEFAULTS`) and parity-checked in CI. We intentionally removed older duplicate docs (`endpoints.md`, `server-defaults.md`, `required-params.md`).
+   ```sh
+   npm install
+   ```
 
-### When you change schemas or defaults
+3. Run a type check to confirm your environment:
 
-1. Update request/response schemas or `SERVER_DEFAULTS`.
-2. Run `npm run docs:inventory`.
-3. Commit the updated `docs/endpoint-inventory.*` files.
-4. Ensure `npm run check:inventory` passes.
+   ```sh
+   npm run typecheck
+   ```
+
+4. Run linting and formatting:
+
+   ```sh
+   npm run lint
+   npm run format
+   ```
+
+> For detailed testing conventions and folder layout, see **TESTING.md** (authoritative).
+
+---
+
+## Project Structure
+
+```
+src/
+  core/              # primitives and helpers (Zod types, utils)
+    __tests__/       # core unit tests
+      common.cslist.test.ts
+      common.utils.test.ts
+      ddmmyyyy.test.ts
+      explain-zod-error*.test.ts
+      parse-utils*.test.ts
+      primitives.urlstring.test.ts
+      test-helpers.ts
+
+  endpoints/         # one folder per API group (coins, exchanges, ...)
+    __tests__/       # functional harness + shared helpers/fixtures
+      _utils/
+        assertions.ts
+        defaults.ts
+        fixtures.ts
+        harness.ts          # EndpointHarness implementation
+        index.ts
+        normalize.ts
+        path.ts
+        schema.ts
+      endpoints.functional.test.requirements.md
+      endpoints.functional.test.ts   # single, over-arching functional suite
+      fixtures/                      # shared JSON fixtures for many endpoints
+        (see repo)
+
+    asset_platforms/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    categories/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    coins/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    companies/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    contract/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    derivatives/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    exchanges/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    global/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    ping/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    search/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+    simple/
+      index.ts
+      requests.ts
+      responses.ts
+      schemas.ts
+
+  runtime/           # query builder, URL helpers, defaults, validation, endpoint registry
+    __tests__/
+      drop-params.test.ts
+      format-path.test.ts
+      public-api.smoke.test.ts
+      query.*.test.ts
+      server-defaults.test.ts
+      url.utils.test.ts
+      validate.test.ts
+      with-defaults.test.ts
+    endpoints.ts     # registry of all endpoints
+    index.ts
+    query.ts
+    server-defaults.ts
+    url.ts
+    validate.ts
+    with-defaults.ts
+
+src/index.ts         # package barrel (public API)
+
+```
+
+### Rules
+
+- **Requests**: always `strict()` and aligned with CoinGecko docs.
+- **Responses**: always tolerant via `.catchall(z.unknown())` to survive new upstream fields.
+- **Shared bits**: if multiple endpoints repeat a pattern, move it to `core/common.ts`.
+- **Harness**: endpoint functional tests run through (`src/endpoints/__tests__/endpoints.functional.test.ts`) using (`_utils/harness.ts`). Add endpoint-local tests only for edge cases or special fixtures.
 
 ---
 
 ## Coding Standards
 
-- **TypeScript**
-  - Aim for `strict` correctness (consider enabling `exactOptionalPropertyTypes`, `noUncheckedIndexedAccess` where feasible).
-  - Prefer ESM (`"type": "module"`) semantics.
-
-- **Zod**
-  - **Zod v4 only.** Do not import `ZodIssue` or use v3 aliases.
-  - Request schemas should be **ZodObject** at the top level when possible. If not, document why in TSDoc.
-
-- **Docs Generators**
-  - Cross-platform (Windows-friendly). Avoid bash-only scripts.
-  - Accept `--debug` / `--endpoint=…` flags; avoid environment-variable toggles.
+- **TypeScript** strict mode is on (consider enabling `exactOptionalPropertyTypes` and `noUncheckedIndexedAccess`).
+- **Zod schemas** include TSDoc for clarity.
+- Prefer **branded primitives** (e.g., `CoinId`, `VsCurrency`) over raw strings.
+- Use `UrlString` helper where applicable.
+- Alphabetize object keys where practical for cleaner diffs.
+- Write cross-platform scripts (Node/tsx, avoid bash-only).
 
 ---
 
-## TSDoc Guidelines
+## JSDoc & Documentation
 
-We enforce TSDoc on exported items. For exported constants and branded types, use full-block comments:
+Every source file starts with a concise file header:
 
 ```ts
-/** Branded string for Coin IDs (e.g. "bitcoin"). */
-export const CoinId = brand(NonEmptyString, "CoinId");
+/**
+ * @file src/endpoints/coins/schemas.ts
+ * @module endpoints/coins/schemas
+ * @summary Zod schemas for Coins endpoints (requests/responses).
+ */
 ```
 
-Prefer `/** … */` over `//` comments to satisfy TSDoc checks.
+Keep endpoint-specific docs short and example-driven. Internal contributor docs live in CONTRIBUTING.md and TESTING.md.
+
+### Generated documentation
+
+- **Endpoint Inventory** (`docs/endpoint-inventory.md` + `.json`) is the single source of truth.
+
+- Always regenerate docs after schema or `SERVER_DEFAULTS` changes:
+
+  ```sh
+  npm run docs:inventory
+  npm run check:inventory
+  ```
+
+- Commit the updated files. CI will fail if inventory is out of sync.
 
 ---
 
-## Examples
+## Tests
 
-- Keep `examples/basic-usage.ts` compiling (no runtime fetch).
-- If you add examples:
-  - Target the **type system** (build-only).
-  - Avoid network calls; use `toURL`, `formatPath`, etc.
+See **TESTING.md** for detailed conventions.
 
----
+- **Harness-driven**: all endpoints validated via `src/endpoints/__tests__/endpoints.functional.test.ts` (powered by `_utils/harness.ts`).
+- **Core/runtime tests** live under their respective `__tests__` folders.
+- **Fixtures**: JSON only, minimal, never mutated. Shared fixtures under `src/endpoints/__tests__/fixtures/`.
 
-## Commit / PR Checklist
+### What to cover
 
-- [ ] Updated schemas and/or `SERVER_DEFAULTS` as needed.
-- [ ] Ran `npm run docs:inventory` and committed updated `docs/endpoint-inventory.md` and `.json`.
-- [ ] `npm run check:inventory` passes.
-- [ ] `npm run check:tsdoc` passes (add missing TSDoc if flagged).
-- [ ] `npm run check:examples` passes.
-- [ ] Tests/linters green locally.
-
-(Optional) Add a pre-commit hook:
-
-```bash
-npx husky add .husky/pre-commit "npm run docs:inventory && git add docs/endpoint-inventory.*"
-```
+- **Requests**: happy path + strictness (reject unknowns, enums).
+- **Responses**: tolerant parsing, Zod guard checks, unknown preservation.
+- **Serialization**: CSV normalization, boolean/number coercion.
+- **Sanity**: schema defaults vs serializer baseline.
 
 ---
 
-## Windows Notes
+## Pull Requests
 
-- Use `npx tsx scripts/… --debug` for script flags.
-- Avoid `bash` scripts; use Node/TS (`tsx`) or cross-platform shell.
+- Keep changes focused and incremental.
+
+- Add/adjust tests in line with conventions.
+
+- Ensure:
+  - `npm run typecheck`
+  - `npm run lint`
+  - `npm run test:coverage`
+  - `npm run check:inventory`
+  - `npm run check:tsdoc`
+
+- Include a brief PR description (what/why).
+
+Thank you! 🙂

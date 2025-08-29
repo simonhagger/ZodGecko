@@ -1,5 +1,5 @@
 // src/endpoints/__tests__/_utils/harness.ts
-import type { z } from "zod";
+import { z } from "zod";
 
 import { toStringDefaultsMap } from "./defaults.js";
 import { getPathParamKeys, dropPathParams } from "./path.js";
@@ -28,8 +28,8 @@ export class EndpointHarness {
   private constructor(ep: Endpoint) {
     this.EP = ep;
     const { req, res } = getSchemas(ep);
-    this.req = req;
-    this.res = res;
+    this.req = req === undefined ? z.undefined() : req;
+    this.res = res === undefined ? z.undefined() : res;
 
     this.defaults = getServerDefaults(ep);
     this.defaultsStr = toStringDefaultsMap(this.defaults);
@@ -66,8 +66,8 @@ export function makeEndpointPrefix(ep: Endpoint): string {
       if (m) return `by-${m[1].replace(/\s+/g, "-")}`;
       return s.toLowerCase();
     });
-  if (segs.length === 2 && segs[0] === "coins" && segs[1].startsWith("by-")) {
-    return "coins.detail";
-  }
+  // if (segs.length === 2 && segs[0] === "coins" && segs[1].startsWith("by-")) {
+  //   return "coins.detail";
+  // }
   return segs.join(".");
 }

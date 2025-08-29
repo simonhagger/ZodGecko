@@ -31,7 +31,7 @@ export const DEFAULT_BASE = "https://api.coingecko.com/api/v3";
  * - Delegates joining to `core.joinBaseAndPath`.
  * - Uses runtime `buildQuery` (Endpoint-aware: default-dropping, CSV, booleans).
  */
-export function toURL(base: string, path: string, params: Record<string, unknown>): string {
+export function toURL(base: string, path: string, params: Record<string, unknown>): URL {
   const href = joinBaseAndPath(base, path);
   const url = new URL(href);
   const qs = buildQuery(path as Endpoint, params);
@@ -39,7 +39,7 @@ export function toURL(base: string, path: string, params: Record<string, unknown
   for (const k of Object.keys(qs).sort()) {
     url.searchParams.append(k, qs[k]);
   }
-  return url.toString();
+  return url;
 }
 
 /**

@@ -8,7 +8,7 @@
 
 import { z } from "zod";
 
-import { NullableNumber, NullableString, tolerantObject } from "../../index.js";
+import { NonEmptyString, NullableNumber, NullableString, tolerantObject } from "../../index.js";
 
 /* ============================================================================
  * Requests
@@ -34,9 +34,9 @@ export type AssetPlatformsRequest = z.infer<typeof AssetPlatformsRequestSchema>;
  */
 export const AssetPlatformsResponseSchema = z.array(
   tolerantObject({
-    id: z.string(),
+    id: NonEmptyString,
     chain_identifier: NullableNumber.optional(),
-    name: z.string(),
+    name: NonEmptyString,
     shortname: NullableString.optional(),
   }),
 );

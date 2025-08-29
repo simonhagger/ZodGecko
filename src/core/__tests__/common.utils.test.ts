@@ -11,7 +11,7 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 
-import { tolerantObject, RecordBy } from "../../core/common.js";
+import { tolerantObject, RecordBy, OneToThreeSixtyFiveString } from "../../core/common.js";
 
 describe("tolerantObject", () => {
   it("accepts extra fields", () => {
@@ -24,5 +24,21 @@ describe("RecordBy", () => {
   it("constrains key/value types", () => {
     const S = RecordBy(z.string(), z.number());
     expect(S.parse({ usd: 1, eur: 2 })).toEqual({ usd: 1, eur: 2 });
+  });
+});
+
+/** Testing custom format OneToThreeSixtyFiveString compliance */
+describe("OneToThreeSixtyFiveString", () => {
+  const S = OneToThreeSixtyFiveString;
+  it("parses a number under 365 represented as a string", () => {
+    expect(S.parse("1")).toEqual("1");
+    expect(S.parse("365")).toEqual("365");
+  });
+  it("does not parse any integer digits", () => {
+    expect(S.safeParse(1)).contains({ success: false });
+    expect(S.safeParse(366)).contains({ success: false });
+  });
+  it("does not parse a number over 365 represented as a string", () => {
+    expect(S.safeParse("366")).contains({ success: false });
   });
 });

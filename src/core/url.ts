@@ -24,6 +24,8 @@
  * - isAbsoluteUrl(u)                        → http/https absolute check
  */
 
+// import type { E } from "vitest/dist/chunks/environment.d.cL3nLXbE.js";
+
 // ---------- Internal (inline) types ----------
 
 type EmptyParams = Record<never, never>;

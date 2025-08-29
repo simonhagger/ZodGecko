@@ -12,6 +12,19 @@ import { z } from "zod";
 
 import { NonEmptyString, UrlString, brand } from "./primitives.js";
 
+/* ============================================================================ Re-Exports
+ * ========================================================================== */
+
+/** Re-export primitive building blocks so shared modules don’t need to import from primitives directly */
+export {
+  NonEmptyString,
+  UrlString,
+  ISODateTime,
+  DdMmYyyy,
+  CoercedNumber,
+  NullableNumber,
+} from "./primitives.js";
+
 /* ============================================================================
  * 1) Domain "brand" scalars (IDs, currency)
  *    These are small branded strings used widely across the API.

@@ -1,0 +1,55 @@
+import { describe, it, expect } from "vitest";
+
+// Adjust these imports to match actual exports:
+import * as H from "../helpers.js";
+
+describe("core/helpers pure utilities", () => {
+  it("defined: filters undefined and null", () => {
+    const values = [0, "", false, undefined, null, "x"];
+    const out = values.filter((v) => v !== undefined && v !== null);
+    expect(out).toEqual([0, "", false, "x"]);
+  });
+
+  it("entriesSorted: sorts keys deterministically", () => {
+    const r = H.entriesSorted({ b: 2, a: 1, c: 3 });
+    expect(r.map(([k]) => k)).toEqual(["a", "b", "c"]);
+  });
+
+  it("pick/omit: selects and drops by key set", () => {
+    const src = { a: 1, b: 2, c: 3 };
+    expect(H.pick(src, ["a", "c"])).toEqual({ a: 1, c: 3 });
+    expect(H.omit(src, ["b"])).toEqual({ a: 1, c: 3 });
+  });
+
+  it("isFiniteNumber: only finite numbers pass", () => {
+    expect(H.isFiniteNumber(1)).toBe(true);
+    expect(H.isFiniteNumber(NaN)).toBe(false);
+    expect(H.isFiniteNumber(Infinity)).toBe(false);
+  });
+
+  it("isNonEmptyString: trims and rejects empties", () => {
+    expect(H.isNonEmptyString(" x ")).toBe(true);
+    expect(H.isNonEmptyString("   ")).toBe(false);
+    // @ts-expect-error
+    expect(H.isNonEmptyString(123)).toBe(false);
+  });
+
+  it("toCsv: stable sorted, de-duplicated CSV", () => {
+    expect(H.toCsv(["b", "a", "a"])).toBe("a,b");
+    expect(H.toCsv([])).toBeUndefined(); // if empty -> undefined/drop
+  });
+
+  it("filterRecord: remove falsy/empty values", () => {
+    const got = H.filterRecord({
+      a: "a",
+      b: "",
+      c: [],
+      d: {},
+      e: 0,
+      f: false,
+      g: "  ",
+    });
+    // keep 0/false by design? Adjust if your helper drops them:
+    expect(got).toEqual({ a: "a", e: 0, f: false });
+  });
+});

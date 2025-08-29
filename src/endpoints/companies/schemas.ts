@@ -44,12 +44,12 @@ export const CompaniesPublicTreasuryByIdRequestSchema = z
  */
 export const CompanySchema = tolerantObject({
   name: NonEmptyString,
-  symbol: NonEmptyString.optional(),
-  country: NonEmptyString.optional(),
+  symbol: NonEmptyString,
+  country: NonEmptyString,
   total_holdings: NullableNumber,
   total_entry_value_usd: NullableNumber,
   total_current_value_usd: NullableNumber,
-  percentage_of_supply: NullableNumber,
+  percentage_of_total_supply: NullableNumber,
   image: UrlString.optional(),
 });
 
@@ -57,4 +57,9 @@ export const CompanySchema = tolerantObject({
  * @endpoint GET /companies/public_treasury/{coin_id}
  * Array of companies with their treasury holdings.
  */
-export const CompaniesPublicTreasuryByIdResponseSchema = z.array(CompanySchema);
+export const CompaniesPublicTreasuryByIdResponseSchema = tolerantObject({
+  total_holdings: z.number(),
+  total_value_usd: z.number(),
+  market_cap_dominance: z.number(),
+  companies: z.array(CompanySchema),
+});
