@@ -79,22 +79,47 @@ export const OneToThreeSixtyFiveString = z
 
 /**
  * CSList — Comma-Separated List helper.
- * Accepts `string | string[]` for DX and outputs a **stable** comma-string (sorted, deduped).
- * Use for wire params like: ids, names, symbols, vs_currencies, price_change_percentage, contract_addresses, etc.
+ * Normalizes string | array inputs to a stable CSV:
+ *  - trim items
+ *  - drop empties
+ *  - (optional) validate each token with `inner`
+ *  - dedupe + sort
+ *  - error if effectively empty after normalization
  */
-export const CSList = <T extends z.ZodTypeAny>(inner?: T): z.ZodType<string> =>
-  z
-    .union([z.string(), z.array((inner ?? z.string()) as z.ZodTypeAny).nonempty()])
-    .transform((v) => {
-      if (Array.isArray(v)) {
-        return [...new Set(v.map(String))].sort().join(",");
+export const CSList = <T extends z.ZodTypeAny>(inner?: T): z.ZodType<string> => {
+  // Accept string or array; coerce to array of strings
+  const ToArray = z
+    .union([z.string(), z.array(z.any()).nonempty()])
+    .transform((v) => (Array.isArray(v) ? v.map(String) : String(v).split(",")));
+
+  const CleanAndValidate = ToArray.transform((arr) =>
+    arr.map((s) => s.trim()).filter((s) => s.length > 0),
+  ).superRefine((tokens, ctx) => {
+    // Reject effectively-empty CSV
+    if (tokens.length === 0) {
+      ctx.addIssue({
+        code: "custom",
+        message: "CSV must not be empty",
+      });
+    }
+    // Validate each token if `inner` provided
+    if (inner) {
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        const r = (inner as z.ZodTypeAny).safeParse(t);
+        if (!r.success) {
+          ctx.addIssue({
+            code: "custom",
+            path: [i],
+            message: `Invalid CSV member: ${t}`,
+          });
+        }
       }
-      return v
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .join(",");
-    });
+    }
+  });
+
+  return CleanAndValidate.transform((tokens) => Array.from(new Set(tokens)).sort().join(","));
+};
 
 /** Tolerant object helper — allow unknown fields while validating known keys (Zod v4 replacement for .passthrough()) */
 export const tolerantObject = <T extends z.ZodRawShape>(shape: T): z.ZodTypeAny =>

@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from "vitest";
 
-import { ensureArray, pick, stripUndefined, toCsv } from "../helpers.js";
+import { ensureArray, isObjectRecord, pick, stripUndefined, toCsv } from "../helpers.js";
 
 describe("Helpers: pick()", () => {
   it("pick function works", () => {
@@ -50,5 +50,65 @@ describe("Helpers: toCsv()", () => {
   it("toCsv function works on an array and sorts values", () => {
     const S = toCsv(["test3", "", "test1"]);
     expect(S).toEqual("test1,test3");
+  });
+});
+
+describe("isObjectRecord", () => {
+  it("returns true for plain objects", () => {
+    expect(isObjectRecord({})).toBe(true);
+    expect(isObjectRecord({ a: 1 })).toBe(true);
+    expect(isObjectRecord(new Object())).toBe(true);
+  });
+
+  it("returns true for null-prototype objects", () => {
+    const o = Object.create(null) as Record<string, unknown>;
+    o.a = 1;
+    expect(isObjectRecord(o)).toBe(true);
+  });
+
+  it("returns false for null and primitives", () => {
+    expect(isObjectRecord(null)).toBe(false);
+    expect(isObjectRecord("str")).toBe(false);
+    expect(isObjectRecord(123)).toBe(false);
+    expect(isObjectRecord(true)).toBe(false);
+    expect(isObjectRecord(Symbol("s"))).toBe(false);
+    expect(isObjectRecord(10n)).toBe(false);
+    expect(isObjectRecord(undefined)).toBe(false);
+  });
+
+  it("returns false for arrays and functions", () => {
+    expect(isObjectRecord([])).toBe(false);
+    expect(isObjectRecord([1, 2, 3])).toBe(false);
+    expect(isObjectRecord(() => {})).toBe(false);
+    // methods, class constructors, etc.
+    class C {}
+    expect(isObjectRecord(new C())).toBe(false);
+  });
+
+  it("returns false for boxed primitives", () => {
+    expect(isObjectRecord(new Number(1))).toBe(false);
+    expect(isObjectRecord(new String("x"))).toBe(false);
+    expect(isObjectRecord(new Boolean(true))).toBe(false);
+  });
+
+  it("returns false for built-in non-plain objects", () => {
+    expect(isObjectRecord(new Date())).toBe(false);
+    expect(isObjectRecord(/re/)).toBe(false);
+    expect(isObjectRecord(new Map())).toBe(false);
+    expect(isObjectRecord(new Set())).toBe(false);
+    expect(isObjectRecord(new WeakMap())).toBe(false);
+    expect(isObjectRecord(new WeakSet())).toBe(false);
+    expect(isObjectRecord(new Uint8Array())).toBe(false);
+  });
+
+  it("narrows the type for safe access (TS check)", () => {
+    const value: unknown = { foo: "bar" };
+    if (isObjectRecord(value)) {
+      // Within this block, value is Record<string, unknown>
+      const foo = value["foo"];
+      expect(foo).toBe("bar");
+    } else {
+      throw new Error("Type guard failed to narrow");
+    }
   });
 });

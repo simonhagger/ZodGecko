@@ -86,7 +86,8 @@ export default [
         {
           patterns: [
             "**/src/index", // internal root barrel
-            "zodgecko", // package name (from internal files)
+            "zodgecko", // package name (from internal files),
+            "../runtime",
           ],
         },
       ],

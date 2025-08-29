@@ -189,7 +189,7 @@ const ENDPOINTS = {
 export type Endpoint = keyof typeof ENDPOINTS;
 
 /** Frozen list of endpoints for iteration in code/tests. */
-export const ALL_ENDPOINTS = Object.freeze(Object.keys(ENDPOINTS) as Endpoint[]);
+export const ALL_ENDPOINTS = Object.freeze(Object.keys(ENDPOINTS).sort() as Endpoint[]);
 
 /** Zod request schema type for a given endpoint key. */
 export type RequestSchemaOf<E extends Endpoint> = ReturnType<(typeof ENDPOINTS)[E]["req"]>;

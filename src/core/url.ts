@@ -322,11 +322,11 @@ export function formatPathStrict<T extends string>(
   template: T,
   params: PathParams<T>,
   opts?: Omit<FormatPathOptions, "mode" | "onMissing">,
-): string {
+): string | Error {
   const res = formatPathSafe(template, params, { ...opts, mode: "strict" });
   if (!res.ok) {
     const msg = res.issues.map((i) => `[${i.kind}] ${i.key}: ${i.message}`).join("; ");
-    throw new Error(`formatPath: ${msg} (template: "${template}")`);
+    return new Error(`formatPath: ${msg} (template: "${template}")`);
   }
   return res.path;
 }
@@ -349,7 +349,9 @@ export function formatPath<T extends string>(
     ...opts,
   });
   // In soft mode we expect ok:true; if not, degrade gracefully.
-  return res.ok ? res.path : template.replace(/\{[^}]+\}/g, "");
+  return res.ok
+    ? res.path.replace(/\/{2,}/g, "/").replace(/\/+$/g, "")
+    : template.replace(/\{[^}]+\}/g, "");
 }
 
 // ---------- Base/path utilities ----------

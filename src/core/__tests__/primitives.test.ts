@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from "vitest";
 
-import { UrlString } from "../../core/primitives.js";
+import { UrlString } from "../primitives.js";
 
 describe("UrlString", () => {
   it("accepts http/https and returns same string", () => {

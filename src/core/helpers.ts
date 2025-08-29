@@ -109,3 +109,17 @@ export function toCsv(
 
   return arr.join(",");
 }
+
+/**
+ * Narrow `unknown` to a plain object record.
+ * - true for: {}, {a:1}, Object.create(null)
+ * - false for: null, arrays, functions, Dates, Maps/Sets, class instances, objects with custom prototypes
+ */
+export function isObjectRecord(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null) return false;
+  if (Array.isArray(value)) return false;
+
+  // Avoid eslint no-unsafe-assignment by typing the result
+  const proto: object | null = Object.getPrototypeOf(value) as object | null;
+  return proto === Object.prototype || proto === null;
+}

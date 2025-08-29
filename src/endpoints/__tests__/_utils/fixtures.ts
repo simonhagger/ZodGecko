@@ -12,10 +12,10 @@ export const Scenarios = Object.freeze({
 export type ScenarioKey = (typeof Scenarios)[keyof typeof Scenarios];
 
 export type FixtureLoader = Readonly<{
-  load<T = unknown>(relativePathFromTest: string): Promise<T>;
-  request<T = Record<string, unknown>>(scenario: ScenarioKey): Promise<T | undefined>;
-  response<T = unknown>(): Promise<T | undefined>;
-  responseByName<T = unknown>(name: string): Promise<T | undefined>;
+  load<T = unknown>(relativePathFromTest: string): Promise<T | Error>;
+  request<T = Record<string, unknown>>(scenario: ScenarioKey): Promise<T | Error>;
+  response<T = unknown>(): Promise<T | Error>;
+  responseByName<T = unknown>(name: string): Promise<T | Error>;
 }>;
 
 /** Build a loader bound to the test file URL. */
@@ -23,36 +23,35 @@ export function makeFixtureLoader(ep: Endpoint, baseUrl: string): FixtureLoader 
   const prefix = makeEndpointPrefix(ep);
   //   const { req, res } = getSchemas(ep);
 
-  async function _safeImport<T>(href: string): Promise<T | undefined> {
+  async function _safeImport<T>(href: string): Promise<T | Error> {
     try {
       const mod = (await import(href, { with: { type: "json" } })) as { default: T };
       return mod.default;
     } catch {
-      return undefined;
+      return new Error(`Failed to import fixture: ${href}`);
     }
   }
 
-  async function load<T = unknown>(relativePathFromTest: string): Promise<T> {
+  async function load<T = unknown>(relativePathFromTest: string): Promise<T | Error> {
     const url = new URL(relativePathFromTest, baseUrl);
     const res = await _safeImport<T>(url.href);
-    if (res === undefined) throw new Error(`Fixture not found: ${relativePathFromTest}`);
+    if (res === undefined) return new Error(`Fixture not found: ${relativePathFromTest}`);
     return res;
   }
 
-  async function request<T = Record<string, unknown>>(
-    scenario: ScenarioKey,
-  ): Promise<T | undefined> {
-    if (!prefix) return undefined;
+  async function request<T = Record<string, unknown>>(scenario: ScenarioKey): Promise<T | Error> {
+    if (!prefix) return new Error(`No prefix found for endpoint: ${ep}`);
     const url = new URL(`./fixtures/${prefix}.requests.json`, baseUrl);
     const obj = await _safeImport<Record<ScenarioKey, T>>(url.href);
-    return obj?.[scenario];
+    if (obj instanceof Error) return obj;
+    return obj[scenario];
   }
 
-  async function response<T = unknown>(): Promise<T | undefined> {
+  async function response<T = unknown>(): Promise<T | Error> {
     const url = new URL(`./fixtures/${prefix}.response.json`, baseUrl);
     return _safeImport<T>(url.href);
   }
-  async function responseByName<T = unknown>(name: string): Promise<T | undefined> {
+  async function responseByName<T = unknown>(name: string): Promise<T | Error> {
     const url = new URL(`./fixtures/${name}`, baseUrl);
     return _safeImport<T>(url.href);
   }

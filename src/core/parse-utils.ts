@@ -7,7 +7,7 @@
  * Helpers that complement Zod parsing and common request-value coercions.
  */
 
-import type { z } from "zod";
+import { z } from "zod";
 
 /**
  * Safe parse wrapper that returns typed data and a compact error summary.
@@ -162,4 +162,10 @@ export function normalizeVsCurrencies(input: string[] | string): string[] {
   const arr = Array.isArray(input) ? input : input.split(",");
   const cleaned = arr.map((s) => s.trim().toLowerCase()).filter((s) => s.length > 0);
   return Array.from(new Set(cleaned)).sort();
+}
+/** Creates a new Zod Error message from a minimal issue object */
+export function getZodErrorMsgFrom(issue: Record<string, unknown>): string {
+  // @ts-expect-error test-only: constructing minimal issue objects for coverage
+  const err = new z.ZodError([issue]);
+  return explainZodError(err);
 }

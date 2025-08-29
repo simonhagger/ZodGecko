@@ -1,0 +1,12 @@
+{
+  "defaults": {
+    "include_platform": false
+  },
+  "missing-required": {},
+  "non-defaults": {
+    "include_platform": false
+  },
+  "wrong-types": {
+    "include_platform": 123
+  }
+}

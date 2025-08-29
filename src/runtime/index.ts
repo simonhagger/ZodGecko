@@ -21,7 +21,7 @@ export {
 export { SERVER_DEFAULTS, getServerDefaults } from "./server-defaults.js";
 
 // Composition helpers
-export { withDefaults } from "./with-defaults.js";
+export { withDefaults } from "./helpers.js";
 
 // Endpoints (registry + typed schema accessors)
 export {
