@@ -57,3 +57,9 @@ export function getResponseSchema(id: string): ZodLikeSchema | undefined {
   const entry = GENERATED_REGISTRY.find((e) => e.id === id);
   return entry?.responseSchema as ZodLikeSchema | undefined;
 }
+
+/** Lookup the endpoint's request schema (Zod-like) or undefined if not found. */
+export function getRequestSchema(id: string): ZodLikeSchema | undefined {
+  const entry = GENERATED_REGISTRY.find((e) => e.id === id);
+  return entry?.requestSchema as ZodLikeSchema | undefined;
+}

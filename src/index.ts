@@ -19,6 +19,7 @@ export { getRequestFor } from "./helpers/get-request-for.js";
 export { parseRequest } from "./helpers/parse-request.js";
 export { parseResponse } from "./helpers/parse-response.js";
 export { toURL } from "./helpers/to-url.js";
+export { getSchemas } from "./helpers/get-schemas.js";
 
 /* ------------------------------- Registry I/O ------------------------------ */
 /* Read-only accessors for endpoint metadata; useful for advanced consumers. */
@@ -27,6 +28,7 @@ export {
   getPathInfo,
   getQueryRules,
   getResponseSchema,
+  getRequestSchema,
   getServerDefaults,
   listEndpoints,
 } from "./registry/index.js";

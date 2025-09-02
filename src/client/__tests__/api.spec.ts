@@ -72,7 +72,7 @@ describe("ZodGecko client", () => {
     };
 
     const url = client.url(id, req);
-    expect(url).toBe("https://api.coingecko.com/api/simple/price?vs_currencies=usd");
+    expect(url).toBe("https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd");
   });
 
   it("url() fills a path template correctly for coins.by-id (if present)", () => {
@@ -83,6 +83,6 @@ describe("ZodGecko client", () => {
     const req: RequestShape = { path: { id: "bitcoin" }, query: {} };
     const url = client.url(id, req);
 
-    expect(url).toBe("https://api.coingecko.com/api/coins/bitcoin");
+    expect(url).toBe("https://api.coingecko.com/api/v3/coins/bitcoin");
   });
 });

@@ -4,6 +4,7 @@
 // (none)
 
 // Internal imports
+import { defaultBaseFor } from "./defaults.js";
 import { formatParamsForEndpoint } from "../helpers/format-params.js";
 import { formatPath } from "../helpers/format-path.js";
 import { getRequestFor as getRequestSurface } from "../helpers/get-request-for.js";
@@ -11,7 +12,7 @@ import { toURL } from "../helpers/to-url.js";
 import { getPathInfo } from "../registry/index.js";
 import type { EndpointIdFor, EntryFor } from "../registry/select.js";
 import { selectEntryMap } from "../registry/select.js";
-import type { RequestShape, VersionPlanPair } from "../types/api.js";
+import type { RequestShape, VersionPlanKey, VersionPlanPair } from "../types/api.js";
 
 export type ClientOptions<V extends VersionPlanPair> = Readonly<{
   validFor: V;
@@ -28,7 +29,11 @@ export class ZodGecko<V extends VersionPlanPair> {
 
   constructor(opts: ClientOptions<V>) {
     this.validFor = opts.validFor;
-    this.baseURL = opts.baseURL ?? "https://api.coingecko.com/api";
+
+    // Derive a stable default base per Version/Plan (includes /v3)
+    const key = `${opts.validFor.version}/${opts.validFor.plan}` as VersionPlanKey;
+    this.baseURL = opts.baseURL ?? defaultBaseFor(key);
+
     this.entries = selectEntryMap(this.validFor);
   }
 
@@ -65,7 +70,7 @@ export class ZodGecko<V extends VersionPlanPair> {
     const tpl = pathInfo?.pathTemplate ?? ent.pathTemplate;
     const path = formatPath(tpl, req.path ?? {});
 
-    // Query: registry-aware normalization (drops server defaults, encodes arrays, etc.)
+    // Query: registry-aware normalization
     const query = formatParamsForEndpoint(id, req.query ?? {});
 
     return toURL(this.baseURL, path, query);
