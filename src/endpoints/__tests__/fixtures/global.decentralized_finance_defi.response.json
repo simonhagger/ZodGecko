@@ -1,9 +1,0 @@
-{
-  "data": {
-    "defi_market_cap": "120000000000",
-    "eth_market_cap": "300000000000",
-    "defi_to_eth_ratio": "0.4",
-    "trading_volume_24h": "25000000000",
-    "defi_dominance": "6.7"
-  }
-}

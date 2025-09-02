@@ -49,4 +49,4 @@ Because this inventory is generated from the schemas and server defaults in the 
 | `/simple/supported_vs_currencies` | *(none)* | *(none)* | *(none)* | *(none)* |
 | `/simple/token_price/{id}` | `id` | `contract_addresses`, `vs_currencies` | `include_24hr_change=false`, `include_24hr_vol=false`, `include_last_updated_at=false`, `include_market_cap=false` | `precision` |
 
-_Generated on 2025-08-29 14:23:47.118 UTC._
+_Generated on 2025-08-30 00:08:38.460 UTC._

@@ -7,7 +7,13 @@ export default defineConfig({
     environment: "node",
 
     // Only look for tests under src/**/__tests__/
-    include: ["src/**/__tests__/**/*.test.ts"],
+    include: [
+      "src/helpers/__tests__/**/*.spec.ts",
+      "src/testkit/**/*.spec.ts",
+      "src/registry/**/*.spec.ts",
+      "src/fetch/**/*.spec.ts",
+      "src/client/**/*.spec.ts",
+    ],
 
     // Never crawl these paths for tests
     exclude: [
@@ -23,7 +29,7 @@ export default defineConfig({
       // type-only or build artifacts
       "**/*.d.ts",
       // docs, fixtures and test helpers
-      "**/fixtures/**",
+      // "**/fixtures/**",
       "**/docs/**",
       "**/__tests__/_shared/**",
       "**/__tests__/_utils/**",
@@ -35,28 +41,32 @@ export default defineConfig({
       cleanOnRerun: true,
 
       // Measure coverage only from source files, not dist/configs
-      include: ["src/**/*.ts"],
+      include: [
+        "src/registry/**/*.ts",
+        "src/helpers/**/*.ts",
+        "src/fetch/**/*.ts",
+        "src/client/**/*.ts",
+      ],
 
       // Exclude files that are type-only or barrels/config
       exclude: [
-        "src/**/index.ts", // endpoint barrels + root barrel
-        "src/**/requests.ts", // type-only
-        "src/**/responses.ts", // type-only
-        "src/**/*.d.ts",
-
-        // build/runtime outputs & configs
-        ".vscode/**",
+        "node_modules/**",
         "dist/**",
         "coverage/**",
-        "vitest.config.ts",
-        "eslint.config.*",
+        "docs/**",
         "scripts/**",
-
+        "examples/**",
+        // editor/ci noise
+        ".idea/**",
+        ".vscode/**",
+        // type-only or build artifacts
+        "**/*.d.ts",
         // docs, fixtures and test helpers
-        "**/fixtures/**",
+        // "**/fixtures/**",
         "**/docs/**",
         "**/__tests__/_shared/**",
         "**/__tests__/_utils/**",
+        "src/testkit/types.ts", // <-- exclude pure type-only module
       ],
     },
   },

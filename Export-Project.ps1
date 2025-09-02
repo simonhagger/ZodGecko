@@ -64,7 +64,7 @@ $ExcludeNames += [System.IO.Path]::GetFileName($OutputFile)
 $SensitiveNameRegex = '^(?:\.env(?:\..*)?)$'
 
 # Skip paths that match these segments
-$ExcludePathRegex = "\\(node_modules|dist|\.git|coverage|.angular|out|build|tmp|.cache)\\"
+$ExcludePathRegex = "\\(node_modules|dist|\.git|coverage|.angular|out|build|tmp|.cache|(?<=\Sfixtures\\)(v[0-9]+.[0-9].[0-9]))\\"
 
 # ---- Prep ----
 if (Test-Path $OutputFile) { Remove-Item $OutputFile -Force }
