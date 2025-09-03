@@ -13,7 +13,7 @@ import { parseRequest } from "../helpers/parse-request.js";
 import { parseResponse } from "../helpers/parse-response.js";
 import { toURL } from "../helpers/to-url.js";
 import { pathTemplateFromSlug } from "../registry/path-from-slug.js";
-import type { QueryValue, RequestShape } from "../types/api.js";
+import type { QueryValue, RequestShape } from "../types.js";
 
 type DefaultResult =
   | { status: "pass"; url: string }

@@ -410,7 +410,7 @@ export const TickersEnvelope = z
  * 7) Headers & meta
  * ========================================================================== */
 
-/** Rate-limit headers returned by CoinGecko API */
+/** Rate-limit headers returned by CoinGecko API PRO endpoints */
 export const RateLimitHeaders = z
   .object({
     "x-cgpro-api-limit": z.string().optional(),

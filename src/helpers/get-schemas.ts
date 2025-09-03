@@ -9,7 +9,7 @@
 
 // Internal imports
 import { getRequestSchema, getResponseSchema } from "../registry/index.js";
-import type { ZodLikeSchema } from "../registry/types.js";
+import type { ZodLikeSchema } from "../types.js";
 
 /** Return schemas for an endpoint id. */
 export function getSchemas(id: string): Readonly<{

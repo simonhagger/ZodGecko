@@ -1,6 +1,6 @@
 // src/testkit/types.ts
 
-import type { VersionPlanPair } from "../types/api.js";
+import type { VersionPlanPair } from "../types.js";
 
 /** Optional scenario metadata. */
 export type ScenarioMeta = Readonly<{
@@ -56,5 +56,5 @@ export type ScenarioTestPlan = Readonly<{
 export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
 
 /** Re-export for tests that import only from testkit. */
-export type { RequestShape } from "../types/api.js";
-export type { VersionPlanPair } from "../types/api.js";
+export type { RequestShape } from "../types.js";
+export type { VersionPlanPair } from "../types.js";

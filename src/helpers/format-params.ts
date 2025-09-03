@@ -1,6 +1,6 @@
 // src/helpers/format-params.ts
 import { getQueryRules, getServerDefaults } from "../registry/index.js";
-import type { QueryPrimitive } from "../types/api.js";
+import type { QueryPrimitive } from "../types.js";
 
 type QueryValue = QueryPrimitive | ReadonlyArray<QueryPrimitive>;
 type QueryInput = Readonly<Record<string, QueryValue>>;

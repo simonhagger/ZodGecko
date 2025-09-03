@@ -4,8 +4,8 @@ import { getSchemas } from "../get-schemas.js";
 
 describe("getSchemas", () => {
   it("returns request/response schemas for a known endpoint", () => {
-    // Use an endpoint present in your generated registry (e.g., simple.price)
-    const { requestSchema, responseSchema } = getSchemas("simple.price");
+    // Use an endpoint present in your generated registry (e.g., /simple/price)
+    const { requestSchema, responseSchema } = getSchemas("/simple/price");
 
     // Both should be present for simple.price; if any endpoint lacks a request schema,
     // requestSchema would be null (still valid).

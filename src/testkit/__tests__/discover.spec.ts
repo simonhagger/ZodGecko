@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { VersionPlanPair } from "../../types/api.js";
+import type { VersionPlanPair } from "../../types.js";
 import { buildTestPlans, discoverEndpointFixtures } from "../discover.js";
 import * as fsApi from "../fs.js";
 import type { EndpointFixtureRoot, ScenarioTestPlan } from "../types.js";

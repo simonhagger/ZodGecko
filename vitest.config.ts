@@ -11,6 +11,7 @@ export default defineConfig({
       "src/helpers/__tests__/**/*.spec.ts",
       "src/testkit/**/*.spec.ts",
       "src/registry/**/*.spec.ts",
+      "src/schemas/**/*.spec.ts",
       "src/fetch/**/*.spec.ts",
       "src/client/**/*.spec.ts",
     ],
@@ -39,6 +40,7 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       cleanOnRerun: true,
+      skipFull: true,
 
       // Measure coverage only from source files, not dist/configs
       include: [
@@ -46,6 +48,7 @@ export default defineConfig({
         "src/helpers/**/*.ts",
         "src/fetch/**/*.ts",
         "src/client/**/*.ts",
+        "src/schemas/**/*.ts",
       ],
 
       // Exclude files that are type-only or barrels/config

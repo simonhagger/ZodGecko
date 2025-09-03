@@ -1,22 +1,23 @@
 import { describe, expect, it } from "vitest";
 
 import { getPathInfo } from "../../registry/index.js";
-import type { RequestShape } from "../../types/api.js";
+import type { RequestShape } from "../../types.js";
+import { ZodGecko } from "../api.js";
 import { createClient } from "../factory.js";
 
 describe("ZodGecko client", () => {
   const client = createClient({ version: "v3.0.1", plan: "public" } as const);
 
-  it("lists available endpoint ids (includes simple.price)", () => {
-    const ids = client.endpoints();
-    expect(Array.isArray(ids)).toBe(true);
-    expect(ids.length).toBeGreaterThan(0);
-    expect(ids.includes("simple.price" as unknown as (typeof ids)[number])).toBe(true);
+  it("lists available endpoint paths (includes /simple/price)", () => {
+    const paths = client.endpoints();
+    expect(Array.isArray(paths)).toBe(true);
+    expect(paths.length).toBeGreaterThan(0);
+    expect(paths.includes("/simple/price" as (typeof paths)[number])).toBe(true);
   });
 
   it("returns a full entry for a known endpoint (shape + template)", () => {
     const ids = client.endpoints();
-    const id = ids.find((x) => x === ("simple.price" as unknown as (typeof ids)[number]));
+    const id = ids.find((x) => x === ("simple/price" as unknown as (typeof ids)[number]));
     if (!id) return; // skip if not migrated locally
 
     // Ensure it doesn’t throw and returns a value
@@ -84,5 +85,31 @@ describe("ZodGecko client", () => {
     const url = client.url(id, req);
 
     expect(url).toBe("https://api.coingecko.com/api/v3/coins/bitcoin");
+  });
+});
+const vp = { version: "v3.0.1", plan: "public" } as const;
+
+describe("ZodGecko (path keyed)", () => {
+  const client = new ZodGecko({ validFor: vp });
+
+  it("lists endpoint paths", () => {
+    expect(client.endpoints()).toContain("/simple/supported_vs_currencies");
+  });
+
+  it("throws for unknown path", () => {
+    // @ts-expect-error incorrect URL
+    expect(() => client.entry("/nope")).toThrow("Unknown endpoint for v3.0.1/public: /nope");
+  });
+
+  it("builds URL for a simple endpoint", () => {
+    const u = client.url("/simple/price", { query: { ids: "bitcoin", vs_currencies: "usd" } });
+    expect(u).toMatch(/\/api\/v3\/simple\/price\?/);
+    expect(u).toMatch(/ids=bitcoin/);
+    expect(u).toMatch(/vs_currencies=usd/);
+  });
+
+  it("returns request surface", () => {
+    const s = client.getRequestFor("/coins/{id}");
+    expect(s.pathTemplate).toBe("/coins/{id}");
   });
 });

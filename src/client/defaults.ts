@@ -1,16 +1,17 @@
-// External imports
-// (none)
+// src/client/default.ts
+import type { DerivedVersionPlanKey, VersionPlanKey, VersionPlanPair, ApiPlan } from "../types.js";
 
-// Internal imports
-import type { VersionPlanKey } from "../types/api.js";
-
-/** Stable default bases by Version/Plan; evolves per API release. */
-export const DEFAULT_BASE_BY_VERSION: Readonly<Record<VersionPlanKey, string>> = {
+export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
   "v3.0.1/public": "https://api.coingecko.com/api/v3",
-  "v3.1.1/paid": "https://pro-api.coingecko.com/api/v3",
+  // "v3.1.1/paid": "https://pro-api.coingecko.com/api/v3",
 } as const;
 
-/** Helper to resolve the default base for a given key. */
-export function defaultBaseFor(key: VersionPlanKey): string {
-  return DEFAULT_BASE_BY_VERSION[key];
+export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {
+  const key = typeof vp === "string" ? vp : `${vp.version}/${vp.plan}`;
+  // fall back by plan just in case a new pair is added before this table is updated
+  const plan = typeof vp === "string" ? (key.split("/")[1] as ApiPlan) : vp.plan;
+  return (
+    (DEFAULT_BASE_BY_VERSION as Record<string, string>)[key] ??
+    (plan === "paid" ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3")
+  );
 }

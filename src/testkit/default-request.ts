@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 
 import { getRequestFor } from "../helpers/get-request-for.js";
-import type { RequestShape } from "../types/api.js";
+import type { RequestShape } from "../types.js";
 
 /** Build a default request from registry defaults.
  * Returns null if required path params are missing. */

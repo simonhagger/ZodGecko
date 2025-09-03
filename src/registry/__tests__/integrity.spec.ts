@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { GENERATED_REGISTRY } from "../generated.js";
 
-import { VERSION_TO_PLAN } from "../../types/api.js";
+import { VERSION_TO_PLAN } from "../../types.js";
 
 /** Extract placeholders from /path/{like_this}/segments/{foo}. */
 function placeholdersFromTemplate(tpl: string): string[] {
@@ -50,8 +50,10 @@ describe("Registry integrity", () => {
 
       // serverDefaults keys ⊆ queryRules keys
       const sdKeys = Object.keys(e.serverDefaults);
-      for (const k of sdKeys) {
-        expect(ruleKeySet.has(k)).toBe(true);
+      if (sdKeys.length) {
+        for (const k of sdKeys) {
+          expect(ruleKeySet.has(k as keyof typeof e.serverDefaults)).toBe(true);
+        }
       }
 
       // rules with default must mirror serverDefaults[key] === default
@@ -63,19 +65,19 @@ describe("Registry integrity", () => {
       }
       for (const [k, vDefault] of defaultsFromRules) {
         expect(e.serverDefaults).toHaveProperty(k);
-        expect(e.serverDefaults[k]).toEqual(vDefault);
+        expect(e.serverDefaults[k as keyof typeof e.serverDefaults]).toEqual(vDefault);
       }
 
       // requiredQuery keys must not have a default
       for (const r of e.queryRules) {
-        if (reqQ.has(r.key)) {
+        if (reqQ.has(r.key as keyof typeof e.queryRules.keys)) {
           expect(Object.prototype.hasOwnProperty.call(r, "default")).toBe(false);
         }
       }
 
       // no overlap serverDefaults ∩ requiredQuery
       for (const k of sdKeys) {
-        expect(reqQ.has(k)).toBe(false);
+        expect(reqQ.has(k as keyof typeof e.serverDefaults)).toBe(false);
       }
     }
   });

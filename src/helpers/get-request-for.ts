@@ -1,7 +1,7 @@
 // src/helpers/get-request-for.ts
 
 import { getPathInfo, getQueryRules, getServerDefaults } from "../registry/index.js";
-import type { QueryPrimitive } from "../types/api.js";
+import type { QueryPrimitive } from "../types.js";
 
 /** Options shaping how the request object is generated. */
 type GetRequestForOptions = Readonly<{
@@ -55,7 +55,7 @@ function shouldUseArrayPlaceholder(
 /* ------------------------------ main API ------------------------------- */
 
 /** Build a discoverable request object for an endpoint from the registry. */
-export function getRequestFor(endpointId: string, opts?: GetRequestForOptions): RequestSurface {
+export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
   const options = {
     includeUndefinedOptionals: true,
     fillServerDefaults: true,
@@ -63,9 +63,9 @@ export function getRequestFor(endpointId: string, opts?: GetRequestForOptions): 
     ...opts,
   };
 
-  const pathInfo = getPathInfo(endpointId);
-  const rules = getQueryRules(endpointId) ?? [];
-  const defaults = getServerDefaults(endpointId) ?? {};
+  const pathInfo = getPathInfo(endpointPath);
+  const rules = getQueryRules(endpointPath) ?? [];
+  const defaults = getServerDefaults(endpointPath) ?? {};
 
   // Path: include all required path params as empty strings for discoverability
   const path: Record<string, string> = {};

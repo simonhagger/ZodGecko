@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { VersionPlanPair } from "../../types/api.js";
-import { isValidVersionPlan } from "../../types/api.js";
+import type { VersionPlanPair } from "../../types.js";
+import { isValidVersionPlan } from "../../types.js";
 import { createClient } from "../factory.js";
 
 describe("createClient", () => {

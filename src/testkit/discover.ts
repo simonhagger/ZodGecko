@@ -10,7 +10,7 @@ import type {
   ScenarioTestPlan,
   TestPlan,
 } from "./types.js";
-import type { VersionPlanPair } from "../types/api.js";
+import type { VersionPlanPair } from "../types.js";
 
 const DEFAULTS_DIR = "defaults";
 const SCENARIOS_DIR = "scenarios";

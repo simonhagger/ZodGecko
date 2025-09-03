@@ -1,7 +1,7 @@
 // src/helpers/parse-request.ts
 
 import { getPathInfo, getQueryRules } from "../registry/index.js";
-import type { QueryValue, RequestShape } from "../types/api.js";
+import type { QueryValue, RequestShape } from "../types.js";
 
 /** Treat undefined/null/blank-string as "missing" for required checks. */
 function isBlank(v: unknown): boolean {
@@ -16,13 +16,13 @@ function isBlank(v: unknown): boolean {
  * - Throws if required path/query keys are missing/blank
  * - Returns a shallow-normalized shape (no default filling here)
  */
-export function parseRequest(endpointId: string, input: Readonly<RequestShape>): RequestShape {
-  const pathInfo = getPathInfo(endpointId);
-  const rules = getQueryRules(endpointId) ?? [];
+export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
+  const pathInfo = getPathInfo(endpointPath);
+  const rules = getQueryRules(endpointPath) ?? [];
 
   // Unknown endpoint: neither path info nor query rules exist
   if (!pathInfo && rules.length === 0) {
-    throw new Error(`Unknown endpoint id: ${endpointId}`);
+    throw new Error(`Unknown endpoint id: ${endpointPath}`);
   }
 
   // Path validation

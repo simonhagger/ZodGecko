@@ -7,8 +7,7 @@
 import { ZodGecko } from "../client/api.js";
 import { parseRequest } from "../helpers/parse-request.js";
 import { parseResponse } from "../helpers/parse-response.js";
-import type { EndpointIdFor } from "../registry/select.js";
-import type { RequestShape, VersionPlanPair } from "../types/api.js";
+import type { RequestShape, VersionPlanPair, EndpointPathFor } from "../types.js";
 
 /* --------------------------------- Types ---------------------------------- */
 
@@ -119,16 +118,16 @@ export class ZodGeckoFetch<V extends VersionPlanPair> extends ZodGecko<V> {
   }
 
   /** GET helper: build URL, fetch, parse request/response. */
-  async get<TId extends EndpointIdFor<V>>(
-    id: TId,
+  async get<TPath extends EndpointPathFor<V>>(
+    path: TPath,
     req: RequestShape,
     init?: RequestInitLike,
   ): Promise<unknown> {
     // Validate & normalize request against the endpoint schema
-    const normalizedReq = parseRequest(id, req);
+    const normalizedReq = parseRequest(path, req);
 
     // Build URL with registry-aware path & query normalization
-    const url = this.url(id, normalizedReq);
+    const url = this.url(path as EndpointPathFor<V>, normalizedReq);
 
     // Merge headers deterministically
     const mergedHeaders: Record<string, string> = {
@@ -143,6 +142,6 @@ export class ZodGeckoFetch<V extends VersionPlanPair> extends ZodGecko<V> {
     } as unknown as RequestInit); // cast once at the boundary to satisfy runtime fetch
 
     const json: unknown = await res.json();
-    return parseResponse(id, json);
+    return parseResponse(path as EndpointPathFor<V>, json);
   }
 }

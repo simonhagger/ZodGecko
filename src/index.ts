@@ -42,9 +42,9 @@ export type {
   QueryValue,
   RequestShape,
   VersionPlanPair,
-} from "./types/api.js";
+} from "./types.js";
 
-export { PLANS, VERSIONS, VERSION_TO_PLAN, isValidVersionPlan } from "./types/api.js";
+export { PLANS, VERSIONS, VERSION_TO_PLAN, isValidVersionPlan } from "./types.js";
 
 /* --------------------------------- Fetch API ------------------------------- */
 /* Intentionally not re-exported here:

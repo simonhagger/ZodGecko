@@ -4,13 +4,13 @@ import { getRequestFor } from "../get-request-for.js";
 
 describe("getRequestFor", () => {
   it("populates required path params with empty strings and exposes pathTemplate", (): void => {
-    const req = getRequestFor("coins.by-id");
+    const req = getRequestFor("/coins/{id}");
     expect(req.pathTemplate).toBe("/coins/{id}");
     expect(req.path).toEqual({ id: "" });
   });
 
   it("when includeUndefinedOptionals=true and fillServerDefaults=false, shows query keys as blanks", (): void => {
-    const req = getRequestFor("coins.by-id", {
+    const req = getRequestFor("/coins/{id}", {
       includeUndefinedOptionals: true,
       fillServerDefaults: false,
     });
@@ -26,7 +26,7 @@ describe("getRequestFor", () => {
   });
 
   it("when fillServerDefaults=true, fills query with server defaults", (): void => {
-    const req = getRequestFor("coins.by-id", {
+    const req = getRequestFor("/coins/{id}", {
       includeUndefinedOptionals: false,
       fillServerDefaults: true,
     });
@@ -43,8 +43,8 @@ describe("getRequestFor", () => {
     expect(Object.keys(req.query as Record<string, unknown>).length).toBe(6);
   });
 
-  it("simple.price: omitDefaultedFields prunes defaults, keeps placeholders", () => {
-    const req = getRequestFor("simple.price", {
+  it("/simple/price: omitDefaultedFields prunes defaults, keeps placeholders", () => {
+    const req = getRequestFor("/simple/price", {
       includeUndefinedOptionals: true,
       fillServerDefaults: true,
       omitDefaultedFields: true,
@@ -68,7 +68,7 @@ describe("getRequestFor", () => {
   });
 
   it("simple.price with defaults but keep optionals present", () => {
-    const req = getRequestFor("simple.price", {
+    const req = getRequestFor("/simple/price", {
       includeUndefinedOptionals: true,
       fillServerDefaults: true,
     });

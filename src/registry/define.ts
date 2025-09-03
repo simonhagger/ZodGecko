@@ -4,9 +4,14 @@
 import type z from "zod";
 
 // Internal imports
-import type { RegistryEndpoint, QueryRule, HttpMethod } from "./types.js";
 import { EmptyRequest, EmptyResponse } from "../schemas/_shared/structures.js";
-import type { QueryPrimitive, VersionPlanPair } from "../types/api.js";
+import type {
+  RegistryEndpoint,
+  QueryRule,
+  HttpMethod,
+  QueryPrimitive,
+  VersionPlanPair,
+} from "../types.js";
 
 /** Input shape for defining a registry endpoint. */
 export type DefineEndpointInput = Readonly<{

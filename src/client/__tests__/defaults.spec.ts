@@ -6,7 +6,7 @@ import { createClient } from "../factory.js";
 describe("client defaults", () => {
   it("maps version/plan to default base with /v3", () => {
     expect(DEFAULT_BASE_BY_VERSION["v3.0.1/public"]).toMatch(/\/api\/v3$/u);
-    expect(DEFAULT_BASE_BY_VERSION["v3.1.1/paid"]).toMatch(/\/api\/v3$/u);
+    // expect(DEFAULT_BASE_BY_VERSION["v3.1.1/paid"]).toMatch(/\/api\/v3$/u);
   });
 
   it("defaultBaseFor returns the mapped base", () => {
@@ -19,5 +19,13 @@ describe("client defaults", () => {
 
     const c2 = createClient("v3.1.1/paid", { baseURL: "https://example.com/x" });
     expect(c2.baseURL).toBe("https://example.com/x");
+  });
+});
+describe("defaultBaseFor", () => {
+  it("public vs paid", () => {
+    expect(defaultBaseFor("v3.0.1/public")).toMatch(/coingecko\.com\/api\/v3$/);
+    expect(defaultBaseFor({ version: "v3.1.1", plan: "paid" } as const)).toMatch(
+      /pro-api\.coingecko\.com\/api\/v3$/,
+    );
   });
 });

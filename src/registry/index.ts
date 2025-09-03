@@ -3,10 +3,11 @@
 
 // Internal imports
 import { GENERATED_REGISTRY } from "./generated.js";
-import type { RegistryEndpoint, ZodLikeSchema } from "./types.js";
-import type { QueryPrimitive, VersionPlanPair } from "../types/api.js";
+import type { RegistryEndpoint, ZodLikeSchema, QueryPrimitive, VersionPlanPair } from "../types.js";
 
-export function listEndpoints(filter?: Partial<VersionPlanPair>): ReadonlyArray<RegistryEndpoint> {
+export function listEndpoints(
+  filter?: Partial<VersionPlanPair>,
+): ReadonlyArray<(typeof GENERATED_REGISTRY)[number]> {
   if (!filter) return GENERATED_REGISTRY;
   return GENERATED_REGISTRY.filter(
     (e) =>
@@ -16,14 +17,16 @@ export function listEndpoints(filter?: Partial<VersionPlanPair>): ReadonlyArray<
 }
 
 export function getEndpointDefinition(
-  id: string,
+  path: string,
   validFor?: VersionPlanPair,
-): RegistryEndpoint | null {
-  if (!validFor) return GENERATED_REGISTRY.find((e) => e.id === id) ?? null;
+): (typeof GENERATED_REGISTRY)[number] | null {
+  if (!validFor) return GENERATED_REGISTRY.find((e) => e.pathTemplate === path) ?? null;
   return (
     GENERATED_REGISTRY.find(
       (e) =>
-        e.id === id && e.validFor.version === validFor.version && e.validFor.plan === validFor.plan,
+        e.pathTemplate === path &&
+        e.validFor.version === validFor.version &&
+        e.validFor.plan === validFor.plan,
     ) ?? null
   );
 }
@@ -37,29 +40,29 @@ export function getServerDefaults(
 }
 
 export function getQueryRules(
-  id: string,
+  path: string,
   validFor?: VersionPlanPair,
 ): RegistryEndpoint["queryRules"] | null {
-  const def = getEndpointDefinition(id, validFor);
+  const def = getEndpointDefinition(path, validFor);
   return def ? def.queryRules : null;
 }
 
 export function getPathInfo(
-  id: string,
+  path: string,
   validFor?: VersionPlanPair,
 ): { pathTemplate: string; requiredPath: ReadonlyArray<string> } | null {
-  const def = getEndpointDefinition(id, validFor);
+  const def = getEndpointDefinition(path, validFor);
   return def ? { pathTemplate: def.pathTemplate, requiredPath: def.requiredPath } : null;
 }
 
 /** Lookup the endpoint's response schema (Zod-like) or undefined if not found. */
-export function getResponseSchema(id: string): ZodLikeSchema | undefined {
-  const entry = GENERATED_REGISTRY.find((e) => e.id === id);
+export function getResponseSchema(path: string): ZodLikeSchema | undefined {
+  const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
   return entry?.responseSchema as ZodLikeSchema | undefined;
 }
 
 /** Lookup the endpoint's request schema (Zod-like) or undefined if not found. */
-export function getRequestSchema(id: string): ZodLikeSchema | undefined {
-  const entry = GENERATED_REGISTRY.find((e) => e.id === id);
+export function getRequestSchema(path: string): ZodLikeSchema | undefined {
+  const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
   return entry?.requestSchema as ZodLikeSchema | undefined;
 }

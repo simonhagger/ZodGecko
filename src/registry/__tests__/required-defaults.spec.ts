@@ -15,7 +15,7 @@ describe("Registry required vs defaults", () => {
 
       // defaulted → not required
       for (const k of defaults) {
-        expect(reqQ.has(k)).toBe(false);
+        expect(reqQ.has(k as keyof typeof e.serverDefaults)).toBe(false);
       }
     }
   });

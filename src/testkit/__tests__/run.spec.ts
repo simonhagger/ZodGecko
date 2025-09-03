@@ -7,7 +7,7 @@ import * as fmtPath from "../../helpers/format-path.js";
 import * as parseReq from "../../helpers/parse-request.js";
 import * as parseResp from "../../helpers/parse-response.js";
 import * as urlApi from "../../helpers/to-url.js";
-import type { RequestShape, VersionPlanPair } from "../../types/api.js";
+import type { RequestShape, VersionPlanPair } from "../../types.js";
 import * as defaultReq from "../default-request.js";
 import * as fsApi from "../fs.js";
 import { runDefaultTest, runScenarioTest } from "../run.js";
@@ -39,7 +39,7 @@ beforeEach((): void => {
   // request/response pipeline
   vi.spyOn(parseReq, "parseRequest").mockImplementation(
     (_e: string, input: RequestShape): RequestShape => ({
-      pathTemplate: "{id}/info",
+      // pathTemplate: "{id}/info",
       path: input.path ?? {},
       query: input.query ?? {},
     }),
@@ -174,7 +174,7 @@ beforeEach((): void => {
   // minimal pipeline stubs; we don't exercise URL/params here
   vi.spyOn(parseReq, "parseRequest").mockImplementation(
     (_e: string, input: RequestShape): RequestShape => ({
-      pathTemplate: "{id}/info",
+      // pathTemplate: "{id}/info",
       path: input.path ?? {},
       query: input.query ?? {},
     }),

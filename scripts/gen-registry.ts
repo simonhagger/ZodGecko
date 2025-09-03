@@ -1,3 +1,21 @@
+/*
+ * scripts/gen-registry.ts
+ * ---------------------------------------------------------------------------
+ * Generates the runtime registry as a **single `as const` array** export and,
+ * optionally, a tiny derived types helper so the client can index paths by
+ * version/plan without collapsing to `never`.
+ *
+ * Output files:
+ *   - src/registry/generated.ts        (runtime, `GENERATED_REGISTRY` as const)
+ *   - src/registry/derived-types.ts    (types-only, derived from generated)
+ *
+ * Notes:
+ *   - This script expects an array of `EntrySource` from your existing discovery
+ *     step. Replace `loadEntries()` with your project-specific loader.
+ *   - The writer consolidates schema imports and emits them once at the top of
+ *     `generated.ts`.
+ */
+
 /* eslint-disable no-console */
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
@@ -5,13 +23,7 @@ import { pathToFileURL } from "node:url";
 import prettier from "prettier";
 
 import { pathTemplateFromSlug } from "../src/registry/path-from-slug.ts";
-import {
-  PLANS,
-  VERSIONS,
-  VERSION_TO_PLAN,
-  type ApiPlan,
-  type ApiVersion,
-} from "../src/types/api.ts";
+import { PLANS, VERSIONS, VERSION_TO_PLAN, type ApiPlan, type ApiVersion } from "../src/types.ts";
 
 const ROOT = process.cwd();
 const SRC = path.join(ROOT, "src");
@@ -535,20 +547,14 @@ async function main(): Promise<void> {
 
     const method = (meta?.method ?? "GET").toUpperCase();
 
-    const serverDefaultsStr =
-      serverDefaultsPairs.length > 0
-        ? `{ ${serverDefaultsPairs.join(", ")} } as const`
-        : "{} as const";
-
     const queryRulesBlock = renderArrayConst(queryRuleObjs);
-
     const requiredQueryBlock = renderArrayConst(requiredQueryNames);
-
     const serverDefaultsBlock = renderObjectConst(serverDefaultLines);
 
+    // ✅ Push just the OBJECT; we'll wrap everything into an array at the end
     entryBlocks.push(
       [
-        `REGISTRY.push({`,
+        `{`,
         `  id: "${m.slug}",`,
         `  validFor: { version: "${m.version}", plan: "${m.plan}" } as const,`,
         `  method: "${method}",`,
@@ -559,7 +565,7 @@ async function main(): Promise<void> {
         `  serverDefaults: ${serverDefaultsBlock},`,
         `  requestSchema: req_${alias},`,
         `  responseSchema: res_${alias},`,
-        `});`,
+        `}`,
       ].join("\n"),
     );
 
@@ -569,17 +575,19 @@ async function main(): Promise<void> {
   // Build one contiguous, sorted import block
   importBlocks.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   const importBlock = [
+    // (types-only import removed — we no longer need RegistryEndpoint here)
     ...importBlocks.map((x) => x.block),
-    'import type { RegistryEndpoint } from "./types.js";',
   ].join("\n");
 
   const header = `/* AUTO-GENERATED FILE — DO NOT EDIT\n * Run: pnpm gen:registry\n */`;
+
+  // ✅ Emit a SINGLE as-const array export
   const out =
     `${header}\n` +
     `${importBlock}\n\n` +
-    `const REGISTRY: Array<RegistryEndpoint> = [];\n\n` +
-    `${entryBlocks.join("\n\n")}\n\n` +
-    `export const GENERATED_REGISTRY = REGISTRY as ReadonlyArray<RegistryEndpoint>;\n`;
+    `export const GENERATED_REGISTRY = [\n` +
+    `${entryBlocks.join(",\n\n")}\n` +
+    `] as const;\n`;
 
   // format with project config (Prettier picks parser from filepath)
   const prettierConfig = (await prettier.resolveConfig(OUT).catch(() => null)) ?? {};
@@ -589,7 +597,7 @@ async function main(): Promise<void> {
   console.log(`Generated ${path.relative(ROOT, OUT)} with ${entryBlocks.length} entries.`);
 }
 
-main().catch((e) => {
+await main().catch((e) => {
   console.error(e);
   process.exit(1);
 });

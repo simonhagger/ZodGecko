@@ -12,7 +12,7 @@ import {
   isValidVersionPlan,
   type ApiVersion,
   type VersionPlanPair,
-} from "../../types/api.js";
+} from "../../types.js";
 import { buildTestPlans, discoverEndpointFixtures } from "../discover.js";
 import { fixturesRoot } from "../fs.js";
 import { runDefaultTest, runScenarioTest } from "../run.js";

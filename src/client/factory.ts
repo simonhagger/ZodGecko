@@ -3,8 +3,8 @@
 
 // Internal imports
 import { ZodGecko, type ClientOptions } from "./api.js";
-import type { VersionPlanKey, VersionPlanPair } from "../types/api.js";
-import { isValidVersionPlan, parseVersionPlanKey } from "../types/api.js";
+import type { VersionPlanKey, VersionPlanPair } from "../types.js";
+import { isValidVersionPlan, parseVersionPlanKey } from "../types.js";
 
 /** Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type. */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
