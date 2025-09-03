@@ -1,0 +1,309 @@
+[
+  {
+    "id": "asset_platforms",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/asset_platforms",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": [
+      "filter"
+    ]
+  },
+  {
+    "id": "coins.by-id",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [
+      "community_data=true",
+      "developer_data=true",
+      "localization=true",
+      "market_data=true",
+      "sparkline=false",
+      "tickers=true"
+    ],
+    "optOther": [
+      "dex_pair_format"
+    ]
+  },
+  {
+    "id": "coins.by-id.contract.by-contract_address",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/contract/{contract_address}",
+    "reqPath": [
+      "id",
+      "contract_address"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "id": "coins.by-id.contract.by-contract_address.market_chart",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/contract/{contract_address}/market_chart",
+    "reqPath": [
+      "id",
+      "contract_address"
+    ],
+    "reqQuery": [
+      "vs_currency",
+      "days"
+    ],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "id": "coins.by-id.contract.by-contract_address.market_chart.range",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/contract/{contract_address}/market_chart/range",
+    "reqPath": [
+      "id",
+      "contract_address"
+    ],
+    "reqQuery": [
+      "vs_currency",
+      "from",
+      "to"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "precision"
+    ]
+  },
+  {
+    "id": "coins.by-id.history",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/history",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "contract_address",
+      "vs_currency",
+      "from",
+      "to"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "precision"
+    ]
+  },
+  {
+    "id": "coins.by-id.market_chart",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/market_chart",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "vs_currency",
+      "days"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "interval",
+      "precision"
+    ]
+  },
+  {
+    "id": "coins.by-id.market_chart.range",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/market_chart/range",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "vs_currency",
+      "from",
+      "to"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "precision"
+    ]
+  },
+  {
+    "id": "coins.by-id.ohlc",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/ohlc",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "vs_currency",
+      "days"
+    ],
+    "optWithDefault": [],
+    "optOther": [
+      "precision"
+    ]
+  },
+  {
+    "id": "coins.by-id.tickers",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/{id}/tickers",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [],
+    "optWithDefault": [
+      "depth=false",
+      "dex_pair_format=contract_address",
+      "include_exchange_logo=false",
+      "order=trust_score_desc"
+    ],
+    "optOther": [
+      "exchange_ids",
+      "page"
+    ]
+  },
+  {
+    "id": "coins.list",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/list",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [
+      "include_platform=false"
+    ],
+    "optOther": []
+  },
+  {
+    "id": "coins.markets",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/coins/markets",
+    "reqPath": [],
+    "reqQuery": [
+      "vs_currency"
+    ],
+    "optWithDefault": [
+      "include_tokens=top",
+      "locale=en",
+      "order=market_cap_desc",
+      "page=1",
+      "per_page=100",
+      "sparkline=false"
+    ],
+    "optOther": [
+      "category",
+      "ids",
+      "names",
+      "precision",
+      "price_change_percentage",
+      "symbols"
+    ]
+  },
+  {
+    "id": "ping",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/ping",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "id": "simple.price",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/simple/price",
+    "reqPath": [],
+    "reqQuery": [
+      "vs_currencies"
+    ],
+    "optWithDefault": [
+      "include_24hr_change=false",
+      "include_24hr_vol=false",
+      "include_last_updated_at=false",
+      "include_market_cap=false",
+      "include_tokens=top"
+    ],
+    "optOther": [
+      "ids",
+      "names",
+      "precision",
+      "symbols"
+    ]
+  },
+  {
+    "id": "simple.supported_vs_currencies",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/simple/supported_vs_currencies",
+    "reqPath": [],
+    "reqQuery": [],
+    "optWithDefault": [],
+    "optOther": []
+  },
+  {
+    "id": "simple.token_price.by-id",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "/simple/token_price/{id}",
+    "reqPath": [
+      "id"
+    ],
+    "reqQuery": [
+      "contract_addresses",
+      "vs_currencies"
+    ],
+    "optWithDefault": [
+      "include_24hr_change=false",
+      "include_24hr_vol=false",
+      "include_last_updated_at=false",
+      "include_market_cap=false"
+    ],
+    "optOther": [
+      "precision"
+    ]
+  },
+  {
+    "id": "token_lists.by-asset_platform_id.all.json",
+    "version": "v3.0.1",
+    "plan": "public",
+    "method": "GET",
+    "pathTemplate": "token_lists/{asset_platform_id}/all.json",
+    "reqPath": [
+      "asset_platform_id"
+    ],
+    "reqQuery": [
+      "id"
+    ],
+    "optWithDefault": [],
+    "optOther": []
+  }
+]

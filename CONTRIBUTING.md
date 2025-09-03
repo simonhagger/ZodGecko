@@ -1,32 +1,31 @@
 # Contributing to ZodGecko
 
 First off, thanks for taking the time to contribute! 🎉
-This library is a **hobby project** maintained on a best-efforts basis.
-Contributions are welcome—please follow the guidelines below to keep things consistent.
+This library is a **hobby project** maintained on a best-efforts basis. Contributions are welcome—please follow the guidelines below to keep things consistent.
 
 ---
 
 ## Getting Started
 
 1. **Fork** the repo and clone it locally.
-
 2. Install dependencies:
 
    ```sh
-   npm install
+   pnpm install
    ```
 
-3. Run a type check to confirm your environment:
+3. Generate the registry (required before tests):
 
    ```sh
-   npm run typecheck
+   pnpm gen:registry
    ```
 
-4. Run linting and formatting:
+4. Run typecheck, lint, and tests:
 
    ```sh
-   npm run lint
-   npm run format
+   pnpm typecheck
+   pnpm lint
+   pnpm test
    ```
 
 > For detailed testing conventions and folder layout, see **TESTING.md** (authoritative).
@@ -37,189 +36,94 @@ Contributions are welcome—please follow the guidelines below to keep things co
 
 ```
 src/
-  core/              # primitives and helpers (Zod types, utils)
-    __tests__/       # core unit tests
-      common.cslist.test.ts
-      common.utils.test.ts
-      ddmmyyyy.test.ts
-      explain-zod-error*.test.ts
-      parse-utils*.test.ts
-      primitives.urlstring.test.ts
-      test-helpers.ts
-
-  endpoints/         # one folder per API group (coins, exchanges, ...)
-    __tests__/       # functional harness + shared helpers/fixtures
-      _utils/
-        assertions.ts
-        defaults.ts
-        fixtures.ts
-        harness.ts          # EndpointHarness implementation
-        index.ts
-        normalize.ts
-        path.ts
-        schema.ts
-      endpoints.functional.test.requirements.md
-      endpoints.functional.test.ts   # single, over-arching functional suite
-      fixtures/                      # shared JSON fixtures for many endpoints
-        (see repo)
-
-    asset_platforms/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    categories/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    coins/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    companies/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    contract/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    derivatives/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    exchanges/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    global/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    ping/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    search/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-    simple/
-      index.ts
-      requests.ts
-      responses.ts
-      schemas.ts
-
-  runtime/           # query builder, URL helpers, defaults, validation, endpoint registry
-    __tests__/
-      drop-params.test.ts
-      format-path.test.ts
-      public-api.smoke.test.ts
-      query.*.test.ts
-      server-defaults.test.ts
-      url.utils.test.ts
-      validate.test.ts
-      with-defaults.test.ts
-    endpoints.ts     # registry of all endpoints
-    index.ts
-    query.ts
-    server-defaults.ts
-    url.ts
-    validate.ts
-    with-defaults.ts
-
-src/index.ts         # package barrel (public API)
-
+  client/        # no-network client (ZodGecko, createClient, defaults)
+  fetch/         # optional minimal fetch client (subpath import)
+  helpers/       # format-params, format-path, parse-*, get-schemas, to-url, explain-error
+  registry/      # generated.ts + accessors/selectors/path-from-slug/types
+  schemas/       # <endpoint-slug>/<version>/<plan>/{index,request,response}.ts
+  testkit/       # discovery/fs/run + fixtures
+    fixtures/<version>/<plan>/<endpoint>/{defaults,scenarios}/*.json
 ```
 
-### Rules
+Notes:
+
+- **No** `utils/` bucket: helpers are colocated or live in `helpers/`.
+- Endpoints are referenced by **slug** (e.g., `coins.by-id.history`).
+- Path params appear as `by-*` segments in slugs (e.g., `simple.token_price.by-id`).
+
+---
+
+## Rules & Conventions
 
 - **Requests**: always `strict()` and aligned with CoinGecko docs.
 - **Responses**: always tolerant via `.catchall(z.unknown())` to survive new upstream fields.
-- **Shared bits**: if multiple endpoints repeat a pattern, move it to `core/common.ts`.
-- **Harness**: endpoint functional tests run through (`src/endpoints/__tests__/endpoints.functional.test.ts`) using (`_utils/harness.ts`). Add endpoint-local tests only for edge cases or special fixtures.
+- Shared schema fragments belong in `src/schemas/_shared/*`.
+- PRs must not commit a stale `src/registry/generated.ts`.
+- Add fixtures in `testkit/fixtures` where possible to cover new endpoints.
 
 ---
 
 ## Coding Standards
 
-- **TypeScript** strict mode is on (consider enabling `exactOptionalPropertyTypes` and `noUncheckedIndexedAccess`).
-- **Zod schemas** include TSDoc for clarity.
-- Prefer **branded primitives** (e.g., `CoinId`, `VsCurrency`) over raw strings.
-- Use `UrlString` helper where applicable.
+- **TypeScript strict** mode is on.
+- **ESM** with explicit `.js` specifiers.
+- Prefer branded primitives (`CoinId`, `VsCurrency`) over raw strings.
 - Alphabetize object keys where practical for cleaner diffs.
-- Write cross-platform scripts (Node/tsx, avoid bash-only).
+- No `any`; use `unknown` + type narrowing.
+- Explicit return types (incl. generators).
+- Keep imports grouped (external vs internal), alphabetized.
 
 ---
 
-## JSDoc & Documentation
+## Documentation
 
-Every source file starts with a concise file header:
+Every source file starts with a concise header:
 
 ```ts
 /**
- * @file src/endpoints/coins/schemas.ts
- * @module endpoints/coins/schemas
- * @summary Zod schemas for Coins endpoints (requests/responses).
+ * @file src/schemas/coins.by-id/request.ts
+ * @module schemas/coins.by-id/request
+ * @summary Request schema for coins.by-id endpoint.
  */
 ```
 
-Keep endpoint-specific docs short and example-driven. Internal contributor docs live in CONTRIBUTING.md and TESTING.md.
+### Generated docs
 
-### Generated documentation
-
-- **Endpoint Inventory** (`docs/endpoint-inventory.md` + `.json`) is the single source of truth.
-
-- Always regenerate docs after schema or `SERVER_DEFAULTS` changes:
+- Registry is the **single source of truth**.
+- Always regenerate docs/registry after schema changes:
 
   ```sh
-  npm run docs:inventory
-  npm run check:inventory
+  pnpm gen:registry
+  pnpm check:registry
   ```
-
-- Commit the updated files. CI will fail if inventory is out of sync.
 
 ---
 
 ## Tests
 
-See **TESTING.md** for detailed conventions.
+- **Helpers/registry**: unit tests under `src/helpers/__tests__` and `src/registry/__tests__`.
+- **Fixtures runner**: `src/testkit/fixtures/runner.spec.ts` auto-discovers per-endpoint fixtures.
+- **Fixtures**: JSON only, minimal, never mutated. Placed under `testkit/fixtures/<version>/<plan>/<endpoint>/`.
 
-- **Harness-driven**: all endpoints validated via `src/endpoints/__tests__/endpoints.functional.test.ts` (powered by `_utils/harness.ts`).
-- **Core/runtime tests** live under their respective `__tests__` folders.
-- **Fixtures**: JSON only, minimal, never mutated. Shared fixtures under `src/endpoints/__tests__/fixtures/`.
+### Coverage expectations
 
-### What to cover
-
-- **Requests**: happy path + strictness (reject unknowns, enums).
-- **Responses**: tolerant parsing, Zod guard checks, unknown preservation.
+- **Requests**: happy path + strictness.
+- **Responses**: tolerant parsing, unknown preservation.
 - **Serialization**: CSV normalization, boolean/number coercion.
-- **Sanity**: schema defaults vs serializer baseline.
+- **Sanity**: schema defaults vs registry defaults.
 
 ---
 
 ## Pull Requests
 
-- Keep changes focused and incremental.
+- Keep changes small and incremental.
+- Always:
+  - `pnpm typecheck`
+  - `pnpm lint`
+  - `pnpm test:coverage`
+  - `pnpm check:registry`
+  - `pnpm check:tsdoc`
 
-- Add/adjust tests in line with conventions.
-
-- Ensure:
-  - `npm run typecheck`
-  - `npm run lint`
-  - `npm run test:coverage`
-  - `npm run check:inventory`
-  - `npm run check:tsdoc`
-
-- Include a brief PR description (what/why).
+- Include a brief description of what/why.
 
 Thank you! 🙂

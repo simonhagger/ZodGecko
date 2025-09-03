@@ -56,7 +56,7 @@ if (-not ($IncludeRootConfigNames -contains $SelfName)) {
 }
 
 # Skip these by filename (noise/locks)
-$ExcludeNames = @("package-lock.json","yarn.lock","pnpm-lock.yaml","bun.lockb",".DS_Store")
+$ExcludeNames = @("package-lock.json","yarn.lock","pnpm-lock.yaml","bun.lockb",".DS_Store",".\_temp.md")
 # Also exclude the current output file name (so we don't ingest our own dump)
 $ExcludeNames += [System.IO.Path]::GetFileName($OutputFile)
 
