@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { GENERATED_REGISTRY } from "../generated.js";
 
-import { VERSION_TO_PLAN } from "../../types.js";
+import { VERSION_TO_PLAN } from "../../helpers/constants.js";
 
 /** Extract placeholders from /path/{like_this}/segments/{foo}. */
 function placeholdersFromTemplate(tpl: string): string[] {
@@ -82,7 +82,7 @@ describe("Registry integrity", () => {
     }
   });
 
-  it("ids × version × plan are unique (no duplicate entries)", () => {
+  it("ids x version x plan are unique (no duplicate entries)", () => {
     const seen = new Set<string>();
     for (const e of GENERATED_REGISTRY) {
       const key = `${e.id}__${e.validFor.version}__${e.validFor.plan}`;

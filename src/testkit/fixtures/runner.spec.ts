@@ -6,13 +6,9 @@ import * as path from "node:path";
 import { describe, expect, it } from "vitest";
 
 // Internal imports
-import {
-  VERSIONS,
-  VERSION_TO_PLAN,
-  isValidVersionPlan,
-  type ApiVersion,
-  type VersionPlanPair,
-} from "../../types.js";
+import { VERSIONS, VERSION_TO_PLAN } from "../../helpers/constants.js";
+import { isValidVersionPlan } from "../../helpers/object.js";
+import { type ApiVersion, type VersionPlanPair } from "../../types.js";
 import { buildTestPlans, discoverEndpointFixtures } from "../discover.js";
 import { fixturesRoot } from "../fs.js";
 import { runDefaultTest, runScenarioTest } from "../run.js";

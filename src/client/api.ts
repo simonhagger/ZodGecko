@@ -9,8 +9,6 @@ import { formatParamsForEndpoint } from "../helpers/format-params.js";
 import { formatPath } from "../helpers/format-path.js";
 import { getRequestFor as getRequestSurface } from "../helpers/get-request-for.js";
 import { toURL } from "../helpers/to-url.js";
-import type {} from "../registry/select.js";
-import type { GENERATED_REGISTRY } from "../registry/generated.js";
 import { selectEntries } from "../registry/select.js";
 import type {
   RequestShape,
@@ -18,12 +16,9 @@ import type {
   EntryFor,
   EndpointPathFor,
   VersionPlanKey,
+  RegistryEntry,
+  ClientOptions,
 } from "../types.js";
-
-export type ClientOptions<V extends VersionPlanPair> = Readonly<{
-  validFor: V;
-  baseURL?: string;
-}>;
 
 /** Core, no-network API client narrowed by VersionPlanPair. */
 export class ZodGecko<V extends VersionPlanPair> {
@@ -51,13 +46,10 @@ export class ZodGecko<V extends VersionPlanPair> {
 
   /** Full registry entry (schemas, path template, query rules, etc.). */
   entry<const P extends EndpointPathFor<V>>(path: P): EntryFor<V> {
-    const ep = this.endpoints().filter((p) => p === path);
-    if (!ep) {
-      throw new Error(
-        `Unknown endpoint for ${this.validFor.version}/${this.validFor.plan}: ${String(path)}`,
-      );
-    }
-    const e = this.entries[ep[0]];
+    if (!Object.prototype.hasOwnProperty.call(this.entries, path))
+      throw new Error(`Unknown endpoint for v3.0.1/public: ${path}`);
+    const e = this.entries[path as keyof typeof this.entries] as EntryFor<V>;
+
     if (!e) {
       throw new Error(
         `Unknown endpoint for ${this.validFor.version}/${this.validFor.plan}: ${String(path)}`,
@@ -76,7 +68,7 @@ export class ZodGecko<V extends VersionPlanPair> {
 
   /** Build a full URL (base + formatted path + encoded query) for an endpoint. */
   url<const P extends EndpointPathFor<V>>(path: P, req: RequestShape): string {
-    const ent = this.entries[path] as (typeof GENERATED_REGISTRY)[number];
+    const ent = this.entries[path] as RegistryEntry;
     if (!ent) {
       throw new Error(
         `Unknown endpoint for ${this.validFor.version}/${this.validFor.plan}: ${String(path)}`,

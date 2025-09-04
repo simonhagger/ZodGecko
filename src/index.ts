@@ -44,7 +44,8 @@ export type {
   VersionPlanPair,
 } from "./types.js";
 
-export { PLANS, VERSIONS, VERSION_TO_PLAN, isValidVersionPlan } from "./types.js";
+export { PLANS, VERSIONS, VERSION_TO_PLAN } from "./helpers/constants.js";
+export { isValidVersionPlan } from "./helpers/object.js";
 
 /* --------------------------------- Fetch API ------------------------------- */
 /* Intentionally not re-exported here:

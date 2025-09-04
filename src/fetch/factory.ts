@@ -5,8 +5,8 @@
 
 // Internal imports
 import { ZodGeckoFetch, type FetchClientOptions } from "./client.js";
+import { isValidVersionPlan, parseVersionPlanKey } from "../helpers/object.js";
 import type { VersionPlanKey, VersionPlanPair } from "../types.js";
-import { isValidVersionPlan, parseVersionPlanKey } from "../types.js";
 
 /** Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type. */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`

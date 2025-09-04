@@ -1,75 +1,74 @@
 /* AUTO-GENERATED FILE — DO NOT EDIT
- * Run: pnpm gen:registry
- */
+ * Run: pnpm gen:registry */
 import {
   requestSchema as req_asset_platforms_v3_0_1_public,
   responseSchema as res_asset_platforms_v3_0_1_public,
-} from "./../schemas/asset_platforms/v3.0.1/public/index.js";
+} from "../schemas/asset_platforms/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_v3_0_1_public,
   responseSchema as res_coins_by_id_v3_0_1_public,
-} from "./../schemas/coins.by-id/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_contract_by_contract_address_v3_0_1_public,
   responseSchema as res_coins_by_id_contract_by_contract_address_v3_0_1_public,
-} from "./../schemas/coins.by-id.contract.by-contract_address/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.contract.by-contract_address/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_contract_by_contract_address_market_chart_v3_0_1_public,
   responseSchema as res_coins_by_id_contract_by_contract_address_market_chart_v3_0_1_public,
-} from "./../schemas/coins.by-id.contract.by-contract_address.market_chart/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.contract.by-contract_address.market_chart/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_contract_by_contract_address_market_chart_range_v3_0_1_public,
   responseSchema as res_coins_by_id_contract_by_contract_address_market_chart_range_v3_0_1_public,
-} from "./../schemas/coins.by-id.contract.by-contract_address.market_chart.range/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.contract.by-contract_address.market_chart.range/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_history_v3_0_1_public,
   responseSchema as res_coins_by_id_history_v3_0_1_public,
-} from "./../schemas/coins.by-id.history/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.history/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_market_chart_v3_0_1_public,
   responseSchema as res_coins_by_id_market_chart_v3_0_1_public,
-} from "./../schemas/coins.by-id.market_chart/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.market_chart/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_market_chart_range_v3_0_1_public,
   responseSchema as res_coins_by_id_market_chart_range_v3_0_1_public,
-} from "./../schemas/coins.by-id.market_chart.range/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.market_chart.range/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_ohlc_v3_0_1_public,
   responseSchema as res_coins_by_id_ohlc_v3_0_1_public,
-} from "./../schemas/coins.by-id.ohlc/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.ohlc/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_by_id_tickers_v3_0_1_public,
   responseSchema as res_coins_by_id_tickers_v3_0_1_public,
-} from "./../schemas/coins.by-id.tickers/v3.0.1/public/index.js";
+} from "../schemas/coins.by-id.tickers/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_list_v3_0_1_public,
   responseSchema as res_coins_list_v3_0_1_public,
-} from "./../schemas/coins.list/v3.0.1/public/index.js";
+} from "../schemas/coins.list/v3.0.1/public/index.js";
 import {
   requestSchema as req_coins_markets_v3_0_1_public,
   responseSchema as res_coins_markets_v3_0_1_public,
-} from "./../schemas/coins.markets/v3.0.1/public/index.js";
+} from "../schemas/coins.markets/v3.0.1/public/index.js";
 import {
   requestSchema as req_ping_v3_0_1_public,
   responseSchema as res_ping_v3_0_1_public,
-} from "./../schemas/ping/v3.0.1/public/index.js";
+} from "../schemas/ping/v3.0.1/public/index.js";
 import {
   requestSchema as req_simple_price_v3_0_1_public,
   responseSchema as res_simple_price_v3_0_1_public,
-} from "./../schemas/simple.price/v3.0.1/public/index.js";
+} from "../schemas/simple.price/v3.0.1/public/index.js";
 import {
   requestSchema as req_simple_supported_vs_currencies_v3_0_1_public,
   responseSchema as res_simple_supported_vs_currencies_v3_0_1_public,
-} from "./../schemas/simple.supported_vs_currencies/v3.0.1/public/index.js";
+} from "../schemas/simple.supported_vs_currencies/v3.0.1/public/index.js";
 import {
   requestSchema as req_simple_token_price_by_id_v3_0_1_public,
   responseSchema as res_simple_token_price_by_id_v3_0_1_public,
-} from "./../schemas/simple.token_price.by-id/v3.0.1/public/index.js";
+} from "../schemas/simple.token_price.by-id/v3.0.1/public/index.js";
 import {
   requestSchema as req_token_lists_by_asset_platform_id_all_json_v3_0_1_public,
   responseSchema as res_token_lists_by_asset_platform_id_all_json_v3_0_1_public,
-} from "./../schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/public/index.js";
-
+} from "../schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/public/index.js";
+import type { RegistryEntry } from "../types.js";
 export const GENERATED_REGISTRY = [
   {
     id: "asset_platforms",
@@ -83,7 +82,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_asset_platforms_v3_0_1_public,
     responseSchema: res_asset_platforms_v3_0_1_public,
   },
-
   {
     id: "coins.by-id",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -111,7 +109,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_v3_0_1_public,
     responseSchema: res_coins_by_id_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.contract.by-contract_address",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -124,7 +121,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_contract_by_contract_address_v3_0_1_public,
     responseSchema: res_coins_by_id_contract_by_contract_address_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.contract.by-contract_address.market_chart",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -140,7 +136,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_contract_by_contract_address_market_chart_v3_0_1_public,
     responseSchema: res_coins_by_id_contract_by_contract_address_market_chart_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.contract.by-contract_address.market_chart.range",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -158,7 +153,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_contract_by_contract_address_market_chart_range_v3_0_1_public,
     responseSchema: res_coins_by_id_contract_by_contract_address_market_chart_range_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.history",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -177,7 +171,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_history_v3_0_1_public,
     responseSchema: res_coins_by_id_history_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.market_chart",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -195,7 +188,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_market_chart_v3_0_1_public,
     responseSchema: res_coins_by_id_market_chart_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.market_chart.range",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -213,7 +205,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_market_chart_range_v3_0_1_public,
     responseSchema: res_coins_by_id_market_chart_range_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.ohlc",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -230,7 +221,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_ohlc_v3_0_1_public,
     responseSchema: res_coins_by_id_ohlc_v3_0_1_public,
   },
-
   {
     id: "coins.by-id.tickers",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -255,7 +245,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_by_id_tickers_v3_0_1_public,
     responseSchema: res_coins_by_id_tickers_v3_0_1_public,
   },
-
   {
     id: "coins.list",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -268,7 +257,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_list_v3_0_1_public,
     responseSchema: res_coins_list_v3_0_1_public,
   },
-
   {
     id: "coins.markets",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -302,7 +290,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_coins_markets_v3_0_1_public,
     responseSchema: res_coins_markets_v3_0_1_public,
   },
-
   {
     id: "ping",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -315,7 +302,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_ping_v3_0_1_public,
     responseSchema: res_ping_v3_0_1_public,
   },
-
   {
     id: "simple.price",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -345,7 +331,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_simple_price_v3_0_1_public,
     responseSchema: res_simple_price_v3_0_1_public,
   },
-
   {
     id: "simple.supported_vs_currencies",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -358,7 +343,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_simple_supported_vs_currencies_v3_0_1_public,
     responseSchema: res_simple_supported_vs_currencies_v3_0_1_public,
   },
-
   {
     id: "simple.token_price.by-id",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -384,7 +368,6 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_simple_token_price_by_id_v3_0_1_public,
     responseSchema: res_simple_token_price_by_id_v3_0_1_public,
   },
-
   {
     id: "token_lists.by-asset_platform_id.all.json",
     validFor: { version: "v3.0.1", plan: "public" } as const,
@@ -397,4 +380,4 @@ export const GENERATED_REGISTRY = [
     requestSchema: req_token_lists_by_asset_platform_id_all_json_v3_0_1_public,
     responseSchema: res_token_lists_by_asset_platform_id_all_json_v3_0_1_public,
   },
-] as const;
+] as const satisfies readonly RegistryEntry[];

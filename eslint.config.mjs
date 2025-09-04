@@ -32,6 +32,7 @@ export default [
       parserOptions: {
         project: [path.join(__dirname, "tsconfig.json")], // or "./tsconfig.json"
         tsconfigRootDir: __dirname,
+        projectService: true,
       },
     },
     plugins: {
@@ -45,6 +46,7 @@ export default [
         node: { extensions: [".ts", ".tsx", ".js", ".mjs", ".json"] },
       },
     },
+
     rules: {
       // your rules from .eslintrc.json
       eqeqeq: "error",

@@ -16,26 +16,43 @@
  *  - Keep this module **types-first**; the only import is a *types-only* import
  *    from the generated registry for derived unions. This avoids runtime cycles.
  */
+// ===========================================================================
+//  Version / Plan (single source of truth) + Registry Config
+// ===========================================================================
+import type { PLANS, VERSIONS } from "./helpers/constants.js";
+import type { GENERATED_REGISTRY as GEN } from "./registry/generated.js";
 
 // ===========================================================================
-//  Version / Plan (single source of truth)
+//  Derived unions from the generated registry (paths/ids per version/plan)
 // ===========================================================================
 
-/** Supported API versions. Keep in sync with codegen & docs. */
-export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
+export type GeneratedRegistry = typeof GEN;
+export type GeneratedEntry = GeneratedRegistry[number];
+
+/** Narrow entries to those matching a `{ version, plan }` pair using the generated tuple. */
+export type EntryFor<V extends VersionPlanPair> = Extract<GeneratedEntry, { readonly validFor: V }>;
+
+/** Union of API path templates valid for a given `{ version, plan }`. */
+export type EndpointPathFor<V extends VersionPlanPair> = EntryFor<V>["pathTemplate"];
+
+/** Union of endpoint ids valid for a given `{ version, plan }`. */
+export type EndpointIdFor<V extends VersionPlanPair> = EntryFor<V>["id"];
+
+/** Union of all version/plan keys present in the generated registry. */
+export type DerivedVersionPlanKey = GeneratedEntry extends {
+  readonly validFor: {
+    readonly version: infer Ver extends string;
+    readonly plan: infer Pl extends string;
+  };
+}
+  ? `${Ver}/${Pl}`
+  : never;
+
 /** Union of supported API versions. */
 export type ApiVersion = (typeof VERSIONS)[number];
 
-/** Supported API plans/channels. */
-export const PLANS = ["public", "paid"] as const;
 /** Union of supported API plans. */
 export type ApiPlan = (typeof PLANS)[number];
-
-/** Mapping of supported version → plan (only valid combos live here). */
-export const VERSION_TO_PLAN: Readonly<Record<ApiVersion, ApiPlan>> = {
-  "v3.0.1": "public",
-  "v3.1.1": "paid",
-} as const;
 
 /** Structured pair describing a specific API surface (version + plan). */
 export type VersionPlanPair = Readonly<{
@@ -51,51 +68,6 @@ export type VersionPlanKey = `${ApiVersion}/${ApiPlan}`;
 /** Build a key from a {@link VersionPlanPair}. */
 export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}/${V["plan"]}`;
 
-// -- Utilities ---------------------------------------------------------------
-
-/** List the supported versions (for menus or validation). */
-export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
-  return VERSIONS;
-}
-/** List the supported plans (for menus or validation). */
-export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
-  return PLANS;
-}
-/** List the supported (version, plan) pairs (derived from VERSION_TO_PLAN). */
-export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
-  return VERSIONS.map((v) => ({ version: v, plan: VERSION_TO_PLAN[v] }));
-}
-
-/** Type guard: is the value a valid {@link ApiVersion}. */
-export function isValidVersion(x: unknown): x is ApiVersion {
-  return typeof x === "string" && (VERSIONS as readonly string[]).includes(x);
-}
-/** Type guard: is the value a valid {@link ApiPlan}. */
-export function isValidPlan(x: unknown): x is ApiPlan {
-  return typeof x === "string" && (PLANS as readonly string[]).includes(x);
-}
-/** Type guard for a coherent {@link VersionPlanPair}. */
-export function isValidVersionPlan(pair: unknown): pair is VersionPlanPair {
-  if (!pair || typeof pair !== "object") return false;
-  const p = pair as { version?: unknown; plan?: unknown };
-  return isValidVersion(p.version) && VERSION_TO_PLAN[p.version] === p.plan;
-}
-
-/** Parse a {@link VersionPlanKey} like "vX.Y.Z/plan" into a structured pair. */
-export function parseVersionPlanKey(key: VersionPlanKey): VersionPlanPair {
-  const [version, plan] = key.split("/") as [ApiVersion, ApiPlan];
-  return { version, plan };
-}
-
-/** Tolerant parse from an arbitrary string; returns `null` on invalid. */
-export function tryParseVersionPlanKey(key: string): VersionPlanPair | null {
-  const parts = key.split("/");
-  if (parts.length !== 2) return null;
-  const [version, plan] = parts as [string, string];
-  if (!isValidVersion(version) || VERSION_TO_PLAN[version] !== (plan as ApiPlan)) return null;
-  return { version, plan: plan as ApiPlan };
-}
-
 // ===========================================================================
 //  Query string primitives & Request shape
 // ===========================================================================
@@ -103,7 +75,7 @@ export function tryParseVersionPlanKey(key: string): VersionPlanPair | null {
 /** Allowed primitive types in query strings. */
 export type QueryPrimitive = string | number | boolean;
 /** Read‑only array of primitives (CSV‑style encodings). */
-export type QueryArray = ReadonlyArray<QueryPrimitive>;
+export type QueryArray = readonly QueryPrimitive[];
 /** A single query value: a primitive or an immutable array of primitives. */
 export type QueryValue = QueryPrimitive | QueryArray;
 /** Read‑only map of query keys to values. */
@@ -140,7 +112,15 @@ export type EndpointPath = string; // e.g., "/coins/{id}/ohlc"
 export type ArrayEncoding = "csv";
 
 /** Minimal Zod‑like shape (no runtime dependency on zod). */
-export type ZodLikeSchema = Readonly<{ parse: (x: unknown) => unknown }>;
+/** Minimal Zod-compatible surface (no runtime dependency on zod). */
+export type ZodLikeSchema<T = unknown> = Readonly<{
+  parse: (value: unknown) => T;
+  /** Optional: many places duck-type this in tests/introspection. */
+  safeParse?: (value: unknown) => { success: boolean; data?: T; error?: unknown };
+  /** Optional internals seen in different zod builds; kept for duck-typing only. */
+  _def?: unknown;
+  def?: unknown;
+}>;
 
 /** Minimal validator interface; can be backed by Zod internally. */
 export type Schema<T> = Readonly<{ parse: (value: unknown) => T }>;
@@ -150,7 +130,7 @@ export type QueryRule = Readonly<{
   /** Query key (as documented by CoinGecko). */
   key: string;
   /** Server default value (single source of truth) if any. */
-  default?: QueryPrimitive | ReadonlyArray<QueryPrimitive>;
+  default?: QueryValue;
   /** Drop from querystring when value equals its default. Default: `true`. */
   dropWhenDefault?: boolean;
   /** Array serialization policy (MVP: CSV). */
@@ -160,7 +140,7 @@ export type QueryRule = Readonly<{
 }>;
 
 /** HTTP methods used by the registry (most endpoints are GET). */
-export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
 
 // ===========================================================================
 //  Registry descriptors (runtime shape)
@@ -182,28 +162,22 @@ export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
   /** API path template, e.g. "/coins/{id}/history". */
   pathTemplate: EndpointPath;
   /** Required path param names (e.g., ["id", "contract_address"]). */
-  requiredPath: ReadonlyArray<string>;
+  requiredPath: readonly string[];
   /** Required query param names (as strings). */
-  requiredQuery: ReadonlyArray<string>;
+  requiredQuery: readonly string[];
   /** Declarative query rules (defaults + drop policy + encoding). */
-  queryRules: ReadonlyArray<QueryRule>;
+  queryRules: readonly QueryRule[];
   /** Raw map of server defaults (derived). */
-  serverDefaults: Readonly<Record<string, QueryPrimitive | ReadonlyArray<QueryPrimitive>>>;
+  serverDefaults: Readonly<Record<string, QueryValue>>;
   /** Optional request validator (pluggable). */
-  requestSchema?: Schema<Req>;
+  requestSchema: Schema<Req>;
   /** Optional response validator (pluggable). */
-  responseSchema?: Schema<Res>;
+  responseSchema: Schema<Res>;
 }>;
 
 // ===========================================================================
 //  Derived unions from the generated registry (paths/ids per version/plan)
 // ===========================================================================
-
-// IMPORTANT: types‑only import to avoid runtime cycles.
-import type { GENERATED_REGISTRY } from "./registry/generated.js";
-
-/** Single registry entry (const‑derived). */
-export type RegistryEntry = (typeof GENERATED_REGISTRY)[number];
 
 // -- Helpers to pluck version/plan literals from a pair or entry -------------
 export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
@@ -218,39 +192,18 @@ export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
     ? Pl2
     : never;
 
-export type VersionPlanKeyFromPairLoose<V> = `${VPVersion<V>}/${VPPlan<V>}`;
-
-/** Union of all version/plan keys present in the generated registry. */
-export type DerivedVersionPlanKey = RegistryEntry extends {
-  readonly validFor: {
-    readonly version: infer Ver extends string;
-    readonly plan: infer Pl extends string;
-  };
-}
-  ? `${Ver}/${Pl}`
-  : never;
-
-/** Narrow entries to those matching a `{ version, plan }` pair. */
-export type MatchByVersionPlan<E, V> = E extends {
-  readonly validFor: { readonly version: VPVersion<V>; readonly plan: VPPlan<V> };
-}
-  ? E
-  : never;
-
-/** Entry type for a specific `{ version, plan }`. */
-export type EntryFor<V> = MatchByVersionPlan<RegistryEntry, V>;
-
-/** Union of API path templates valid for a given `{ version, plan }`. */
-export type EndpointPathFor<V> = EntryFor<V>["pathTemplate"];
-
-/** Union of endpoint ids valid for a given `{ version, plan }` (kept for internal use). */
-export type EndpointIdFor<V> = EntryFor<V>["id"];
+// /** Narrow entries to those matching a `{ version, plan }` pair. */
+// export type MatchByVersionPlan<E, V> = E extends {
+//   readonly validFor: { readonly version: VPVersion<V>; readonly plan: VPPlan<V> };
+// }
+//   ? E
+//   : never;
 
 /** Union of *all* path templates present in the registry (any version/plan). */
-export type AnyEndpointPath = RegistryEntry["pathTemplate"];
+export type AnyEndpointPath = RegistryEndpoint["pathTemplate"];
 
 /** Union of *all* endpoint ids present in the registry (any version/plan). */
-export type AnyEndpointId = RegistryEntry["id"];
+export type AnyEndpointId = RegistryEndpoint["id"];
 
 // ===========================================================================
 //  Path‑template param extraction helpers (DX niceties)
@@ -279,8 +232,12 @@ export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?:
 
 export type {
   // Aliases kept for back-compat in internal modules
-  RegistryEntry as RuntimeRegistryEntry,
+  RegistryEndpoint as RegistryEntry,
 };
+export type Registry = readonly RegistryEndpoint[];
+export type EndpointId = RegistryEndpoint["id"];
+export type Version = RegistryEndpoint["validFor"]["version"];
+export type Plan = RegistryEndpoint["validFor"]["plan"];
 
 // ===========================================================================
 //  Minimal, cross-env headers types (no DOM lib required).
@@ -297,5 +254,51 @@ export type HeadersLike = {
 /** HeadersInitLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
 export type HeadersInitLike =
   | Readonly<Record<string, string>>
-  | ReadonlyArray<HeaderTuple>
+  | readonly HeaderTuple[]
   | HeadersLike; // structural: real Headers satisfies this
+
+// ---------------------------------------------------------------------------
+// Optional/metadata helpers
+// ---------------------------------------------------------------------------
+
+export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean }>;
+
+// ---------------------------------------------------------------------------
+// Unwrapping for defaults / shapes
+// ---------------------------------------------------------------------------
+
+export type UnwrapDefaultsResult = Readonly<{
+  inner: unknown;
+  defaultValue?: unknown;
+  wasOptional: boolean;
+  isArray: boolean;
+}>;
+
+// ---------------------------------------------------------------------------
+// Module Discovery
+// ---------------------------------------------------------------------------
+/** Discovered Module type */
+export type DiscoveredModule = Readonly<{
+  slug: string;
+  version: ApiVersion;
+  plan: ApiPlan;
+  /** Absolute path to the `index.ts` entry for this variant. */
+  file: string;
+}>;
+/** Discovered Option type */
+export type DiscoverOptions = Readonly<{
+  /** Absolute path to your `src/schemas` directory. */
+  schemasDir: string;
+  /** Optional allowlist of slugs to include. */
+  only?: ReadonlySet<string> | string[] | null;
+  /**
+   * Optional override for file existence checks (useful in tests).
+   * Defaults to `fs.access`.
+   */
+  fsAccess?: (p: string) => Promise<boolean>;
+}>;
+
+export type ClientOptions<V extends VersionPlanPair> = Readonly<{
+  validFor: V;
+  baseURL?: string;
+}>;
