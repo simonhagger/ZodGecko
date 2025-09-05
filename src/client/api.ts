@@ -1,3 +1,8 @@
+/**
+ * @file src/client/api.ts
+ * @module client/api
+ * @summary Api.
+ */
 // src/client/api.ts
 
 // External imports
@@ -47,7 +52,9 @@ export class ZodGecko<V extends VersionPlanPair> {
   /** Full registry entry (schemas, path template, query rules, etc.). */
   entry<const P extends EndpointPathFor<V>>(path: P): EntryFor<V> {
     if (!Object.prototype.hasOwnProperty.call(this.entries, path))
-      throw new Error(`Unknown endpoint for v3.0.1/public: ${path}`);
+      throw new Error(
+        `Unknown endpoint for ${this.validFor.version}/${this.validFor.plan}: ${path}`,
+      );
     const e = this.entries[path as keyof typeof this.entries] as EntryFor<V>;
 
     if (!e) {

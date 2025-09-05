@@ -3,6 +3,9 @@
  * ---------------------------------------------------------------------------
  * Runtime-agnostic constants shared across the codebase.
  * (Keep Node-specific values out of this module.)
+  * @file src/helpers/constants.ts
+  * @module helpers/constants
+  * @summary Constants.
  */
 
 import type { ApiPlan, ApiVersion } from "../types.js";

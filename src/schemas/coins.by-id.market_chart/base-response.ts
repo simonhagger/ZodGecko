@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.market_chart/base-response.ts
- * @module schemas/coins.by-id.market_chart/base
+ * @module schemas/coins.by-id.market_chart/base-response
+  * @summary Base Response.
  */
 
 /** Schema building types */

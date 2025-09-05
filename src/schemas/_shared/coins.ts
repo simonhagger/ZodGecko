@@ -1,3 +1,8 @@
+/**
+ * @file src/schemas/_shared/coins.ts
+ * @module schemas/_shared/coins
+ * @summary Coins.
+ */
 // src/endpoints/_shared/coin.ts
 import { z } from "zod";
 

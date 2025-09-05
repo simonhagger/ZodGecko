@@ -1,3 +1,8 @@
+/**
+ * @file src/fetch/rate-limit.ts
+ * @module fetch/rate-limit
+ * @summary Rate Limit.
+ */
 // src/fetch/rate-limit.ts
 import { RateLimitHeaders } from "../schemas/_shared/common.js";
 import type { RateLimitHeadersType } from "../schemas/_shared/common.js";

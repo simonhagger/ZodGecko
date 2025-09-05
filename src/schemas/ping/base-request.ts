@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/ping/base-request.ts
- * @module schemas/ping/base
+ * @module schemas/ping/base-request
+  * @summary Base Request.
  */
 
 /** Zod import */

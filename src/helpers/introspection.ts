@@ -5,6 +5,7 @@
  * These helpers work with Zod-like objects **without importing Zod**. They are
  * used both by code generation and runtime helpers to derive defaults and
  * shapes in a tolerant, side-effect-free way.
+  * @module helpers/introspection
  */
 
 import type { QMeta, UnwrapDefaultsResult } from "../types.js";

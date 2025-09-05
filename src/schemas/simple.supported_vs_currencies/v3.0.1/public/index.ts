@@ -1,6 +1,7 @@
 /**
- * @file src/schemas/simple.supported_vs_currencies/v3.0.1/index.ts
- * @module schemas/simple.supported_vs_currencies/v3.0.1/index
+ * @file src/schemas/simple.supported_vs_currencies/v3.0.1/public/index.ts
+ * @module schemas/simple.supported_vs_currencies/v3.0.1/public/index
+  * @summary Index.
  */
 
 /** Zod import */

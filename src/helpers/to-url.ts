@@ -1,3 +1,8 @@
+/**
+ * @file src/helpers/to-url.ts
+ * @module helpers/to-url
+ * @summary To Url.
+ */
 export function toURL(
   base: string,
   path: string,

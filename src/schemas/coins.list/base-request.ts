@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.list/base-request.ts
- * @module schemas/coins.list/base
+ * @module schemas/coins.list/base-request
+  * @summary Base Request.
  */
 
 /** Zod import */

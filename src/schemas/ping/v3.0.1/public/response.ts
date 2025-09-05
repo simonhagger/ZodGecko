@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/ping/v3.0.1/public/response.ts
  * @module schemas/ping/v3.0.1/public/response
+  * @summary Response.
  */
 
 /** Base Response Schema import */

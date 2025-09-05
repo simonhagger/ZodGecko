@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.contract.by-contract_address.market_chart/v3.0.1/public/response.ts
  * @module schemas/coins.by-id.contract.by-contract_address.market_chart/v3.0.1/public/response
+  * @summary Response.
  */
 
 /** Base Response Schema import */

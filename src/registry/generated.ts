@@ -1,3 +1,8 @@
+/**
+ * @file src/registry/generated.ts
+ * @module registry/generated
+ * @summary Generated.
+ */
 /* AUTO-GENERATED FILE — DO NOT EDIT
  * Run: pnpm gen:registry */
 import {

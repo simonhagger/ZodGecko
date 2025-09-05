@@ -1,3 +1,8 @@
+/**
+ * @file src/client/index.ts
+ * @module client/index
+ * @summary Index.
+ */
 // External imports
 // (none)
 

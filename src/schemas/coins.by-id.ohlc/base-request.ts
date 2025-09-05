@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.ohlc/base-request.ts
- * @module schemas/coins.by-id.ohlc/base
+ * @module schemas/coins.by-id.ohlc/base-request
+  * @summary Base Request.
  */
 
 /** Zod import */

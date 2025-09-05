@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/ping/v3.0.1/public/request.ts
  * @module schemas/ping/v3.0.1/public/request
+  * @summary Request.
  */
 
 /** Import base schema */

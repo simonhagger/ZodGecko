@@ -1,6 +1,7 @@
 /**
- * @file src/schemas/simple.token_price.by-id/v3.0.1/index.ts
- * @module schemas/simple.token_price.by-id/v3.0.1/index
+ * @file src/schemas/simple.token_price.by-id/v3.0.1/public/index.ts
+ * @module schemas/simple.token_price.by-id/v3.0.1/public/index
+  * @summary Index.
  */
 
 /** Zod import */

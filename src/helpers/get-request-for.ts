@@ -1,3 +1,8 @@
+/**
+ * @file src/helpers/get-request-for.ts
+ * @module helpers/get-request-for
+ * @summary Get Request For.
+ */
 // src/helpers/get-request-for.ts
 
 import { getPathInfo, getQueryRules, getServerDefaults } from "../registry/index.js";

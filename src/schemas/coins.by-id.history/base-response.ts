@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.history/base-response.ts
- * @module schemas/coins.by-id.history/base
+ * @module schemas/coins.by-id.history/base-response
+  * @summary Base Response.
  */
 
 /** Schema building types */

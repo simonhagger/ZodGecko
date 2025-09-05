@@ -1,3 +1,8 @@
+/**
+ * @file src/schemas/_meta/q.ts
+ * @module schemas/_meta/q
+ * @summary Q.
+ */
 import type { z } from "zod";
 
 export type ArrayEncoding = "csv"; // extensible later

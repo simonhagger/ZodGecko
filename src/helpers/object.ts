@@ -1,3 +1,8 @@
+/**
+ * @file src/helpers/object.ts
+ * @module helpers/object
+ * @summary Object.
+ */
 // src/helpers/object.ts
 
 import type { ApiVersion, ApiPlan, VersionPlanPair, VersionPlanKey } from "../types.js";

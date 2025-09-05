@@ -6,6 +6,7 @@
  * - Uses atomic types from `schemas/_shared/atoms`.
  * - Uses common types from `schemas/_shared/common`.
  * - Produces end consumable Zod structures for use in schema definitions
+  * @summary Structures.
  */
 
 /** Zod Import */

@@ -1,3 +1,8 @@
+/**
+ * @file src/fetch/factory.ts
+ * @module fetch/factory
+ * @summary Factory.
+ */
 // src/fetch/factory.ts
 
 // External imports

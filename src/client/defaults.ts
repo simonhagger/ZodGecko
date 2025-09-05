@@ -1,4 +1,9 @@
-// src/client/default.ts
+/**
+ * @file src/client/defaults.ts
+ * @module client/defaults
+ * @summary Defaults.
+ */
+// src/client/defaults.ts
 import type { VersionPlanKey, VersionPlanPair, ApiPlan } from "../types.js";
 
 type SupportedVersionPlans = "v3.0.1/public";

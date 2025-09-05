@@ -1,3 +1,8 @@
+/**
+ * @file src/testkit/discover.ts
+ * @module testkit/discover
+ * @summary Discover.
+ */
 // -----------------------------------------------------------------------------
 import * as path from "node:path";
 

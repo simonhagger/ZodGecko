@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/simple.price/base-response.ts
- * @module schemas/simple.price/base
+ * @module schemas/simple.price/base-response
+  * @summary Base Response.
  */
 
 /** Zod import */

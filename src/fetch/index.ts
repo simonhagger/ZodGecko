@@ -1,3 +1,8 @@
+/**
+ * @file src/fetch/index.ts
+ * @module fetch/index
+ * @summary Index.
+ */
 // External imports
 // (none)
 

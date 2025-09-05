@@ -1,3 +1,8 @@
+/**
+ * @file src/client/factory.ts
+ * @module client/factory
+ * @summary Factory.
+ */
 // External imports
 // (none)
 

@@ -1,3 +1,8 @@
+/**
+ * @file src/fetch/client.ts
+ * @module fetch/client
+ * @summary Client.
+ */
 // src/fetch/client.ts
 
 // External imports

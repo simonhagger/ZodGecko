@@ -1,6 +1,7 @@
 /**
- * @file src/schemas/coins.list/v3.0.1/index.ts
- * @module schemas/coins.list/v3.0.1/index
+ * @file src/schemas/coins.list/v3.0.1/public/index.ts
+ * @module schemas/coins.list/v3.0.1/public/index
+  * @summary Index.
  */
 
 /** Zod import */

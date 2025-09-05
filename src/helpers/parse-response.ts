@@ -1,3 +1,8 @@
+/**
+ * @file src/helpers/parse-response.ts
+ * @module helpers/parse-response
+ * @summary Parse Response.
+ */
 // src/helpers/parse-response.ts
 
 import { getResponseSchema } from "../registry/index.js";

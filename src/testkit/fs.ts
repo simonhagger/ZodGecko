@@ -1,3 +1,8 @@
+/**
+ * @file src/testkit/fs.ts
+ * @module testkit/fs
+ * @summary Fs.
+ */
 // src/testkit/fs.ts
 import { promises as fs } from "node:fs";
 import * as fsSync from "node:fs";

@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.tickers/base-request.ts
- * @module schemas/coins.by-id.tickers/base
+ * @module schemas/coins.by-id.tickers/base-request
+  * @summary Base Request.
  */
 
 /** Zod import */

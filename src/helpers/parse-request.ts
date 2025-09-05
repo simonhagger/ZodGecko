@@ -1,3 +1,8 @@
+/**
+ * @file src/helpers/parse-request.ts
+ * @module helpers/parse-request
+ * @summary Parse Request.
+ */
 // src/helpers/parse-request.ts
 
 import { getPathInfo, getQueryRules } from "../registry/index.js";

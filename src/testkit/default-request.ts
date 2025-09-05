@@ -1,3 +1,8 @@
+/**
+ * @file src/testkit/default-request.ts
+ * @module testkit/default-request
+ * @summary Default Request.
+ */
 // -----------------------------------------------------------------------------
 // file: src/testkit/default-request.ts
 // -----------------------------------------------------------------------------

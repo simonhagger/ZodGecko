@@ -6,6 +6,7 @@
  * - Uses atomic types from `schemas/_shared/atoms`.
  * - Centralizes request fragments (Pagination, CSList, IncludeTokens, etc.),
  *   domain enums (MarketsOrder, PrecisionString, locales), and response fragments.
+  * @summary Common.
  */
 
 import { z } from "zod";

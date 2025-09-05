@@ -1,3 +1,8 @@
+/**
+ * @file src/registry/index.ts
+ * @module registry/index
+ * @summary Index.
+ */
 // External imports
 // (none)
 

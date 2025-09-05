@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.contract.by-contract_address.market_chart.range/base-request.ts
- * @module schemas/coins.by-id.contract.by-contract_address.market_chart.range/base
+ * @module schemas/coins.by-id.contract.by-contract_address.market_chart.range/base-request
+  * @summary Base Request.
  */
 
 /** Zod import */

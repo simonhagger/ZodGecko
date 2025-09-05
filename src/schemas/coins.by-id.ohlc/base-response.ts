@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.ohlc/base-response.ts
- * @module schemas/coins.by-id.ohlc/base
+ * @module schemas/coins.by-id.ohlc/base-response
+  * @summary Base Response.
  */
 
 /** Schema building types */

@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/ping/base-response.ts
- * @module schemas/ping/base
+ * @module schemas/ping/base-response
+  * @summary Base Response.
  */
 
 /** Zod import */

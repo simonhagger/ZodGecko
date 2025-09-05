@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/token_lists.by-asset_platform_id.all.json/base-response.ts
- * @module schemas/token_lists.by-asset_platform_id.all.json/base
+ * @module schemas/token_lists.by-asset_platform_id.all.json/base-response
+  * @summary Base Response.
  */
 
 /** Zod import */

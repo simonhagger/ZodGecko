@@ -1,3 +1,8 @@
+/**
+ * @file src/registry/define.ts
+ * @module registry/define
+ * @summary Define.
+ */
 // src/registry/define.ts
 
 // External imports

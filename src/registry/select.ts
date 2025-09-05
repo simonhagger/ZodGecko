@@ -1,3 +1,8 @@
+/**
+ * @file src/registry/select.ts
+ * @module registry/select
+ * @summary Select.
+ */
 import { GENERATED_REGISTRY } from "./generated.js";
 import type { EndpointIdFor, EntryFor, RegistryEntry, VersionPlanPair } from "../types.js";
 

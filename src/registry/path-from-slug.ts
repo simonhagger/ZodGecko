@@ -1,3 +1,8 @@
+/**
+ * @file src/registry/path-from-slug.ts
+ * @module registry/path-from-slug
+ * @summary Path From Slug.
+ */
 // src/registry/path-from-slug.ts
 export type PathFromSlug = Readonly<{
   template: string; // e.g. "/coins/{id}/history"

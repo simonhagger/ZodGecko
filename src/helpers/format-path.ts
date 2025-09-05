@@ -1,3 +1,8 @@
+/**
+ * @file src/helpers/format-path.ts
+ * @module helpers/format-path
+ * @summary Format Path.
+ */
 export type PathParams = Readonly<Record<string, string | number>>;
 
 export function formatPath(template: string, params: PathParams = {}): string {

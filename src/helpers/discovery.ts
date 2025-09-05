@@ -4,6 +4,9 @@
  * Node-only helpers for discovering schema modules under `src/schemas`.
  * Extracted from the registry generator so other tooling (tests, CLIs) can
  * reuse a single, deterministic discovery implementation.
+  * @file src/helpers/discovery.ts
+  * @module helpers/discovery
+  * @summary Discovery.
  */
 
 import { promises as fs } from "node:fs";

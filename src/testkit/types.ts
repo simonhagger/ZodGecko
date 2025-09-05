@@ -1,3 +1,8 @@
+/**
+ * @file src/testkit/types.ts
+ * @module testkit/types
+ * @summary Types.
+ */
 // src/testkit/types.ts
 
 import type { VersionPlanPair } from "../types.js";

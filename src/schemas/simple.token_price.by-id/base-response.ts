@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/simple.token_price.by-id/base-response.ts
- * @module schemas/simple.token_price.by-id/base
+ * @module schemas/simple.token_price.by-id/base-response
+  * @summary Base Response.
  */
 
 /** Zod import */

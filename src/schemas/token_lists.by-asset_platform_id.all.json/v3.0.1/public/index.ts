@@ -1,6 +1,7 @@
 /**
- * @file src/schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/index.ts
- * @module schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/index
+ * @file src/schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/public/index.ts
+ * @module schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/public/index
+  * @summary Index.
  */
 
 /** Zod import */

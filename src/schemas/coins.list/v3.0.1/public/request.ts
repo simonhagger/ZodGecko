@@ -1,6 +1,7 @@
 /**
  * @file src/schemas/coins.list/v3.0.1/public/request.ts
  * @module schemas/coins.list/v3.0.1/public/request
+  * @summary Request.
  */
 
 /** Import base schema */

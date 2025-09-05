@@ -2,6 +2,8 @@
  * @file src/helpers/get-schemas.ts
  * @description Convenience helper to fetch request/response schemas for an endpoint id.
  * Returns `{ requestSchema, responseSchema }`. Throws if the endpoint/response schema is missing.
+  * @module helpers/get-schemas
+  * @summary Get Schemas.
  */
 
 // External imports

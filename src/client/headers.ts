@@ -1,3 +1,8 @@
+/**
+ * @file src/client/headers.ts
+ * @module client/headers
+ * @summary Headers.
+ */
 // src/client/headers.ts
 import type { ApiPlan, HeadersInitLike, VersionPlanKey, VersionPlanPair } from "../types.js";
 
