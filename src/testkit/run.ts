@@ -92,6 +92,11 @@ function sanitizeRequestShape(x: unknown): RequestShape {
   return out;
 }
 
+/**
+ * Function runDefaultTest.
+ * @param plan (required: object)
+ * @returns Promise
+ */
 export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResult> {
   // Build a raw request source; if synth returns null, skip immediately
   let raw: unknown;
@@ -129,6 +134,11 @@ export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResu
   }
 }
 
+/**
+ * Function runScenarioTest.
+ * @param plan (required: object)
+ * @returns Promise
+ */
 export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
   // Request as unknown → sanitize → validate/normalize
   const raw = await readJSON<unknown>(plan.requestPath);

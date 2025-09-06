@@ -20,6 +20,9 @@ function isBlank(v: unknown): boolean {
  * - Throws if endpoint is unknown
  * - Throws if required path/query keys are missing/blank
  * - Returns a shallow-normalized shape (no default filling here)
+ * @param endpointPath (required: string)
+ * @param input (required: object)
+ * @returns object
  */
 export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
   const pathInfo = getPathInfo(endpointPath);

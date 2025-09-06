@@ -74,6 +74,10 @@ import {
   responseSchema as res_token_lists_by_asset_platform_id_all_json_v3_0_1_public,
 } from "../schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/public/index.js";
 import type { RegistryEntry } from "../types.js";
+/**
+ * Constant GENERATED_REGISTRY.
+ * @remarks Type: ReadonlyArray<object>
+ */
 export const GENERATED_REGISTRY = [
   {
     id: "asset_platforms",

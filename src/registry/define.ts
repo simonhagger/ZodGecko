@@ -18,7 +18,19 @@ import type {
   VersionPlanPair,
 } from "../types.js";
 
-/** Input shape for defining a registry endpoint. */
+/**
+ * Input shape for defining a registry endpoint.
+ * @property id (required: string).
+ * @property validFor (required: VersionPlanPair).
+ * @property method (optional: HttpMethod).
+ * @property pathTemplate (required: string).
+ * @property requiredPath (optional: ReadonlyArray<string>).
+ * @property requiredQuery (optional: ReadonlyArray<string>).
+ * @property queryRules (optional: ReadonlyArray<QueryRule>).
+ * @property serverDefaults (optional: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>).
+ * @property requestSchema (optional: z.ZodTypeAny).
+ * @property responseSchema (required: z.ZodTypeAny).
+ */
 export type DefineEndpointInput = Readonly<{
   id: string;
   validFor: VersionPlanPair;
@@ -32,7 +44,11 @@ export type DefineEndpointInput = Readonly<{
   responseSchema: z.ZodTypeAny;
 }>;
 
-/** Create a normalized RegistryEndpoint from minimal inputs. */
+/**
+ * Create a normalized RegistryEndpoint from minimal inputs.
+ * @param input (required: object)
+ * @returns object
+ */
 export function defineEndpoint(input: DefineEndpointInput): RegistryEndpoint {
   const method = input.method ?? "GET";
   const requiredPath = input.requiredPath ?? extractParams(input.pathTemplate);

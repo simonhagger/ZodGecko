@@ -13,7 +13,11 @@
 import { getRequestSchema, getResponseSchema } from "../registry/index.js";
 import type { ZodLikeSchema } from "../types.js";
 
-/** Return schemas for an endpoint id. */
+/**
+ * Return schemas for an endpoint id.
+ * @param id (required: string)
+ * @returns object
+ */
 export function getSchemas(id: string): Readonly<{
   requestSchema: ZodLikeSchema | null;
   responseSchema: ZodLikeSchema | null;

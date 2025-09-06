@@ -7,7 +7,11 @@
 // file: src/testkit/slug.ts
 // -----------------------------------------------------------------------------
 
-/** Convert an unversioned API path template to our repo slug (dot + by-). */
+/**
+ * Convert an unversioned API path template to our repo slug (dot + by-).
+ * @param template (required: string)
+ * @returns string
+ */
 export function slugFromPathTemplate(template: string): string {
   return template
     .replace(/^\//, "")

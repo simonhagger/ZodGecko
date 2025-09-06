@@ -59,12 +59,21 @@ function normalize(obj: QueryInput): Record<string, string> {
   return Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));
 }
 
-/** Core variant: registry-agnostic normalization. */
+/**
+ * Core variant: registry-agnostic normalization.
+ * @param params (required: object)
+ * @returns object
+ */
 export function formatParams(params: QueryInput): Record<string, string> {
   return normalize(params);
 }
 
-/** Registry-aware variant: drops params equal to server defaults per rules. */
+/**
+ * Registry-aware variant: drops params equal to server defaults per rules.
+ * @param endpointId (required: string)
+ * @param params (required: object)
+ * @returns object
+ */
 export function formatParamsForEndpoint(
   endpointId: string,
   params: QueryInput,

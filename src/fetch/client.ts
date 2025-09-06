@@ -94,7 +94,14 @@ function headersToObject(h?: HeadersLike): Record<string, string> {
 
 /* --------------------------------- Client --------------------------------- */
 
-/** Options for the minimal fetch client (no DOM types required). */
+/**
+ * Options for the minimal fetch client (no DOM types required).
+ * @property validFor (required: V).
+ * @property baseURL (optional: string).
+ * @property apiKey (optional: string).
+ * @property userAgent (optional: string).
+ * @property headers (optional: HeadersLike).
+ */
 export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
   validFor: V;
   baseURL?: string;
@@ -103,7 +110,11 @@ export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
   headers?: HeadersLike;
 }>;
 
-/** Build default headers for CoinGecko GET calls. */
+/**
+ * Build default headers for CoinGecko GET calls.
+ * @param opts (required: object)
+ * @returns object
+ */
 export function buildHeaders(opts: FetchClientOptions<VersionPlanPair>): Record<string, string> {
   const base: Record<string, string> = headersToObject(opts.headers);
 

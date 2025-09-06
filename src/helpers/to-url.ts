@@ -3,6 +3,13 @@
  * @module helpers/to-url
  * @summary To Url.
  */
+/**
+ * Function toURL.
+ * @param base (required: string)
+ * @param path (required: string)
+ * @param query (optional: object) [default={}]
+ * @returns string
+ */
 export function toURL(
   base: string,
   path: string,

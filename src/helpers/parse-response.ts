@@ -18,6 +18,9 @@ function isZodLike(s: unknown): s is ZodLikeSchema {
  * - Throws if endpoint is unknown
  * - Uses the endpoint's Zod response schema to validate
  * - Returns the parsed (possibly transformed) value
+ * @param endpointPath (required: string)
+ * @param data (required: unknown)
+ * @returns T
  */
 export function parseResponse<T = unknown>(endpointPath: string, data: unknown): T {
   const schema = getResponseSchema(endpointPath);

@@ -59,7 +59,12 @@ function shouldUseArrayPlaceholder(
 
 /* ------------------------------ main API ------------------------------- */
 
-/** Build a discoverable request object for an endpoint from the registry. */
+/**
+ * Build a discoverable request object for an endpoint from the registry.
+ * @param endpointPath (required: string)
+ * @param opts (optional: undefined | object)
+ * @returns object
+ */
 export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
   const options = {
     includeUndefinedOptionals: true,

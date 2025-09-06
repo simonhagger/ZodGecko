@@ -11,7 +11,10 @@ import { getRequestFor } from "../helpers/get-request-for.js";
 import type { RequestShape } from "../types.js";
 
 /** Build a default request from registry defaults.
- * Returns null if required path params are missing. */
+ * Returns null if required path params are missing.
+ * @param endpointId (required: string)
+ * @returns null | object
+ */
 export function synthesizeDefaultRequest(endpointId: string): RequestShape | null {
   const seed = getRequestFor(endpointId, {
     includeUndefinedOptionals: true,

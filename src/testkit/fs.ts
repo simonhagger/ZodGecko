@@ -8,6 +8,11 @@ import { promises as fs } from "node:fs";
 import * as fsSync from "node:fs";
 import * as path from "node:path";
 
+/**
+ * Function pathExists.
+ * @param p (required: string)
+ * @returns Promise
+ */
 export async function pathExists(p: string): Promise<boolean> {
   try {
     await fs.access(p);
@@ -17,6 +22,11 @@ export async function pathExists(p: string): Promise<boolean> {
   }
 }
 
+/**
+ * Function readJSON.
+ * @param p (required: string)
+ * @returns Promise
+ */
 export async function readJSON<T>(p: string): Promise<T> {
   const raw = await fs.readFile(p, "utf8");
   try {
@@ -26,6 +36,11 @@ export async function readJSON<T>(p: string): Promise<T> {
   }
 }
 
+/**
+ * Function listFiles.
+ * @param p (required: string)
+ * @returns Promise
+ */
 export async function listFiles(p: string): Promise<string[]> {
   try {
     const entries = await fs.readdir(p);
@@ -35,7 +50,10 @@ export async function listFiles(p: string): Promise<string[]> {
   }
 }
 
-/** Resolve the fixtures root, preferring src/testkit/... if it exists. */
+/**
+ * Resolve the fixtures root, preferring src/testkit/... if it exists.
+ * @returns string
+ */
 export function fixturesRoot(): string {
   const cwd = process.cwd();
   const candidates = [
@@ -55,6 +73,13 @@ export function fixturesRoot(): string {
   return candidates[0];
 }
 
+/**
+ * Function endpointRoot.
+ * @param version (required: string)
+ * @param plan (required: string)
+ * @param testkitlug (required: string)
+ * @returns string
+ */
 export function endpointRoot(version: string, plan: string, testkitlug: string): string {
   return path.join(fixturesRoot(), version, plan, testkitlug);
 }

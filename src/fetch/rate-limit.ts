@@ -20,7 +20,12 @@ function coerceHeaderValue(v: unknown): string | null {
   return null;
 }
 
-/** Read a header by name. For plain objects, match case-insensitively. */
+/**
+ * Read a header by name. For plain objects, match case-insensitively.
+ * @param h (required: object | HeadersLike)
+ * @param name (required: string)
+ * @returns string | null
+ */
 export function getHeader(h: HeadersLike | Record<string, unknown>, name: string): string | null {
   if (isHeadersLike(h)) {
     const v = h.get(name);
@@ -43,7 +48,11 @@ export function getHeader(h: HeadersLike | Record<string, unknown>, name: string
   return null;
 }
 
-/** Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns). */
+/**
+ * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
+ * @param h (required: object | HeadersLike)
+ * @returns object
+ */
 export function parseRateLimitHeaders(
   h: HeadersLike | Record<string, unknown>,
 ): RateLimitHeadersType {
@@ -57,13 +66,23 @@ export function parseRateLimitHeaders(
   return RateLimitHeaders.parse(picked);
 }
 
+/**
+ * Type alias RateLimitNumbers.
+ * @property limit (optional: number).
+ * @property remaining (optional: number).
+ * @property reset (optional: number).
+ */
 export type RateLimitNumbers = Readonly<{
   limit?: number;
   remaining?: number;
   reset?: number;
 }>;
 
-/** Numeric convenience view (keeps `undefined` when absent). */
+/**
+ * Numeric convenience view (keeps `undefined` when absent).
+ * @param h (required: object | HeadersLike)
+ * @returns object
+ */
 export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>): RateLimitNumbers {
   const rl = parseRateLimitHeaders(h);
   const num = (s: string | undefined): number | undefined =>

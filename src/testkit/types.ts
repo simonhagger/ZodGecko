@@ -7,13 +7,23 @@
 
 import type { VersionPlanPair } from "../types.js";
 
-/** Optional scenario metadata. */
+/**
+ * Optional scenario metadata.
+ * @property expect (optional: "pass" | "fail").
+ */
 export type ScenarioMeta = Readonly<{
   /** Expected validator outcome. Default inferred from presence of error.response fixture. */
   expect?: "pass" | "fail";
 }>;
 
-/** A discovered scenario file group (request + response variants). */
+/**
+ * A discovered scenario file group (request + response variants).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property metaPath (required: string | null).
+ */
 export type ScenarioFilePair = Readonly<{
   name: string;
   requestPath: string;
@@ -22,7 +32,14 @@ export type ScenarioFilePair = Readonly<{
   metaPath: string | null;
 }>;
 
-/** Root info for an endpoint’s fixtures. */
+/**
+ * Root info for an endpoint’s fixtures.
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>).
+ * @property scenarios (required: ReadonlyArray<ScenarioFilePair>).
+ */
 export type EndpointFixtureRoot = Readonly<{
   validFor: VersionPlanPair;
   endpointSlug: string;
@@ -34,7 +51,15 @@ export type EndpointFixtureRoot = Readonly<{
   scenarios: ReadonlyArray<ScenarioFilePair>;
 }>;
 
-/** Default (docs) test plan. */
+/**
+ * Default (docs) test plan.
+ * @property kind (required: "default").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property requestPath (required: string | null).
+ * @property responsePath (required: string).
+ */
 export type DefaultTestPlan = Readonly<{
   kind: "default";
   validFor: VersionPlanPair;
@@ -44,7 +69,18 @@ export type DefaultTestPlan = Readonly<{
   responsePath: string;
 }>;
 
-/** Scenario (variant) test plan. */
+/**
+ * Scenario (variant) test plan.
+ * @property kind (required: "scenario").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property meta (required: Readonly<{ expect: "pass" | "fail" }>).
+ */
 export type ScenarioTestPlan = Readonly<{
   kind: "scenario";
   validFor: VersionPlanPair;
@@ -57,7 +93,10 @@ export type ScenarioTestPlan = Readonly<{
   meta: Readonly<{ expect: "pass" | "fail" }>;
 }>;
 
-/** Union of supported plans. */
+/**
+ * Union of supported plans.
+ * @remarks Type: __type
+ */
 export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
 
 /** Re-export for tests that import only from testkit. */

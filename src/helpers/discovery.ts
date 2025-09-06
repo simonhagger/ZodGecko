@@ -39,6 +39,12 @@ const isAccessFn = (fn: unknown): fn is (p: string) => Promise<boolean> => typeo
  * - `slug` must match {@link SLUG_RE}
  * - `version` must be one of {@link VERSIONS}
  * - `plan` is derived from {@link VERSION_TO_PLAN}
+ * @param {
+ *   schemasDir,
+ *   only = null,
+ *   fsAccess,
+ * } (required: object)
+ * @returns Promise
  */
 export async function discoverSchemaModules({
   schemasDir,

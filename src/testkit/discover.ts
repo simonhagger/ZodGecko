@@ -20,7 +20,12 @@ import type { VersionPlanPair } from "../types.js";
 const DEFAULTS_DIR = "defaults";
 const SCENARIOS_DIR = "scenarios";
 
-/** Discover a single endpoint's fixtures (defaults + scenarios). */
+/**
+ * Discover a single endpoint's fixtures (defaults + scenarios).
+ * @param validFor (required: object)
+ * @param endpointSlug (required: string)
+ * @returns Promise
+ */
 export async function discoverEndpointFixtures(
   validFor: VersionPlanPair,
   endpointSlug: string,
@@ -72,7 +77,11 @@ export async function discoverEndpointFixtures(
   };
 }
 
-/** Build concrete test plans for an endpoint fixture root. */
+/**
+ * Build concrete test plans for an endpoint fixture root.
+ * @param root (required: object)
+ * @returns Promise
+ */
 export async function buildTestPlans(root: EndpointFixtureRoot): Promise<TestPlan[]> {
   const plans: TestPlan[] = [];
 

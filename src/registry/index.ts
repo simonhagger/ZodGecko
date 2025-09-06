@@ -10,6 +10,11 @@
 import { GENERATED_REGISTRY } from "./generated.js";
 import type { RegistryEndpoint, ZodLikeSchema, QueryPrimitive, VersionPlanPair } from "../types.js";
 
+/**
+ * Function listEndpoints.
+ * @param filter (optional: undefined | object)
+ * @returns ReadonlyArray
+ */
 export function listEndpoints(
   filter?: Partial<VersionPlanPair>,
 ): ReadonlyArray<(typeof GENERATED_REGISTRY)[number]> {
@@ -21,6 +26,12 @@ export function listEndpoints(
   );
 }
 
+/**
+ * Function getEndpointDefinition.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | object
+ */
 export function getEndpointDefinition(
   path: string,
   validFor?: VersionPlanPair,
@@ -36,6 +47,12 @@ export function getEndpointDefinition(
   );
 }
 
+/**
+ * Function getServerDefaults.
+ * @param id (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | object
+ */
 export function getServerDefaults(
   id: string,
   validFor?: VersionPlanPair,
@@ -44,6 +61,12 @@ export function getServerDefaults(
   return def ? def.serverDefaults : null;
 }
 
+/**
+ * Function getQueryRules.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | ReadonlyArray
+ */
 export function getQueryRules(
   path: string,
   validFor?: VersionPlanPair,
@@ -52,6 +75,12 @@ export function getQueryRules(
   return def ? def.queryRules : null;
 }
 
+/**
+ * Function getPathInfo.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string>; } | null
+ */
 export function getPathInfo(
   path: string,
   validFor?: VersionPlanPair,
@@ -60,13 +89,21 @@ export function getPathInfo(
   return def ? { pathTemplate: def.pathTemplate, requiredPath: def.requiredPath } : null;
 }
 
-/** Lookup the endpoint's response schema (Zod-like) or undefined if not found. */
+/**
+ * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns undefined | object
+ */
 export function getResponseSchema(path: string): ZodLikeSchema | undefined {
   const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
   return entry?.responseSchema as ZodLikeSchema | undefined;
 }
 
-/** Lookup the endpoint's request schema (Zod-like) or undefined if not found. */
+/**
+ * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns undefined | object
+ */
 export function getRequestSchema(path: string): ZodLikeSchema | undefined {
   const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
   return entry?.requestSchema as ZodLikeSchema | undefined;

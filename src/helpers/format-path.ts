@@ -3,8 +3,18 @@
  * @module helpers/format-path
  * @summary Format Path.
  */
+/**
+ * Type alias PathParams.
+ * @remarks Type: { readonly [x: string]: string | number; }
+ */
 export type PathParams = Readonly<Record<string, string | number>>;
 
+/**
+ * Function formatPath.
+ * @param template (required: string)
+ * @param params (optional: object) [default={}]
+ * @returns string
+ */
 export function formatPath(template: string, params: PathParams = {}): string {
   return template
     .replace(/^\//, "")

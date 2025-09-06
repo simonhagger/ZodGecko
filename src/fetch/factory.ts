@@ -13,18 +13,33 @@ import { ZodGeckoFetch, type FetchClientOptions } from "./client.js";
 import { isValidVersionPlan, parseVersionPlanKey } from "../helpers/object.js";
 import type { VersionPlanKey, VersionPlanPair } from "../types.js";
 
-/** Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type. */
+/**
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: `${infer V}/${infer P}`
+ */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
   ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
   : never;
 
-/** Options when constructing via a VersionPlanKey (validFor is derived). */
+/**
+ * Options when constructing via a VersionPlanKey (validFor is derived).
+ * @property baseURL (optional: string)
+ * @property apiKey (optional: string)
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
+ */
 export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
   FetchClientOptions<KeyToPair<K>>,
   "validFor"
 >;
 
-/** Options when constructing via a VersionPlanPair (already provided). */
+/**
+ * Options when constructing via a VersionPlanPair (already provided).
+ * @property baseURL (optional: string)
+ * @property apiKey (optional: string)
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
+ */
 export type PairFetchOptions<V extends VersionPlanPair> = Omit<FetchClientOptions<V>, "validFor">;
 
 /** Overload: create using an enum/string key like "v3.1.1/paid". */
@@ -39,7 +54,12 @@ export function createFetchClient<V extends VersionPlanPair>(
   opts?: PairFetchOptions<V>,
 ): ZodGeckoFetch<V>;
 
-/** Implementation. */
+/**
+ * Implementation.
+ * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param opts (optional: undefined | object)
+ * @returns ZodGeckoFetch
+ */
 export function createFetchClient(
   arg: VersionPlanKey | VersionPlanPair,
   opts?: Omit<FetchClientOptions<VersionPlanPair>, "validFor">,

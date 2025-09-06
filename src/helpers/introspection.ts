@@ -22,7 +22,11 @@ function hasOwnKey(obj: unknown, key: PropertyKey): boolean {
   return isObject(obj) && Object.prototype.hasOwnProperty.call(obj, key);
 }
 
-/** Get an internal Zod-like definition object (if present). */
+/**
+ * Get an internal Zod-like definition object (if present).
+ * @param s (required: unknown)
+ * @returns undefined | object
+ */
 export function getDef(s: unknown): Record<string, unknown> | undefined {
   if (!isObject(s)) return undefined;
 
@@ -44,6 +48,8 @@ function getCtorName(s: unknown): string | undefined {
 /**
  * Best-effort type name for Zod-like nodes. Prefers `_def.typeName`, else falls
  * back to a constructor beginning with `Zod`.
+ * @param s (required: unknown)
+ * @returns string | undefined
  */
 export function getTypeName(s: unknown): string | undefined {
   const d = getDef(s);
@@ -60,6 +66,8 @@ export function getTypeName(s: unknown): string | undefined {
 /**
  * Read optional query metadata attached to a schema via a well-known symbol.
  * Returns `null` when absent or malformed.
+ * @param schema (required: unknown)
+ * @returns null | object
  */
 export function getQMeta(schema: unknown): QMeta | null {
   if (!isObject(schema)) return null;
@@ -84,7 +92,11 @@ function hasSafeParse(x: unknown): x is { safeParse: (val: unknown) => unknown }
   );
 }
 
-/** Heuristic: does `schema.safeParse(undefined)` succeed? */
+/**
+ * Heuristic: does `schema.safeParse(undefined)` succeed?
+ * @param schema (required: unknown)
+ * @returns boolean
+ */
 export function isOptionalish(schema: unknown): boolean {
   if (!hasSafeParse(schema)) return false;
   try {
@@ -102,6 +114,8 @@ export function isOptionalish(schema: unknown): boolean {
 /**
  * Handle chained wrappers (Default / Optional / Effects / Branded) and surface
  * the first default discovered while unwrapping.
+ * @param s (required: unknown)
+ * @returns object
  */
 export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
   let node: unknown = s;
@@ -175,7 +189,11 @@ export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
   return { inner: node, defaultValue, wasOptional, isArray };
 }
 
-/** Unwrap until a ZodObject or give up (returns the last node seen). */
+/**
+ * Unwrap until a ZodObject or give up (returns the last node seen).
+ * @param s (required: unknown)
+ * @returns unknown
+ */
 export function unwrapObjectForShapeDeep(s: unknown): unknown {
   let node: unknown = s;
   for (let i = 0; i < 12; i += 1) {
@@ -225,7 +243,11 @@ function shapeFromCandidate(candidate: unknown): Record<string, unknown> | null 
   return isObject(candidate) ? candidate : null;
 }
 
-/** Accepts either a ZodObject or a wrapper around it. */
+/**
+ * Accepts either a ZodObject or a wrapper around it.
+ * @param s (required: unknown)
+ * @returns null | object
+ */
 export function getObjectShape(s: unknown): Record<string, unknown> | null {
   const root = unwrapObjectForShapeDeep(s);
   if (getTypeName(root) !== "ZodObject") return null;
