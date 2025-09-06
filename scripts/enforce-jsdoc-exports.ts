@@ -51,6 +51,19 @@ function collapseBooleanParts(parts: string[]): string[] {
   }
   return Array.from(new Set(parts));
 }
+function sortPrimitiveUnion(parts: string[]): string[] {
+  const order = new Map<string, number>([
+    ["string", 1],
+    ["number", 2],
+    ["boolean", 3],
+    ["bigint", 4],
+    ["symbol", 5],
+    ["null", 6],
+    ["undefined", 7],
+    ["object", 8],
+  ]);
+  return [...parts].sort((a, b) => (order.get(a) ?? 999) - (order.get(b) ?? 999));
+}
 
 function capDocType(t: string): string {
   return t && t.length > MAX_TYPE_LEN ? "complex type" : t;
@@ -122,6 +135,14 @@ function declaredTypeLiteral(t: TypeAliasDeclaration): TypeLiteralNode | undefin
   const unwrapped = unwrapReadonly(base);
   if (unwrapped && TsNode.isTypeLiteral(unwrapped)) return unwrapped;
   return undefined;
+}
+
+function normalizeInlineUnionText(s: string): string {
+  // collapse whitespace around pipes and remove any leading pipe
+  let out = s.replace(/\s*\|\s*/g, " | ").replace(/^\s*\|\s*/, "");
+  // de-dupe accidental double spaces
+  out = out.replace(/\s{2,}/g, " ").trim();
+  return out;
 }
 
 /** Read declared props (name, optional, type text) from a TypeLiteralNode. */
@@ -429,8 +450,20 @@ function elementTypeDescription(node: Node, t: Type): string {
   if (t.isArray()) {
     const et = t.getArrayElementType();
     if (et) {
+      // If the element has a symbol (e.g., QueryPrimitive), prefer a readable expansion
+      const aliasTxt = sanitizeTypeTextForDocs(et.getText(node));
+      if (aliasTxt && !looksNoisyType(aliasTxt)) {
+        // collapse true|false -> boolean inside the alias text
+        const parts = aliasTxt.split("|").map((p) => p.trim());
+        const collapsed =
+          parts.includes("true") && parts.includes("false")
+            ? ["boolean", ...parts.filter((p) => p !== "true" && p !== "false")]
+            : parts;
+        const uniq = Array.from(new Set(collapsed)).join(" | ");
+        return uniq;
+      }
       const sym = et.getSymbol()?.getName();
-      if (sym && sym !== "__type") return sym; // prefer names
+      if (sym && sym !== "__type") return sym; // fallback to the alias name
       const s = compactTypeText(node, et);
       if (s === "object" || s === "__object" || looksNoisyType(s)) return "unknown";
       return s;
@@ -468,6 +501,34 @@ function compactTypeText(node: Node, t = node.getType()): string {
   const symName = t.getSymbol()?.getName();
   if (symName && symName !== "__type") return symName;
 
+  if (isTupleType(t)) {
+    const rawTxt = t.getText(node).trim();
+    const appTxt = t.getApparentType().getText(node).trim();
+    const ro = /^readonly\b/.test(rawTxt) || /^readonly\b/.test(appTxt);
+
+    // Render each element compactly
+    const elems = tupleElementTypes(node, t);
+    const parts = elems.map((e) => {
+      const sym = e.getSymbol()?.getName();
+      const token = sym && sym !== "__type" ? sym : compactTypeText(node, e);
+      return sanitizeTypeTextForDocs(token);
+    });
+
+    // If tuple is large or elements look noisy/object-like, collapse to Array form
+    const tooMany = parts.length > 5;
+    const looksNoisy = parts.some((p) => p === "object" || p === "__object" || looksNoisyType(p));
+    if (tooMany || looksNoisy) {
+      // Try to infer a sane element description; fall back to `object`.
+      const guess = elementTypeDescription(node, t);
+      const el = !guess || guess === "unknown" ? "object" : guess;
+      const ctor = ro ? "ReadonlyArray" : "Array";
+      return `${ctor}<${el}>`;
+    }
+
+    const inner = parts.join(", ");
+    return `${ro ? "readonly " : ""}[${inner}]`;
+  }
+
   if (isArrayLike(node, t)) {
     // Don’t explode to huge literal types.
     // Prefer a clean ctor and only show elements if they look sane.
@@ -504,9 +565,11 @@ function compactTypeText(node: Node, t = node.getType()): string {
     const uniq = Array.from(
       new Set(parts.map((p) => (p === "__object" || p === "__type" ? "object" : p))),
     );
-
-    const joined = uniq.join(" | ");
-    return joined.length <= MAX_TYPE_LEN ? joined : `union(${uniq.length})`;
+    const ordered = sortPrimitiveUnion(uniq);
+    const joined = ordered.join(" | ");
+    return normalizeInlineUnionText(joined).length <= MAX_TYPE_LEN
+      ? normalizeInlineUnionText(joined)
+      : `union(${uniq.length})`;
   }
 
   if (t.isIntersection()) {
@@ -673,7 +736,17 @@ function ensureConstDoc(sf: SourceFile, decl: VariableDeclaration, name: string)
   }
 
   const doc = consolidateJsDocs(host, `Constant ${name}.`);
-  const typeText = compactTypeText(decl, decl.getType()).replace(/\b__type\b/g, "object");
+  let typeText = compactTypeText(decl, decl.getType()).replace(/\b__type\b/g, "object");
+
+  // If we fell back to plain "object", try the declared type annotation text
+  if (typeText === "object") {
+    const tn = decl.getTypeNode?.();
+    const aliasTxt = tn ? sanitizeTypeTextForDocs(tn.getText()) : "";
+    if (aliasTxt && !looksNoisyType(aliasTxt) && aliasTxt.length <= MAX_TYPE_LEN) {
+      typeText = aliasTxt;
+    }
+  }
+
   addOrEnsureTag(
     doc,
     "remarks",
@@ -692,6 +765,10 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
     if (needs) recordViolation(sf, "type", name, "missing/insufficient JSDoc");
     return;
   }
+  // Is the alias text a conditional helper like `T extends X ? Y : Z`
+  function looksConditionalAliasText(s: string): boolean {
+    return /\bextends\b[^?]*\?[^:]*:/.test(s);
+  }
 
   // Single doc per node (merge any pre-existing blocks)
   const doc = consolidateJsDocs(t, `Type alias ${name}.`);
@@ -699,7 +776,12 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
   const tt = t.getType();
   const aliasTextRaw = t.getTypeNode()?.getText() ?? "";
   const aliasTextClean = sanitizeTypeTextForDocs(aliasTextRaw);
+  const isConditionalAlias = looksConditionalAliasText(aliasTextClean);
   const isTypeofAlias = /^\s*typeof\s+/.test(aliasTextClean);
+  const templateBody = (s: string): string | null => {
+    const m = s.match(/`([^`]+)`/);
+    return m ? m[1] : null;
+  };
 
   // 1) Array/tuple-like: don't enumerate properties; give concise collection description
   if (isArrayLike(t, tt)) {
@@ -774,8 +856,14 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
     if (lines.length > 0) {
       replacePropertyTags(doc, lines);
     } else {
-      addOrEnsureTag(doc, "remarks", `Type: ${sanitizeTypeTextForDocs(compactTypeText(t, tt))}`);
+      if (isConditionalAlias) {
+        const tmpl = templateBody(aliasTextClean);
+        if (tmpl) addOrEnsureTag(doc, "remarks", `Type: \`${tmpl}\``);
+      } else {
+        addOrEnsureTag(doc, "remarks", `Type: ${sanitizeTypeTextForDocs(compactTypeText(t, tt))}`);
+      }
     }
+
     normalizeExampleTags(doc);
     bumpFix();
     return;
@@ -796,7 +884,8 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
     } else {
       const simpleAll = parts.every(isSimpleAtom);
       if (simpleAll && parts.length <= 6) {
-        addOrEnsureTag(doc, "remarks", `Type: ${parts.join(" | ")}`);
+        const ordered = sortPrimitiveUnion(parts);
+        addOrEnsureTag(doc, "remarks", `Type: ${ordered.join(" | ")}`);
       } else {
         addOrEnsureTag(doc, "remarks", `Variants:\n- ${parts.join("\n- ")}`);
       }
@@ -813,12 +902,28 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
     }
     normalizeExampleTags(doc);
   } else {
-    // Simple/non-composite: prefer alias node text if it’s clean
-    if (aliasTextClean && !looksNoisyType(aliasTextClean)) {
-      addOrEnsureTag(doc, "remarks", `Type: ${aliasTextClean}`);
+    // Simple/non-composite
+    if (isConditionalAlias) {
+      const tmpl = templateBody(aliasTextClean);
+      if (tmpl) {
+        addOrEnsureTag(doc, "remarks", `Type: \`${tmpl}\``);
+        normalizeExampleTags(doc);
+      } else {
+        const ct = sanitizeTypeTextForDocs(compactTypeText(t, tt));
+        if (ct && ct !== "object") {
+          addOrEnsureTag(doc, "remarks", `Type: ${ct}`);
+          normalizeExampleTags(doc);
+        }
+        // else: skip noisy/meaningless remark
+      }
+    } else if (aliasTextClean && !looksNoisyType(aliasTextClean)) {
+      addOrEnsureTag(doc, "remarks", `Type: ${normalizeInlineUnionText(aliasTextClean)}`);
       normalizeExampleTags(doc);
     } else {
-      addOrEnsureTag(doc, "remarks", `Type: ${sanitizeTypeTextForDocs(compactTypeText(t, tt))}`);
+      const pref = normalizeInlineUnionText(
+        preferredAliasDocText(t, sanitizeTypeTextForDocs(t.getName())),
+      );
+      addOrEnsureTag(doc, "remarks", `Type: ${pref}`);
       normalizeExampleTags(doc);
     }
   }

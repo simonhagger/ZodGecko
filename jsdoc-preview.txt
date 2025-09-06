@@ -1,7 +1,7 @@
 # JSDoc Exports — Dry Run Report
 Mode: DRY RUN (no files written)
 Files changed: 30
-Generated at: 2025-09-06T08:53:47.046Z
+Generated at: 2025-09-06T10:21:09.070Z
 
 ===== FILE: src/types.ts =====
 --- BEFORE ---
@@ -341,7 +341,7 @@ import type { GENERATED_REGISTRY as GEN } from "./registry/generated.js";
 
 /**
  * Type alias GeneratedRegistry.
- * @remarks Type: ReadonlyArray<unknown>
+ * @remarks Type: ReadonlyArray<object>
  */
 export type GeneratedRegistry = typeof GEN;
 /**
@@ -370,7 +370,7 @@ export type EndpointIdFor<V extends VersionPlanPair> = EntryFor<V>["id"];
 
 /**
  * Union of all version/plan keys present in the generated registry.
- * @remarks Type: "v3.0.1/public"
+ * @remarks Type: `${Ver}/${Pl}`
  */
 export type DerivedVersionPlanKey = GeneratedEntry extends {
   readonly validFor: {
@@ -413,7 +413,7 @@ export type VersionPlanKey = `${ApiVersion}/${ApiPlan}`;
 
 /**
  * Build a key from a {@link VersionPlanPair}.
- * @remarks Type: `${V["version"]}/${V["plan"]}`
+ * @remarks Type: VersionPlanKeyFromPair
  */
 export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}/${V["plan"]}`;
 
@@ -423,7 +423,7 @@ export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}
 
 /**
  * Allowed primitive types in query strings.
- * @remarks Type: boolean | string | number
+ * @remarks Type: string | number | boolean
  */
 export type QueryPrimitive = string | number | boolean;
 /**
@@ -433,7 +433,7 @@ export type QueryPrimitive = string | number | boolean;
 export type QueryArray = readonly QueryPrimitive[];
 /**
  * A single query value: a primitive or an immutable array of primitives.
- * @remarks Type: boolean | string | number | ReadonlyArray
+ * @remarks Type: string | number | boolean | ReadonlyArray
  */
 export type QueryValue = QueryPrimitive | QueryArray;
 /**
@@ -583,20 +583,14 @@ export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
 // ===========================================================================
 
 // -- Helpers to pluck version/plan literals from a pair or entry -------------
-/**
- * Type alias VPVersion.
- * @remarks Type: object
- */
+/** Type alias VPVersion. */
 export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
   ? Ver
   : V extends { version: infer Ver2 extends string }
     ? Ver2
     : never;
 
-/**
- * Type alias VPPlan.
- * @remarks Type: object
- */
+/** Type alias VPPlan. */
 export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
   ? Pl
   : V extends { plan: infer Pl2 extends string }
@@ -628,7 +622,7 @@ export type AnyEndpointId = RegistryEndpoint["id"];
 
 /**
  * Extract the set of `{placeholder}` names from a path template.
- * @remarks Type: object
+ * @remarks Type: `${string}{${infer K}}${infer R}`
  */
 export type ExtractPathParams<
   P extends string,
@@ -641,10 +635,7 @@ export type ExtractPathParams<
  */
 export type EmptyObject = Record<never, never>;
 
-/**
- * Build the `path` shape for a given path template.
- * @remarks Type: object
- */
+/** Build the `path` shape for a given path template. */
 export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
   ? EmptyObject
   : { path: Readonly<Record<ExtractPathParams<P>, string>> };
@@ -690,7 +681,7 @@ export type Plan = RegistryEndpoint["validFor"]["plan"];
 
 /**
  * HeaderTuple is a tuple of two strings: `name` and `value`.
- * @remarks Type: ReadonlyArray<string>
+ * @remarks Type: readonly [string, string]
  */
 export type HeaderTuple = readonly [string, string];
 
@@ -822,7 +813,7 @@ import type { VersionPlanKey, VersionPlanPair, ApiPlan, DerivedVersionPlanKey } 
 
 /**
  * Constant DEFAULT_BASE_BY_VERSION.
- * @remarks Type: object
+ * @remarks Type: Readonly<Record<DerivedVersionPlanKey, string>>
  */
 export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
   "v3.0.1/public": "https://api.coingecko.com/api/v3",
@@ -830,7 +821,7 @@ export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, str
 
 /**
  * Function defaultBaseFor.
- * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @returns string
  */
 export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {
@@ -914,7 +905,7 @@ import type { VersionPlanKey, VersionPlanPair, ClientOptions } from "../types.js
 
 /**
  * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
- * @remarks Type: object
+ * @remarks Type: `${infer V}/${infer P}`
  */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
   ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
@@ -948,7 +939,7 @@ export function createClient<V extends VersionPlanPair>(
 // Impl
 /**
  * Function createClient.
- * @param arg (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @param opts (optional: { baseURL?: string; } | undefined)
  * @returns ZodGecko
  */
@@ -1044,7 +1035,7 @@ export type HeaderOptions = Readonly<{
 
 /**
  * Deterministic default headers for CoinGecko requests.
- * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @param opts (optional: undefined | object)
  * @returns HeadersInitLike
  */
@@ -1461,7 +1452,7 @@ import type { VersionPlanKey, VersionPlanPair } from "../types.js";
 
 /**
  * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
- * @remarks Type: object
+ * @remarks Type: `${infer V}/${infer P}`
  */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
   ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
@@ -1502,7 +1493,7 @@ export function createFetchClient<V extends VersionPlanPair>(
 
 /**
  * Implementation.
- * @param arg (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @param opts (optional: undefined | object)
  * @returns ZodGeckoFetch
  */
@@ -1625,7 +1616,7 @@ function coerceHeaderValue(v: unknown): string | null {
 
 /**
  * Read a header by name. For plain objects, match case-insensitively.
- * @param h (required: HeadersLike | object)
+ * @param h (required: object | HeadersLike)
  * @param name (required: string)
  * @returns string | null
  */
@@ -1653,7 +1644,7 @@ export function getHeader(h: HeadersLike | Record<string, unknown>, name: string
 
 /**
  * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
- * @param h (required: HeadersLike | object)
+ * @param h (required: object | HeadersLike)
  * @returns object
  */
 export function parseRateLimitHeaders(
@@ -1683,7 +1674,7 @@ export type RateLimitNumbers = Readonly<{
 
 /**
  * Numeric convenience view (keeps `undefined` when absent).
- * @param h (required: HeadersLike | object)
+ * @param h (required: object | HeadersLike)
  * @returns object
  */
 export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>): RateLimitNumbers {
@@ -1705,9 +1696,9 @@ export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>):
  * ---------------------------------------------------------------------------
  * Runtime-agnostic constants shared across the codebase.
  * (Keep Node-specific values out of this module.)
-  * @file src/helpers/constants.ts
-  * @module helpers/constants
-  * @summary Constants.
+ * @file src/helpers/constants.ts
+ * @module helpers/constants
+ * @summary Constants.
  */
 
 import type { ApiPlan, ApiVersion } from "../types.js";
@@ -1746,9 +1737,9 @@ export type VERSION_TO_PLAN = typeof VERSION_TO_PLAN;
  * ---------------------------------------------------------------------------
  * Runtime-agnostic constants shared across the codebase.
  * (Keep Node-specific values out of this module.)
-  * @file src/helpers/constants.ts
-  * @module helpers/constants
-  * @summary Constants.
+ * @file src/helpers/constants.ts
+ * @module helpers/constants
+ * @summary Constants.
  */
 
 import type { ApiPlan, ApiVersion } from "../types.js";
@@ -1774,27 +1765,27 @@ export const PATH_PARAM_RE = /\{([^}]+)\}/g;
 
 /**
  * Supported API versions. Keep in sync with codegen & docs.
- * @remarks Type: ReadonlyArray<"v3.0.1" | "v3.1.1">
+ * @remarks Type: readonly ["v3.0.1", "v3.1.1"]
  */
 export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
 /**
  * Supported API versions as strong typing. Keep in sync with codegen & docs.
- * @remarks Type: ReadonlyArray<"v3.0.1" | "v3.1.1">
+ * @remarks Type: readonly ["v3.0.1", "v3.1.1"]
  */
 export type VERSIONS = typeof VERSIONS;
 /**
  * Supported API plans/channels.
- * @remarks Type: ReadonlyArray<"public" | "paid">
+ * @remarks Type: readonly ["public", "paid"]
  */
 export const PLANS = ["public", "paid"] as const;
 /**
  * Mapping of supported version as strong typing → plan (only valid combos live here).
- * @remarks Type: ReadonlyArray<"public" | "paid">
+ * @remarks Type: readonly ["public", "paid"]
  */
 export type PLANS = typeof PLANS;
 /**
  * Mapping of supported version → plan (only valid combos live here).
- * @remarks Type: object
+ * @remarks Type: Readonly<Record<ApiVersion, ApiPlan>>
  */
 export const VERSION_TO_PLAN: Readonly<Record<ApiVersion, ApiPlan>> = {
   "v3.0.1": "public",
@@ -1815,9 +1806,9 @@ export type VERSION_TO_PLAN = typeof VERSION_TO_PLAN;
  * Node-only helpers for discovering schema modules under `src/schemas`.
  * Extracted from the registry generator so other tooling (tests, CLIs) can
  * reuse a single, deterministic discovery implementation.
-  * @file src/helpers/discovery.ts
-  * @module helpers/discovery
-  * @summary Discovery.
+ * @file src/helpers/discovery.ts
+ * @module helpers/discovery
+ * @summary Discovery.
  */
 
 import { promises as fs } from "node:fs";
@@ -1928,9 +1919,9 @@ export async function discoverSchemaModules({
  * Node-only helpers for discovering schema modules under `src/schemas`.
  * Extracted from the registry generator so other tooling (tests, CLIs) can
  * reuse a single, deterministic discovery implementation.
-  * @file src/helpers/discovery.ts
-  * @module helpers/discovery
-  * @summary Discovery.
+ * @file src/helpers/discovery.ts
+ * @module helpers/discovery
+ * @summary Discovery.
  */
 
 import { promises as fs } from "node:fs";
@@ -2648,8 +2639,8 @@ export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions)
  * @file src/helpers/get-schemas.ts
  * @description Convenience helper to fetch request/response schemas for an endpoint id.
  * Returns `{ requestSchema, responseSchema }`. Throws if the endpoint/response schema is missing.
-  * @module helpers/get-schemas
-  * @summary Get Schemas.
+ * @module helpers/get-schemas
+ * @summary Get Schemas.
  */
 
 // External imports
@@ -2680,8 +2671,8 @@ export function getSchemas(id: string): Readonly<{
  * @file src/helpers/get-schemas.ts
  * @description Convenience helper to fetch request/response schemas for an endpoint id.
  * Returns `{ requestSchema, responseSchema }`. Throws if the endpoint/response schema is missing.
-  * @module helpers/get-schemas
-  * @summary Get Schemas.
+ * @module helpers/get-schemas
+ * @summary Get Schemas.
  */
 
 // External imports
@@ -2721,7 +2712,7 @@ export function getSchemas(id: string): Readonly<{
  * These helpers work with Zod-like objects **without importing Zod**. They are
  * used both by code generation and runtime helpers to derive defaults and
  * shapes in a tolerant, side-effect-free way.
-  * @module helpers/introspection
+ * @module helpers/introspection
  */
 
 import type { QMeta, UnwrapDefaultsResult } from "../types.js";
@@ -2961,7 +2952,7 @@ export function getObjectShape(s: unknown): Record<string, unknown> | null {
  * These helpers work with Zod-like objects **without importing Zod**. They are
  * used both by code generation and runtime helpers to derive defaults and
  * shapes in a tolerant, side-effect-free way.
-  * @module helpers/introspection
+ * @module helpers/introspection
  */
 
 import type { QMeta, UnwrapDefaultsResult } from "../types.js";
@@ -4305,7 +4296,7 @@ import {
 import type { RegistryEntry } from "../types.js";
 /**
  * Constant GENERATED_REGISTRY.
- * @remarks Type: ReadonlyArray<unknown>
+ * @remarks Type: ReadonlyArray<object>
  */
 export const GENERATED_REGISTRY = [
   {
