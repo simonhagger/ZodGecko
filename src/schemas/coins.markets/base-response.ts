@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/coins.markets/base-response.ts
  * @module schemas/coins.markets/base-response
-  * @summary Base Response.
+ * @summary Base Response.
  */
 
 /** Zod import */

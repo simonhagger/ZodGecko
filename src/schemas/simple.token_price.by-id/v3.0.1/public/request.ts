@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/simple.token_price.by-id/v3.0.1/public/request.ts
  * @module schemas/simple.token_price.by-id/v3.0.1/public/request
-  * @summary Request.
+ * @summary Request.
  */
 
 /** Import base schema */

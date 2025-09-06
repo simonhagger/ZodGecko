@@ -5,7 +5,7 @@
  * Zod primitives and brand utilities used across the library.
  * - Keep generic, framework-agnostic scalars here (ISODateTime, UrlString, brand, etc.).
  * - Domain-specific enums/fragments belong in `schemas/_shared/common.ts`.
-  * @summary Atoms.
+ * @summary Atoms.
  */
 import { z } from "zod";
 

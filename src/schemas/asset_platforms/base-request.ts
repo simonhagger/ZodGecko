@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/asset_platforms/base-request.ts
  * @module schemas/asset_platforms/base-request
-  * @summary Base Request.
+ * @summary Base Request.
  */
 
 /** Zod import */

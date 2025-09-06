@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.tickers/v3.0.1/public/index.ts
  * @module schemas/coins.by-id.tickers/v3.0.1/public/index
-  * @summary Index.
+ * @summary Index.
  */
 
 /** Zod import */

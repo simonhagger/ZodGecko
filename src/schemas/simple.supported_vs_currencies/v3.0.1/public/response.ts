@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/simple.supported_vs_currencies/v3.0.1/public/response.ts
  * @module schemas/simple.supported_vs_currencies/v3.0.1/public/response
-  * @summary Response.
+ * @summary Response.
  */
 
 /** Base Response Schema import */

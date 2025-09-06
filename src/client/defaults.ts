@@ -4,11 +4,9 @@
  * @summary Defaults.
  */
 // src/client/defaults.ts
-import type { VersionPlanKey, VersionPlanPair, ApiPlan } from "../types.js";
+import type { VersionPlanKey, VersionPlanPair, ApiPlan, DerivedVersionPlanKey } from "../types.js";
 
-type SupportedVersionPlans = "v3.0.1/public";
-
-export const DEFAULT_BASE_BY_VERSION: Readonly<Record<SupportedVersionPlans, string>> = {
+export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
   "v3.0.1/public": "https://api.coingecko.com/api/v3",
 } as const;
 

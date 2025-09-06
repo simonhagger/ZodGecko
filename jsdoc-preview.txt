@@ -1,7 +1,7 @@
 # JSDoc Exports — Dry Run Report
 Mode: DRY RUN (no files written)
 Files changed: 30
-Generated at: 2025-09-05T13:07:08.372Z
+Generated at: 2025-09-06T08:53:47.046Z
 
 ===== FILE: src/types.ts =====
 --- BEFORE ---
@@ -340,12 +340,12 @@ import type { GENERATED_REGISTRY as GEN } from "./registry/generated.js";
 // ===========================================================================
 
 /**
- * TODO: document type `GeneratedRegistry`.
- * @remarks Type: typeof GEN
+ * Type alias GeneratedRegistry.
+ * @remarks Type: ReadonlyArray<unknown>
  */
 export type GeneratedRegistry = typeof GEN;
 /**
- * TODO: document type `GeneratedEntry`.
+ * Type alias GeneratedEntry.
  * @remarks Type: GeneratedRegistry[number]
  */
 export type GeneratedEntry = GeneratedRegistry[number];
@@ -383,24 +383,20 @@ export type DerivedVersionPlanKey = GeneratedEntry extends {
 
 /**
  * Union of supported API versions.
- * @remarks Variants:
- * - "v3.0.1"
- * - "v3.1.1"
+ * @remarks Type: "v3.0.1" | "v3.1.1"
  */
 export type ApiVersion = (typeof VERSIONS)[number];
 
 /**
  * Union of supported API plans.
- * @remarks Variants:
- * - "public"
- * - "paid"
+ * @remarks Type: "public" | "paid"
  */
 export type ApiPlan = (typeof PLANS)[number];
 
 /**
  * Structured pair describing a specific API surface (version + plan).
- * @property version (required: ApiVersion) – TODO.
- * @property plan (required: ApiPlan) – TODO.
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
  */
 export type VersionPlanPair = Readonly<{
   /** API version (e.g. "v3.0.1"). */
@@ -411,11 +407,7 @@ export type VersionPlanPair = Readonly<{
 
 /**
  * String literal of the valid version/plan key (e.g. "v3.0.1/public").
- * @remarks Variants:
- * - "v3.0.1/public"
- * - "v3.0.1/paid"
- * - "v3.1.1/public"
- * - "v3.1.1/paid"
+ * @remarks Type: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid"
  */
 export type VersionPlanKey = `${ApiVersion}/${ApiPlan}`;
 
@@ -431,27 +423,17 @@ export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}
 
 /**
  * Allowed primitive types in query strings.
- * @remarks Variants:
- * - string
- * - number
- * - false
- * - true
+ * @remarks Type: boolean | string | number
  */
 export type QueryPrimitive = string | number | boolean;
 /**
  * Read‑only array of primitives (CSV‑style encodings).
  * @remarks Type: ReadonlyArray
- * Elements: string | number | boolean
  */
 export type QueryArray = readonly QueryPrimitive[];
 /**
  * A single query value: a primitive or an immutable array of primitives.
- * @remarks Variants:
- * - string
- * - number
- * - false
- * - true
- * - ReadonlyArray
+ * @remarks Type: boolean | string | number | ReadonlyArray
  */
 export type QueryValue = QueryPrimitive | QueryArray;
 /**
@@ -467,8 +449,8 @@ export type PathParams = Readonly<Record<string, string>>;
 
 /**
  * Canonical request shape used across helpers & client.
- * @property path (optional: PathParams) – TODO.
- * @property query (optional: QueryParams) – TODO.
+ * @property path (optional: PathParams).
+ * @property query (optional: QueryParams).
  * @example const req: RequestShape = {
  *   path: { id: "bitcoin" },
  *   query: { vs_currency: "usd", days: 1 }
@@ -499,10 +481,10 @@ export type ArrayEncoding = "csv";
 
 /**
  * Minimal Zod‑like shape (no runtime dependency on zod).
- * @property parse (required: (value: unknown) => T) – TODO.
- * @property safeParse (optional: (value: unknown) => { success: boolean; data?: T; error?: unknown }) – TODO.
- * @property _def (optional: unknown) – TODO.
- * @property def (optional: unknown) – TODO.
+ * @property parse (required: (value: unknown) => T).
+ * @property safeParse (optional: (value: unknown) => { success: boolean; data?: T; error?: unknown }).
+ * @property _def (optional: unknown).
+ * @property def (optional: unknown).
  */
 export type ZodLikeSchema<T = unknown> = Readonly<{
   parse: (value: unknown) => T;
@@ -515,17 +497,17 @@ export type ZodLikeSchema<T = unknown> = Readonly<{
 
 /**
  * Minimal validator interface; can be backed by Zod internally.
- * @property parse (required: (value: unknown) => T) – TODO.
+ * @property parse (required: (value: unknown) => T).
  */
 export type Schema<T> = Readonly<{ parse: (value: unknown) => T }>;
 
 /**
  * Declarative rule for a single query parameter.
- * @property key (required: string) – TODO.
- * @property default (optional: QueryValue) – TODO.
- * @property dropWhenDefault (optional: boolean) – TODO.
- * @property arrayEncoding (optional: ArrayEncoding) – TODO.
- * @property required (optional: true) – TODO.
+ * @property key (required: string).
+ * @property default (optional: QueryValue).
+ * @property dropWhenDefault (optional: boolean).
+ * @property arrayEncoding (optional: ArrayEncoding).
+ * @property required (optional: true).
  */
 export type QueryRule = Readonly<{
   /** Query key (as documented by CoinGecko). */
@@ -562,16 +544,16 @@ export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | 
  *
  * @template Req - Parsed request type (schema output).
  * @template Res - Parsed response type (schema output).
- * @property id (required: string) – TODO.
- * @property validFor (required: VersionPlanPair) – TODO.
- * @property method (required: HttpMethod) – TODO.
- * @property pathTemplate (required: EndpointPath) – TODO.
- * @property requiredPath (required: readonly string[]) – TODO.
- * @property requiredQuery (required: readonly string[]) – TODO.
- * @property queryRules (required: readonly QueryRule[]) – TODO.
- * @property serverDefaults (required: Readonly<Record<string, QueryValue>>) – TODO.
- * @property requestSchema (required: Schema<Req>) – TODO.
- * @property responseSchema (required: Schema<Res>) – TODO.
+ * @property id (required: string).
+ * @property validFor (required: VersionPlanPair).
+ * @property method (required: HttpMethod).
+ * @property pathTemplate (required: EndpointPath).
+ * @property requiredPath (required: readonly string[]).
+ * @property requiredQuery (required: readonly string[]).
+ * @property queryRules (required: readonly QueryRule[]).
+ * @property serverDefaults (required: Readonly<Record<string, QueryValue>>).
+ * @property requestSchema (required: Schema<Req>).
+ * @property responseSchema (required: Schema<Res>).
  */
 export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
   /** Dot + `by-<param>` slug, e.g. "coins.by-id.history". */
@@ -602,7 +584,7 @@ export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
 
 // -- Helpers to pluck version/plan literals from a pair or entry -------------
 /**
- * TODO: document type `VPVersion`.
+ * Type alias VPVersion.
  * @remarks Type: object
  */
 export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
@@ -612,7 +594,7 @@ export type VPVersion<V> = V extends { readonly version: infer Ver extends strin
     : never;
 
 /**
- * TODO: document type `VPPlan`.
+ * Type alias VPPlan.
  * @remarks Type: object
  */
 export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
@@ -669,7 +651,7 @@ export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
 
 /**
  * Request shape specialized for a given path template.
- * @property query (optional: QueryParams) – TODO.
+ * @property query (optional: QueryParams)
  */
 export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
 
@@ -682,28 +664,23 @@ export type {
   RegistryEndpoint as RegistryEntry,
 };
 /**
-     * TODO: document type `Registry`.
+     * Type alias Registry.
      * @remarks Type: ReadonlyArray
-     * Elements: __type
      */
     export type Registry = readonly RegistryEndpoint[];
 /**
- * TODO: document type `EndpointId`.
+ * Type alias EndpointId.
  * @remarks Type: RegistryEndpoint["id"]
  */
 export type EndpointId = RegistryEndpoint["id"];
 /**
- * TODO: document type `Version`.
- * @remarks Variants:
- * - "v3.0.1"
- * - "v3.1.1"
+ * Type alias Version.
+ * @remarks Type: "v3.0.1" | "v3.1.1"
  */
 export type Version = RegistryEndpoint["validFor"]["version"];
 /**
- * TODO: document type `Plan`.
- * @remarks Variants:
- * - "public"
- * - "paid"
+ * Type alias Plan.
+ * @remarks Type: "public" | "paid"
  */
 export type Plan = RegistryEndpoint["validFor"]["plan"];
 
@@ -714,13 +691,12 @@ export type Plan = RegistryEndpoint["validFor"]["plan"];
 /**
  * HeaderTuple is a tuple of two strings: `name` and `value`.
  * @remarks Type: ReadonlyArray<string>
- * Elements: string
  */
 export type HeaderTuple = readonly [string, string];
 
 //** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
 /**
- * TODO: document type `HeadersLike`.
+ * Type alias HeadersLike.
  * @remarks Type: { get(name: string): string | null; }
  */
 export type HeadersLike = {
@@ -741,9 +717,9 @@ export type HeadersInitLike =
 // ---------------------------------------------------------------------------
 
 /**
- * TODO: document type `QMeta`.
- * @property arrayEncoding (optional: "csv") – TODO.
- * @property dropWhenDefault (optional: boolean) – TODO.
+ * Type alias QMeta.
+ * @property arrayEncoding (optional: "csv").
+ * @property dropWhenDefault (optional: boolean).
  */
 export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean }>;
 
@@ -752,11 +728,11 @@ export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean 
 // ---------------------------------------------------------------------------
 
 /**
- * TODO: document type `UnwrapDefaultsResult`.
- * @property inner (required: unknown) – TODO.
- * @property defaultValue (optional: unknown) – TODO.
- * @property wasOptional (required: boolean) – TODO.
- * @property isArray (required: boolean) – TODO.
+ * Type alias UnwrapDefaultsResult.
+ * @property inner (required: unknown).
+ * @property defaultValue (optional: unknown).
+ * @property wasOptional (required: boolean).
+ * @property isArray (required: boolean).
  */
 export type UnwrapDefaultsResult = Readonly<{
   inner: unknown;
@@ -770,10 +746,10 @@ export type UnwrapDefaultsResult = Readonly<{
 // ---------------------------------------------------------------------------
 /**
  * Discovered Module type
- * @property slug (required: string) – TODO.
- * @property version (required: ApiVersion) – TODO.
- * @property plan (required: ApiPlan) – TODO.
- * @property file (required: string) – TODO.
+ * @property slug (required: string).
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
+ * @property file (required: string).
  */
 export type DiscoveredModule = Readonly<{
   slug: string;
@@ -784,9 +760,9 @@ export type DiscoveredModule = Readonly<{
 }>;
 /**
  * Discovered Option type
- * @property schemasDir (required: string) – TODO.
- * @property only (optional: ReadonlySet<string> | string[] | null) – TODO.
- * @property fsAccess (optional: (p: string) => Promise<boolean>) – TODO.
+ * @property schemasDir (required: string).
+ * @property only (optional: ReadonlySet<string> | string[] | null).
+ * @property fsAccess (optional: (p: string) => Promise<boolean>).
  */
 export type DiscoverOptions = Readonly<{
   /** Absolute path to your `src/schemas` directory. */
@@ -801,9 +777,9 @@ export type DiscoverOptions = Readonly<{
 }>;
 
 /**
- * TODO: document type `ClientOptions`.
- * @property validFor (required: V) – TODO.
- * @property baseURL (optional: string) – TODO.
+ * Type alias ClientOptions.
+ * @property validFor (required: V).
+ * @property baseURL (optional: string).
  */
 export type ClientOptions<V extends VersionPlanPair> = Readonly<{
   validFor: V;
@@ -819,11 +795,9 @@ export type ClientOptions<V extends VersionPlanPair> = Readonly<{
  * @summary Defaults.
  */
 // src/client/defaults.ts
-import type { VersionPlanKey, VersionPlanPair, ApiPlan } from "../types.js";
+import type { VersionPlanKey, VersionPlanPair, ApiPlan, DerivedVersionPlanKey } from "../types.js";
 
-type SupportedVersionPlans = "v3.0.1/public";
-
-export const DEFAULT_BASE_BY_VERSION: Readonly<Record<SupportedVersionPlans, string>> = {
+export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
   "v3.0.1/public": "https://api.coingecko.com/api/v3",
 } as const;
 
@@ -844,22 +818,20 @@ export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {
  * @summary Defaults.
  */
 // src/client/defaults.ts
-import type { VersionPlanKey, VersionPlanPair, ApiPlan } from "../types.js";
-
-type SupportedVersionPlans = "v3.0.1/public";
+import type { VersionPlanKey, VersionPlanPair, ApiPlan, DerivedVersionPlanKey } from "../types.js";
 
 /**
- * TODO: document const `DEFAULT_BASE_BY_VERSION`.
- * @remarks Type: __type
+ * Constant DEFAULT_BASE_BY_VERSION.
+ * @remarks Type: object
  */
-export const DEFAULT_BASE_BY_VERSION: Readonly<Record<SupportedVersionPlans, string>> = {
+export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
   "v3.0.1/public": "https://api.coingecko.com/api/v3",
 } as const;
 
 /**
- * TODO: document function `defaultBaseFor`.
- * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | __type) – TODO.
- * @returns string – TODO.
+ * Function defaultBaseFor.
+ * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @returns string
  */
 export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {
   const key = typeof vp === "string" ? vp : `${vp.version}/${vp.plan}`;
@@ -950,7 +922,7 @@ export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer 
 
 /**
  * Options when constructing via a VersionPlanKey (validFor is derived).
- * @property baseURL (optional: string) – TODO.
+ * @property baseURL (optional: string)
  */
 export type KeyClientOptions<K extends VersionPlanKey> = Omit<
   ClientOptions<KeyToPair<K>>,
@@ -959,7 +931,7 @@ export type KeyClientOptions<K extends VersionPlanKey> = Omit<
 
 /**
  * Options when constructing via a VersionPlanPair (already provided).
- * @property baseURL (optional: string) – TODO.
+ * @property baseURL (optional: string)
  */
 export type PairClientOptions<V extends VersionPlanPair> = Omit<ClientOptions<V>, "validFor">;
 
@@ -975,10 +947,10 @@ export function createClient<V extends VersionPlanPair>(
 
 // Impl
 /**
- * TODO: document function `createClient`.
- * @param arg (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | __type) – TODO.
- * @param opts (optional: { baseURL?: string; } | undefined) – TODO.
- * @returns ZodGecko – TODO.
+ * Function createClient.
+ * @param arg (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param opts (optional: { baseURL?: string; } | undefined)
+ * @returns ZodGecko
  */
 export function createClient(
   arg: VersionPlanKey | VersionPlanPair,
@@ -1046,9 +1018,9 @@ export function defaultHeadersFor(
 import type { ApiPlan, HeadersInitLike, VersionPlanKey, VersionPlanPair } from "../types.js";
 
 /**
- * TODO: document function `headerNameForPlan`.
- * @param plan (required: "public" | "paid") – TODO.
- * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key" – TODO.
+ * Function headerNameForPlan.
+ * @param plan (required: "public" | "paid")
+ * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key"
  */
 export function headerNameForPlan(plan: ApiPlan): "x-cg-demo-api-key" | "x-cg-pro-api-key" {
   return plan === "paid" ? "x-cg-pro-api-key" : "x-cg-demo-api-key";
@@ -1059,9 +1031,9 @@ function planOf(vp: VersionPlanKey | VersionPlanPair): ApiPlan {
 }
 
 /**
- * TODO: document type `HeaderOptions`.
- * @property apiKey (optional: string) – TODO.
- * @property extra (optional: HeadersInitLike | (() => HeadersInitLike)) – TODO.
+ * Type alias HeaderOptions.
+ * @property apiKey (optional: string).
+ * @property extra (optional: HeadersInitLike | (() => HeadersInitLike)).
  */
 export type HeaderOptions = Readonly<{
   /** API key to include; omit to send no auth header. */
@@ -1072,9 +1044,9 @@ export type HeaderOptions = Readonly<{
 
 /**
  * Deterministic default headers for CoinGecko requests.
- * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | __type) – TODO.
- * @param opts (optional: undefined | __type) – TODO.
- * @returns HeadersInitLike – TODO.
+ * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param opts (optional: undefined | object)
+ * @returns HeadersInitLike
  */
 export function defaultHeadersFor(
   vp: VersionPlanKey | VersionPlanPair,
@@ -1346,11 +1318,11 @@ function headersToObject(h?: HeadersLike): Record<string, string> {
 
 /**
  * Options for the minimal fetch client (no DOM types required).
- * @property validFor (required: V) – TODO.
- * @property baseURL (optional: string) – TODO.
- * @property apiKey (optional: string) – TODO.
- * @property userAgent (optional: string) – TODO.
- * @property headers (optional: HeadersLike) – TODO.
+ * @property validFor (required: V).
+ * @property baseURL (optional: string).
+ * @property apiKey (optional: string).
+ * @property userAgent (optional: string).
+ * @property headers (optional: HeadersLike).
  */
 export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
   validFor: V;
@@ -1362,8 +1334,8 @@ export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
 
 /**
  * Build default headers for CoinGecko GET calls.
- * @param opts (required: __type) – TODO.
- * @returns __type – TODO.
+ * @param opts (required: object)
+ * @returns object
  */
 export function buildHeaders(opts: FetchClientOptions<VersionPlanPair>): Record<string, string> {
   const base: Record<string, string> = headersToObject(opts.headers);
@@ -1497,10 +1469,10 @@ export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer 
 
 /**
  * Options when constructing via a VersionPlanKey (validFor is derived).
- * @property baseURL (optional: string) – TODO.
- * @property apiKey (optional: string) – TODO.
- * @property userAgent (optional: string) – TODO.
- * @property headers (optional: HeadersLike) – TODO.
+ * @property baseURL (optional: string)
+ * @property apiKey (optional: string)
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
  */
 export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
   FetchClientOptions<KeyToPair<K>>,
@@ -1509,10 +1481,10 @@ export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
 
 /**
  * Options when constructing via a VersionPlanPair (already provided).
- * @property baseURL (optional: string) – TODO.
- * @property apiKey (optional: string) – TODO.
- * @property userAgent (optional: string) – TODO.
- * @property headers (optional: HeadersLike) – TODO.
+ * @property baseURL (optional: string)
+ * @property apiKey (optional: string)
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
  */
 export type PairFetchOptions<V extends VersionPlanPair> = Omit<FetchClientOptions<V>, "validFor">;
 
@@ -1530,9 +1502,9 @@ export function createFetchClient<V extends VersionPlanPair>(
 
 /**
  * Implementation.
- * @param arg (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | __type) – TODO.
- * @param opts (optional: undefined | __type) – TODO.
- * @returns ZodGeckoFetch – TODO.
+ * @param arg (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid" | object)
+ * @param opts (optional: undefined | object)
+ * @returns ZodGeckoFetch
  */
 export function createFetchClient(
   arg: VersionPlanKey | VersionPlanPair,
@@ -1653,9 +1625,9 @@ function coerceHeaderValue(v: unknown): string | null {
 
 /**
  * Read a header by name. For plain objects, match case-insensitively.
- * @param h (required: HeadersLike | __type) – TODO.
- * @param name (required: string) – TODO.
- * @returns string | null – TODO.
+ * @param h (required: HeadersLike | object)
+ * @param name (required: string)
+ * @returns string | null
  */
 export function getHeader(h: HeadersLike | Record<string, unknown>, name: string): string | null {
   if (isHeadersLike(h)) {
@@ -1681,8 +1653,8 @@ export function getHeader(h: HeadersLike | Record<string, unknown>, name: string
 
 /**
  * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
- * @param h (required: HeadersLike | __type) – TODO.
- * @returns __type – TODO.
+ * @param h (required: HeadersLike | object)
+ * @returns object
  */
 export function parseRateLimitHeaders(
   h: HeadersLike | Record<string, unknown>,
@@ -1698,10 +1670,10 @@ export function parseRateLimitHeaders(
 }
 
 /**
- * TODO: document type `RateLimitNumbers`.
- * @property limit (optional: number) – TODO.
- * @property remaining (optional: number) – TODO.
- * @property reset (optional: number) – TODO.
+ * Type alias RateLimitNumbers.
+ * @property limit (optional: number).
+ * @property remaining (optional: number).
+ * @property reset (optional: number).
  */
 export type RateLimitNumbers = Readonly<{
   limit?: number;
@@ -1711,8 +1683,8 @@ export type RateLimitNumbers = Readonly<{
 
 /**
  * Numeric convenience view (keeps `undefined` when absent).
- * @param h (required: HeadersLike | __type) – TODO.
- * @returns __type – TODO.
+ * @param h (required: HeadersLike | object)
+ * @returns object
  */
 export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>): RateLimitNumbers {
   const rl = parseRateLimitHeaders(h);
@@ -1807,7 +1779,7 @@ export const PATH_PARAM_RE = /\{([^}]+)\}/g;
 export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
 /**
  * Supported API versions as strong typing. Keep in sync with codegen & docs.
- * @remarks Type: typeof VERSIONS
+ * @remarks Type: ReadonlyArray<"v3.0.1" | "v3.1.1">
  */
 export type VERSIONS = typeof VERSIONS;
 /**
@@ -1817,12 +1789,12 @@ export type VERSIONS = typeof VERSIONS;
 export const PLANS = ["public", "paid"] as const;
 /**
  * Mapping of supported version as strong typing → plan (only valid combos live here).
- * @remarks Type: typeof PLANS
+ * @remarks Type: ReadonlyArray<"public" | "paid">
  */
 export type PLANS = typeof PLANS;
 /**
  * Mapping of supported version → plan (only valid combos live here).
- * @remarks Type: __type
+ * @remarks Type: object
  */
 export const VERSION_TO_PLAN: Readonly<Record<ApiVersion, ApiPlan>> = {
   "v3.0.1": "public",
@@ -1995,8 +1967,8 @@ const isAccessFn = (fn: unknown): fn is (p: string) => Promise<boolean> => typeo
  *   schemasDir,
  *   only = null,
  *   fsAccess,
- * } (required: __type) – TODO.
- * @returns Promise – TODO.
+ * } (required: object)
+ * @returns Promise
  */
 export async function discoverSchemaModules({
   schemasDir,
@@ -2092,9 +2064,9 @@ export function explainError(err: unknown): string {
  * @summary Explain Error.
  */
 /**
- * TODO: document function `explainError`.
- * @param err (required: unknown) – TODO.
- * @returns string – TODO.
+ * Function explainError.
+ * @param err (required: unknown)
+ * @returns string
  */
 export function explainError(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -2273,8 +2245,8 @@ function normalize(obj: QueryInput): Record<string, string> {
 
 /**
  * Core variant: registry-agnostic normalization.
- * @param params (required: __type) – TODO.
- * @returns __type – TODO.
+ * @param params (required: object)
+ * @returns object
  */
 export function formatParams(params: QueryInput): Record<string, string> {
   return normalize(params);
@@ -2282,9 +2254,9 @@ export function formatParams(params: QueryInput): Record<string, string> {
 
 /**
  * Registry-aware variant: drops params equal to server defaults per rules.
- * @param endpointId (required: string) – TODO.
- * @param params (required: __type) – TODO.
- * @returns __type – TODO.
+ * @param endpointId (required: string)
+ * @param params (required: object)
+ * @returns object
  */
 export function formatParamsForEndpoint(
   endpointId: string,
@@ -2355,16 +2327,16 @@ export function formatPath(template: string, params: PathParams = {}): string {
  * @summary Format Path.
  */
 /**
- * TODO: document type `PathParams`.
+ * Type alias PathParams.
  * @remarks Type: { readonly [x: string]: string | number; }
  */
 export type PathParams = Readonly<Record<string, string | number>>;
 
 /**
- * TODO: document function `formatPath`.
- * @param template (required: string) – TODO.
- * @param params (optional: __type) [default={}] – TODO.
- * @returns string – TODO.
+ * Function formatPath.
+ * @param template (required: string)
+ * @param params (optional: object) [default={}]
+ * @returns string
  */
 export function formatPath(template: string, params: PathParams = {}): string {
   return template
@@ -2589,9 +2561,9 @@ function shouldUseArrayPlaceholder(
 
 /**
  * Build a discoverable request object for an endpoint from the registry.
- * @param endpointPath (required: string) – TODO.
- * @param opts (optional: undefined | __type) – TODO.
- * @returns __type – TODO.
+ * @param endpointPath (required: string)
+ * @param opts (optional: undefined | object)
+ * @returns object
  */
 export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
   const options = {
@@ -2721,8 +2693,8 @@ import type { ZodLikeSchema } from "../types.js";
 
 /**
  * Return schemas for an endpoint id.
- * @param id (required: string) – TODO.
- * @returns __type – TODO.
+ * @param id (required: string)
+ * @returns object
  */
 export function getSchemas(id: string): Readonly<{
   requestSchema: ZodLikeSchema | null;
@@ -3008,8 +2980,8 @@ function hasOwnKey(obj: unknown, key: PropertyKey): boolean {
 
 /**
  * Get an internal Zod-like definition object (if present).
- * @param s (required: unknown) – TODO.
- * @returns undefined | __type – TODO.
+ * @param s (required: unknown)
+ * @returns undefined | object
  */
 export function getDef(s: unknown): Record<string, unknown> | undefined {
   if (!isObject(s)) return undefined;
@@ -3032,8 +3004,8 @@ function getCtorName(s: unknown): string | undefined {
 /**
  * Best-effort type name for Zod-like nodes. Prefers `_def.typeName`, else falls
  * back to a constructor beginning with `Zod`.
- * @param s (required: unknown) – TODO.
- * @returns string | undefined – TODO.
+ * @param s (required: unknown)
+ * @returns string | undefined
  */
 export function getTypeName(s: unknown): string | undefined {
   const d = getDef(s);
@@ -3050,8 +3022,8 @@ export function getTypeName(s: unknown): string | undefined {
 /**
  * Read optional query metadata attached to a schema via a well-known symbol.
  * Returns `null` when absent or malformed.
- * @param schema (required: unknown) – TODO.
- * @returns null | __type – TODO.
+ * @param schema (required: unknown)
+ * @returns null | object
  */
 export function getQMeta(schema: unknown): QMeta | null {
   if (!isObject(schema)) return null;
@@ -3078,8 +3050,8 @@ function hasSafeParse(x: unknown): x is { safeParse: (val: unknown) => unknown }
 
 /**
  * Heuristic: does `schema.safeParse(undefined)` succeed?
- * @param schema (required: unknown) – TODO.
- * @returns boolean – TODO.
+ * @param schema (required: unknown)
+ * @returns boolean
  */
 export function isOptionalish(schema: unknown): boolean {
   if (!hasSafeParse(schema)) return false;
@@ -3098,8 +3070,8 @@ export function isOptionalish(schema: unknown): boolean {
 /**
  * Handle chained wrappers (Default / Optional / Effects / Branded) and surface
  * the first default discovered while unwrapping.
- * @param s (required: unknown) – TODO.
- * @returns __type – TODO.
+ * @param s (required: unknown)
+ * @returns object
  */
 export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
   let node: unknown = s;
@@ -3175,8 +3147,8 @@ export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
 
 /**
  * Unwrap until a ZodObject or give up (returns the last node seen).
- * @param s (required: unknown) – TODO.
- * @returns unknown – TODO.
+ * @param s (required: unknown)
+ * @returns unknown
  */
 export function unwrapObjectForShapeDeep(s: unknown): unknown {
   let node: unknown = s;
@@ -3229,8 +3201,8 @@ function shapeFromCandidate(candidate: unknown): Record<string, unknown> | null 
 
 /**
  * Accepts either a ZodObject or a wrapper around it.
- * @param s (required: unknown) – TODO.
- * @returns null | __type – TODO.
+ * @param s (required: unknown)
+ * @returns null | object
  */
 export function getObjectShape(s: unknown): Record<string, unknown> | null {
   const root = unwrapObjectForShapeDeep(s);
@@ -3344,32 +3316,32 @@ export type AnyRecord = Record<string, unknown>;
 
 /**
  * Typed Object.keys — string keys only (symbols are intentionally excluded).
- * @param o (required: T) – TODO.
- * @returns Array – TODO.
+ * @param o (required: T)
+ * @returns Array
  */
 export const keysOf = <T extends AnyRecord>(o: T): Array<keyof T & string> =>
   Object.keys(o) as Array<keyof T & string>;
 
 /**
  * Typed Object.entries — string keys only.
- * @param o (required: T) – TODO.
- * @returns Array – TODO.
+ * @param o (required: T)
+ * @returns Array
  */
 export const entriesOf = <T extends AnyRecord>(o: T): Array<[keyof T & string, T[keyof T]]> =>
   Object.entries(o) as Array<[keyof T & string, T[keyof T]]>;
 
 /**
  * Typed Object.values.
- * @param o (required: T) – TODO.
- * @returns Array – TODO.
+ * @param o (required: T)
+ * @returns Array
  */
 export const valuesOf = <T extends AnyRecord>(o: T): Array<T[keyof T]> =>
   Object.values(o) as Array<T[keyof T]>;
 
 /**
  * Strict, typed fromEntries for string keys (no `any`, no unsafe access).
- * @param entries (required: Iterable) – TODO.
- * @returns __type – TODO.
+ * @param entries (required: Iterable)
+ * @returns object
  */
 export function fromEntriesStrict<K extends string, V>(
   entries: Iterable<readonly [K, V]>,
@@ -3383,21 +3355,21 @@ export function fromEntriesStrict<K extends string, V>(
 
 /**
  * List the supported versions (for menus or validation).
- * @returns ReadonlyArray – TODO.
+ * @returns ReadonlyArray
  */
 export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
   return VERSIONS;
 }
 /**
  * List the supported plans (for menus or validation).
- * @returns ReadonlyArray – TODO.
+ * @returns ReadonlyArray
  */
 export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
   return PLANS;
 }
 /**
  * List the supported (version, plan) pairs (derived from VERSION_TO_PLAN).
- * @returns ReadonlyArray – TODO.
+ * @returns ReadonlyArray
  */
 export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
   return VERSIONS.map((v) => ({ version: v, plan: VERSION_TO_PLAN[v] }));
@@ -3405,24 +3377,24 @@ export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
 
 /**
  * Type guard: is the value a valid {@link ApiVersion}.
- * @param x (required: unknown) – TODO.
- * @returns boolean – TODO.
+ * @param x (required: unknown)
+ * @returns boolean
  */
 export function isValidVersion(x: unknown): x is ApiVersion {
   return typeof x === "string" && (VERSIONS as readonly string[]).includes(x);
 }
 /**
  * Type guard: is the value a valid {@link ApiPlan}.
- * @param x (required: unknown) – TODO.
- * @returns boolean – TODO.
+ * @param x (required: unknown)
+ * @returns boolean
  */
 export function isValidPlan(x: unknown): x is ApiPlan {
   return typeof x === "string" && (PLANS as readonly string[]).includes(x);
 }
 /**
  * Type guard for a coherent {@link VersionPlanPair}.
- * @param pair (required: unknown) – TODO.
- * @returns boolean – TODO.
+ * @param pair (required: unknown)
+ * @returns boolean
  */
 export function isValidVersionPlan(pair: unknown): pair is VersionPlanPair {
   if (!pair || typeof pair !== "object") return false;
@@ -3432,8 +3404,8 @@ export function isValidVersionPlan(pair: unknown): pair is VersionPlanPair {
 
 /**
  * Parse a {@link VersionPlanKey} like "vX.Y.Z/plan" into a structured pair.
- * @param key (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid") – TODO.
- * @returns __type – TODO.
+ * @param key (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @returns object
  */
 export function parseVersionPlanKey(key: VersionPlanKey): VersionPlanPair {
   const [version, plan] = key.split("/") as [ApiVersion, ApiPlan];
@@ -3442,8 +3414,8 @@ export function parseVersionPlanKey(key: VersionPlanKey): VersionPlanPair {
 
 /**
  * Tolerant parse from an arbitrary string; returns `null` on invalid.
- * @param key (required: string) – TODO.
- * @returns null | __type – TODO.
+ * @param key (required: string)
+ * @returns null | object
  */
 export function tryParseVersionPlanKey(key: string): VersionPlanPair | null {
   const parts = key.split("/");
@@ -3544,9 +3516,9 @@ function isBlank(v: unknown): boolean {
  * - Throws if endpoint is unknown
  * - Throws if required path/query keys are missing/blank
  * - Returns a shallow-normalized shape (no default filling here)
- * @param endpointPath (required: string) – TODO.
- * @param input (required: __type) – TODO.
- * @returns __type – TODO.
+ * @param endpointPath (required: string)
+ * @param input (required: object)
+ * @returns object
  */
 export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
   const pathInfo = getPathInfo(endpointPath);
@@ -3650,9 +3622,9 @@ function isZodLike(s: unknown): s is ZodLikeSchema {
  * - Throws if endpoint is unknown
  * - Uses the endpoint's Zod response schema to validate
  * - Returns the parsed (possibly transformed) value
- * @param endpointPath (required: string) – TODO.
- * @param data (required: unknown) – TODO.
- * @returns T – TODO.
+ * @param endpointPath (required: string)
+ * @param data (required: unknown)
+ * @returns T
  */
 export function parseResponse<T = unknown>(endpointPath: string, data: unknown): T {
   const schema = getResponseSchema(endpointPath);
@@ -3695,11 +3667,11 @@ export function toURL(
  * @summary To Url.
  */
 /**
- * TODO: document function `toURL`.
- * @param base (required: string) – TODO.
- * @param path (required: string) – TODO.
- * @param query (optional: __type) [default={}] – TODO.
- * @returns string – TODO.
+ * Function toURL.
+ * @param base (required: string)
+ * @param path (required: string)
+ * @param query (optional: object) [default={}]
+ * @returns string
  */
 export function toURL(
   base: string,
@@ -3803,16 +3775,16 @@ import type {
 
 /**
  * Input shape for defining a registry endpoint.
- * @property id (required: string) – TODO.
- * @property validFor (required: VersionPlanPair) – TODO.
- * @property method (optional: HttpMethod) – TODO.
- * @property pathTemplate (required: string) – TODO.
- * @property requiredPath (optional: ReadonlyArray<string>) – TODO.
- * @property requiredQuery (optional: ReadonlyArray<string>) – TODO.
- * @property queryRules (optional: ReadonlyArray<QueryRule>) – TODO.
- * @property serverDefaults (optional: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>) – TODO.
- * @property requestSchema (optional: z.ZodTypeAny) – TODO.
- * @property responseSchema (required: z.ZodTypeAny) – TODO.
+ * @property id (required: string).
+ * @property validFor (required: VersionPlanPair).
+ * @property method (optional: HttpMethod).
+ * @property pathTemplate (required: string).
+ * @property requiredPath (optional: ReadonlyArray<string>).
+ * @property requiredQuery (optional: ReadonlyArray<string>).
+ * @property queryRules (optional: ReadonlyArray<QueryRule>).
+ * @property serverDefaults (optional: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>).
+ * @property requestSchema (optional: z.ZodTypeAny).
+ * @property responseSchema (required: z.ZodTypeAny).
  */
 export type DefineEndpointInput = Readonly<{
   id: string;
@@ -3829,8 +3801,8 @@ export type DefineEndpointInput = Readonly<{
 
 /**
  * Create a normalized RegistryEndpoint from minimal inputs.
- * @param input (required: __type) – TODO.
- * @returns __type – TODO.
+ * @param input (required: object)
+ * @returns object
  */
 export function defineEndpoint(input: DefineEndpointInput): RegistryEndpoint {
   const method = input.method ?? "GET";
@@ -4332,7 +4304,7 @@ import {
 } from "../schemas/token_lists.by-asset_platform_id.all.json/v3.0.1/public/index.js";
 import type { RegistryEntry } from "../types.js";
 /**
- * TODO: document const `GENERATED_REGISTRY`.
+ * Constant GENERATED_REGISTRY.
  * @remarks Type: ReadonlyArray<unknown>
  */
 export const GENERATED_REGISTRY = [
@@ -4739,9 +4711,9 @@ import { GENERATED_REGISTRY } from "./generated.js";
 import type { RegistryEndpoint, ZodLikeSchema, QueryPrimitive, VersionPlanPair } from "../types.js";
 
 /**
- * TODO: document function `listEndpoints`.
- * @param filter (optional: undefined | __type) – TODO.
- * @returns ReadonlyArray – TODO.
+ * Function listEndpoints.
+ * @param filter (optional: undefined | object)
+ * @returns ReadonlyArray
  */
 export function listEndpoints(
   filter?: Partial<VersionPlanPair>,
@@ -4755,10 +4727,10 @@ export function listEndpoints(
 }
 
 /**
- * TODO: document function `getEndpointDefinition`.
- * @param path (required: string) – TODO.
- * @param validFor (optional: undefined | __type) – TODO.
- * @returns null | object – TODO.
+ * Function getEndpointDefinition.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | object
  */
 export function getEndpointDefinition(
   path: string,
@@ -4776,10 +4748,10 @@ export function getEndpointDefinition(
 }
 
 /**
- * TODO: document function `getServerDefaults`.
- * @param id (required: string) – TODO.
- * @param validFor (optional: undefined | __type) – TODO.
- * @returns null | __type – TODO.
+ * Function getServerDefaults.
+ * @param id (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | object
  */
 export function getServerDefaults(
   id: string,
@@ -4790,10 +4762,10 @@ export function getServerDefaults(
 }
 
 /**
- * TODO: document function `getQueryRules`.
- * @param path (required: string) – TODO.
- * @param validFor (optional: undefined | __type) – TODO.
- * @returns null | ReadonlyArray – TODO.
+ * Function getQueryRules.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | ReadonlyArray
  */
 export function getQueryRules(
   path: string,
@@ -4804,10 +4776,10 @@ export function getQueryRules(
 }
 
 /**
- * TODO: document function `getPathInfo`.
- * @param path (required: string) – TODO.
- * @param validFor (optional: undefined | __type) – TODO.
- * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string>; } | null – TODO.
+ * Function getPathInfo.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string>; } | null
  */
 export function getPathInfo(
   path: string,
@@ -4819,8 +4791,8 @@ export function getPathInfo(
 
 /**
  * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
- * @param path (required: string) – TODO.
- * @returns undefined | __type – TODO.
+ * @param path (required: string)
+ * @returns undefined | object
  */
 export function getResponseSchema(path: string): ZodLikeSchema | undefined {
   const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
@@ -4829,8 +4801,8 @@ export function getResponseSchema(path: string): ZodLikeSchema | undefined {
 
 /**
  * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
- * @param path (required: string) – TODO.
- * @returns undefined | __type – TODO.
+ * @param path (required: string)
+ * @returns undefined | object
  */
 export function getRequestSchema(path: string): ZodLikeSchema | undefined {
   const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
@@ -4845,7 +4817,8 @@ export function getRequestSchema(path: string): ZodLikeSchema | undefined {
  * @module registry/path-from-slug
  * @summary Path From Slug.
  */
-// src/registry/path-from-slug.ts
+
+/** src/registry/path-from-slug.ts */
 export type PathFromSlug = Readonly<{
   template: string; // e.g. "/coins/{id}/history"
   requiredParams: ReadonlyArray<string>; // e.g. ["id"]
@@ -4876,11 +4849,11 @@ export function pathTemplateFromSlug(slug: string): PathFromSlug {
  * @module registry/path-from-slug
  * @summary Path From Slug.
  */
-// src/registry/path-from-slug.ts
+
 /**
- * TODO: document type `PathFromSlug`.
- * @property template (required: string) – TODO.
- * @property requiredParams (required: ReadonlyArray<string>) – TODO.
+ * src/registry/path-from-slug.ts
+ * @property template (required: string).
+ * @property requiredParams (required: ReadonlyArray<string>).
  */
 export type PathFromSlug = Readonly<{
   template: string; // e.g. "/coins/{id}/history"
@@ -4889,8 +4862,8 @@ export type PathFromSlug = Readonly<{
 
 /**
  * Build a URL path template from a slug using dot + `by-<param>` rules.
- * @param slug (required: string) – TODO.
- * @returns __type – TODO.
+ * @param slug (required: string)
+ * @returns object
  */
 export function pathTemplateFromSlug(slug: string): PathFromSlug {
   const parts = slug.split(".");
@@ -4954,9 +4927,9 @@ import type { EndpointIdFor, EntryFor, RegistryEntry, VersionPlanPair } from "..
 
 // Runtime helpers (pure)
 /**
- * TODO: document function `selectEntries`.
- * @param validFor (required: V) – TODO.
- * @returns ReadonlyArray – TODO.
+ * Function selectEntries.
+ * @param validFor (required: V)
+ * @returns ReadonlyArray
  */
 export function selectEntries<V extends VersionPlanPair>(validFor: V): ReadonlyArray<EntryFor<V>> {
   return GENERATED_REGISTRY.filter(
@@ -4966,9 +4939,9 @@ export function selectEntries<V extends VersionPlanPair>(validFor: V): ReadonlyA
 }
 
 /**
- * TODO: document function `selectEntryMap`.
- * @param validFor (required: V) – TODO.
- * @returns __type – TODO.
+ * Function selectEntryMap.
+ * @param validFor (required: V)
+ * @returns object
  */
 export function selectEntryMap<V extends VersionPlanPair>(
   validFor: V,
@@ -5029,8 +5002,8 @@ import type { RequestShape } from "../types.js";
 
 /** Build a default request from registry defaults.
  * Returns null if required path params are missing.
- * @param endpointId (required: string) – TODO.
- * @returns null | __type – TODO.
+ * @param endpointId (required: string)
+ * @returns null | object
  */
 export function synthesizeDefaultRequest(endpointId: string): RequestShape | null {
   const seed = getRequestFor(endpointId, {
@@ -5182,9 +5155,9 @@ const SCENARIOS_DIR = "scenarios";
 
 /**
  * Discover a single endpoint's fixtures (defaults + scenarios).
- * @param validFor (required: __type) – TODO.
- * @param endpointSlug (required: string) – TODO.
- * @returns Promise – TODO.
+ * @param validFor (required: object)
+ * @param endpointSlug (required: string)
+ * @returns Promise
  */
 export async function discoverEndpointFixtures(
   validFor: VersionPlanPair,
@@ -5239,8 +5212,8 @@ export async function discoverEndpointFixtures(
 
 /**
  * Build concrete test plans for an endpoint fixture root.
- * @param root (required: __type) – TODO.
- * @returns Promise – TODO.
+ * @param root (required: object)
+ * @returns Promise
  */
 export async function buildTestPlans(root: EndpointFixtureRoot): Promise<TestPlan[]> {
   const plans: TestPlan[] = [];
@@ -5352,9 +5325,9 @@ import * as fsSync from "node:fs";
 import * as path from "node:path";
 
 /**
- * TODO: document function `pathExists`.
- * @param p (required: string) – TODO.
- * @returns Promise – TODO.
+ * Function pathExists.
+ * @param p (required: string)
+ * @returns Promise
  */
 export async function pathExists(p: string): Promise<boolean> {
   try {
@@ -5366,9 +5339,9 @@ export async function pathExists(p: string): Promise<boolean> {
 }
 
 /**
- * TODO: document function `readJSON`.
- * @param p (required: string) – TODO.
- * @returns Promise – TODO.
+ * Function readJSON.
+ * @param p (required: string)
+ * @returns Promise
  */
 export async function readJSON<T>(p: string): Promise<T> {
   const raw = await fs.readFile(p, "utf8");
@@ -5380,9 +5353,9 @@ export async function readJSON<T>(p: string): Promise<T> {
 }
 
 /**
- * TODO: document function `listFiles`.
- * @param p (required: string) – TODO.
- * @returns Promise – TODO.
+ * Function listFiles.
+ * @param p (required: string)
+ * @returns Promise
  */
 export async function listFiles(p: string): Promise<string[]> {
   try {
@@ -5395,7 +5368,7 @@ export async function listFiles(p: string): Promise<string[]> {
 
 /**
  * Resolve the fixtures root, preferring src/testkit/... if it exists.
- * @returns string – TODO.
+ * @returns string
  */
 export function fixturesRoot(): string {
   const cwd = process.cwd();
@@ -5417,11 +5390,11 @@ export function fixturesRoot(): string {
 }
 
 /**
- * TODO: document function `endpointRoot`.
- * @param version (required: string) – TODO.
- * @param plan (required: string) – TODO.
- * @param testkitlug (required: string) – TODO.
- * @returns string – TODO.
+ * Function endpointRoot.
+ * @param version (required: string)
+ * @param plan (required: string)
+ * @param testkitlug (required: string)
+ * @returns string
  */
 export function endpointRoot(version: string, plan: string, testkitlug: string): string {
   return path.join(fixturesRoot(), version, plan, testkitlug);
@@ -5703,9 +5676,9 @@ function sanitizeRequestShape(x: unknown): RequestShape {
 }
 
 /**
- * TODO: document function `runDefaultTest`.
- * @param plan (required: __type) – TODO.
- * @returns Promise – TODO.
+ * Function runDefaultTest.
+ * @param plan (required: object)
+ * @returns Promise
  */
 export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResult> {
   // Build a raw request source; if synth returns null, skip immediately
@@ -5745,9 +5718,9 @@ export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResu
 }
 
 /**
- * TODO: document function `runScenarioTest`.
- * @param plan (required: __type) – TODO.
- * @returns Promise – TODO.
+ * Function runScenarioTest.
+ * @param plan (required: object)
+ * @returns Promise
  */
 export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
   // Request as unknown → sanitize → validate/normalize
@@ -5832,8 +5805,8 @@ export function slugFromPathTemplate(template: string): string {
 
 /**
  * Convert an unversioned API path template to our repo slug (dot + by-).
- * @param template (required: string) – TODO.
- * @returns string – TODO.
+ * @param template (required: string)
+ * @returns string
  */
 export function slugFromPathTemplate(template: string): string {
   return template
@@ -5928,7 +5901,7 @@ import type { VersionPlanPair } from "../types.js";
 
 /**
  * Optional scenario metadata.
- * @property expect (optional: "pass" | "fail") – TODO.
+ * @property expect (optional: "pass" | "fail").
  */
 export type ScenarioMeta = Readonly<{
   /** Expected validator outcome. Default inferred from presence of error.response fixture. */
@@ -5937,11 +5910,11 @@ export type ScenarioMeta = Readonly<{
 
 /**
  * A discovered scenario file group (request + response variants).
- * @property name (required: string) – TODO.
- * @property requestPath (required: string) – TODO.
- * @property responsePath (required: string | null) – TODO.
- * @property errorResponsePath (required: string | null) – TODO.
- * @property metaPath (required: string | null) – TODO.
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property metaPath (required: string | null).
  */
 export type ScenarioFilePair = Readonly<{
   name: string;
@@ -5953,11 +5926,11 @@ export type ScenarioFilePair = Readonly<{
 
 /**
  * Root info for an endpoint’s fixtures.
- * @property validFor (required: VersionPlanPair) – TODO.
- * @property endpointSlug (required: string) – TODO.
- * @property rootDir (required: string) – TODO.
- * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>) – TODO.
- * @property scenarios (required: ReadonlyArray<ScenarioFilePair>) – TODO.
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>).
+ * @property scenarios (required: ReadonlyArray<ScenarioFilePair>).
  */
 export type EndpointFixtureRoot = Readonly<{
   validFor: VersionPlanPair;
@@ -5972,12 +5945,12 @@ export type EndpointFixtureRoot = Readonly<{
 
 /**
  * Default (docs) test plan.
- * @property kind (required: "default") – TODO.
- * @property validFor (required: VersionPlanPair) – TODO.
- * @property endpointSlug (required: string) – TODO.
- * @property rootDir (required: string) – TODO.
- * @property requestPath (required: string | null) – TODO.
- * @property responsePath (required: string) – TODO.
+ * @property kind (required: "default").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property requestPath (required: string | null).
+ * @property responsePath (required: string).
  */
 export type DefaultTestPlan = Readonly<{
   kind: "default";
@@ -5990,15 +5963,15 @@ export type DefaultTestPlan = Readonly<{
 
 /**
  * Scenario (variant) test plan.
- * @property kind (required: "scenario") – TODO.
- * @property validFor (required: VersionPlanPair) – TODO.
- * @property endpointSlug (required: string) – TODO.
- * @property rootDir (required: string) – TODO.
- * @property name (required: string) – TODO.
- * @property requestPath (required: string) – TODO.
- * @property responsePath (required: string | null) – TODO.
- * @property errorResponsePath (required: string | null) – TODO.
- * @property meta (required: Readonly<{ expect: "pass" | "fail" }>) – TODO.
+ * @property kind (required: "scenario").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property meta (required: Readonly<{ expect: "pass" | "fail" }>).
  */
 export type ScenarioTestPlan = Readonly<{
   kind: "scenario";
@@ -6014,8 +5987,7 @@ export type ScenarioTestPlan = Readonly<{
 
 /**
  * Union of supported plans.
- * @remarks Variants:
- * - __type
+ * @remarks Type: __type
  */
 export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
 

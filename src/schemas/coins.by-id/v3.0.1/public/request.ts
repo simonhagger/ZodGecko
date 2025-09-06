@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/coins.by-id/v3.0.1/public/request.ts
  * @module schemas/coins.by-id/v3.0.1/public/request
-  * @summary Request.
+ * @summary Request.
  */
 
 /** Import base schema */

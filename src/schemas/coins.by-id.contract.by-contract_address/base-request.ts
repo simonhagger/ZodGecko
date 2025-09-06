@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/coins.by-id.contract.by-contract_address/base-request.ts
  * @module schemas/coins.by-id.contract.by-contract_address/base-request
-  * @summary Base Request.
+ * @summary Base Request.
  */
 
 /** Zod import */

@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/token_lists.by-asset_platform_id.all.json/base-request.ts
  * @module schemas/token_lists.by-asset_platform_id.all.json/base-request
-  * @summary Base Request.
+ * @summary Base Request.
  */
 
 /** Zod import */

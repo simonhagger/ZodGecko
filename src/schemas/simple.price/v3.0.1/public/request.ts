@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/simple.price/v3.0.1/public/request.ts
  * @module schemas/simple.price/v3.0.1/public/request
-  * @summary Request.
+ * @summary Request.
  */
 
 /** Import base schema */

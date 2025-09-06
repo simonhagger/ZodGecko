@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/simple.price/base-request.ts
  * @module schemas/simple.price/base-request
-  * @summary Base Request.
+ * @summary Base Request.
  */
 
 /** Zod import */

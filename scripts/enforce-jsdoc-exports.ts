@@ -43,6 +43,27 @@ const IGNORE = new Set<string>([path.join(SRC, "registry", "generated.ts")]);
 
 const MAX_TYPE_LEN = 120;
 
+function collapseBooleanParts(parts: string[]): string[] {
+  const set = new Set(parts.map((p) => p.trim()));
+  if (set.has("true") && set.has("false")) {
+    const rest = parts.filter((p) => p !== "true" && p !== "false");
+    return Array.from(new Set(["boolean", ...rest]));
+  }
+  return Array.from(new Set(parts));
+}
+
+function capDocType(t: string): string {
+  return t && t.length > MAX_TYPE_LEN ? "complex type" : t;
+}
+function isSimpleAtom(s: string): boolean {
+  return (
+    /^(string|number|boolean|bigint|null|undefined|symbol|object)$/.test(s) ||
+    /^"[^"]*"$/.test(s) ||
+    /^'[^']*'$/.test(s) ||
+    /^[A-Za-z_][A-Za-z0-9_]*$/.test(s)
+  );
+}
+
 // ---- reporting (dry-run) ----
 type ReportEntry = { file: string; before: string; after: string };
 const report: ReportEntry[] = [];
@@ -331,6 +352,8 @@ function sanitizeTypeTextForDocs(s: string): string {
   s = s.replace(/\s+/g, " ");
   // Avoid the internal __object marker
   s = s.replace(/\b__object\b/g, "object");
+  // Avoid the internal __type marker
+  s = s.replace(/\b__type\b/g, "object");
   return s.trim();
 }
 
@@ -468,14 +491,24 @@ function compactTypeText(node: Node, t = node.getType()): string {
   }
 
   if (t.isUnion()) {
-    const parts = t.getUnionTypes().map((u) => {
+    let parts = t.getUnionTypes().map((u) => {
       const n = u.getSymbol()?.getName();
       return n && n !== "__type" ? n : compactTypeText(node, u);
     });
-    const uniq = Array.from(new Set(parts.map((p) => (p === "__object" ? "object" : p))));
+    // collapse true|false → boolean
+    const set = new Set(parts);
+    if (set.has("true") && set.has("false")) {
+      parts = parts.filter((p) => p !== "true" && p !== "false");
+      parts.unshift("boolean");
+    }
+    const uniq = Array.from(
+      new Set(parts.map((p) => (p === "__object" || p === "__type" ? "object" : p))),
+    );
+
     const joined = uniq.join(" | ");
     return joined.length <= MAX_TYPE_LEN ? joined : `union(${uniq.length})`;
   }
+
   if (t.isIntersection()) {
     const parts = t.getIntersectionTypes().map((u) => compactTypeText(node, u));
     const uniq = Array.from(new Set(parts));
@@ -608,18 +641,20 @@ function ensureFunctionDoc(
     return;
   }
 
-  const doc = consolidateJsDocs(host, `TODO: document function \`${name}\`.`);
+  const doc = consolidateJsDocs(host, `Function ${name}.`);
 
   const params = getParams(node);
   const paramLines = params.map((p) => {
     const reqOpt = p.isOptional ? "optional" : "required";
     const def = p.defaultText ? ` [default=${p.defaultText}]` : "";
-    return `${p.name} (${reqOpt}: ${p.typeText || "unknown"})${def} – TODO.`;
+    const tshort = capDocType((p.typeText || "unknown").replace(/\b__type\b/g, "object"));
+    return `${p.name} (${reqOpt}: ${tshort})${def}`;
   });
   replaceParamTags(doc, paramLines);
 
   const rType = compactTypeText(node, node.getReturnType());
-  addOrEnsureTag(doc, "returns", `${rType} – TODO.`);
+  addOrEnsureTag(doc, "returns", capDocType(rType.replace(/\b__type\b/g, "object")));
+
   normalizeExampleTags(doc);
   bumpFix();
 }
@@ -637,14 +672,14 @@ function ensureConstDoc(sf: SourceFile, decl: VariableDeclaration, name: string)
     return;
   }
 
-  const doc = consolidateJsDocs(host, `TODO: document const \`${name}\`.`);
-  const typeText = compactTypeText(decl, decl.getType());
+  const doc = consolidateJsDocs(host, `Constant ${name}.`);
+  const typeText = compactTypeText(decl, decl.getType()).replace(/\b__type\b/g, "object");
   addOrEnsureTag(
     doc,
     "remarks",
     `Type: ${typeText.length <= MAX_TYPE_LEN ? typeText : "complex object; see source"}`,
   );
-  normalizeExampleTags(doc);
+
   bumpFix();
 }
 
@@ -659,7 +694,7 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
   }
 
   // Single doc per node (merge any pre-existing blocks)
-  const doc = consolidateJsDocs(t, `TODO: document type \`${name}\`.`);
+  const doc = consolidateJsDocs(t, `Type alias ${name}.`);
 
   const tt = t.getType();
   const aliasTextRaw = t.getTypeNode()?.getText() ?? "";
@@ -670,17 +705,16 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
   if (isArrayLike(t, tt)) {
     // If the alias is literally "typeof GEN" etc., keep it as-is for clarity.
     if (isTypeofAlias) {
-      addOrEnsureTag(doc, "remarks", `Type: ${aliasTextClean}`);
+      const pretty = compactTypeText(t, tt);
+      addOrEnsureTag(doc, "remarks", `Type: ${pretty}`);
       normalizeExampleTags(doc);
       bumpFix();
       return;
     }
 
     // Otherwise show Array<NamedElement> or Array<unknown>; no "Elements:" if unknown.
-    const pretty = compactTypeText(t, tt); // now guaranteed to be Array<...> or ReadonlyArray<...>
-    const elem = elementTypeDescription(t, tt);
-    const body = elem !== "unknown" ? `Type: ${pretty}\nElements: ${elem}` : `Type: ${pretty}`;
-    addOrEnsureTag(doc, "remarks", body);
+    const pretty = compactTypeText(t, tt); // Array<...> or ReadonlyArray<...>
+    addOrEnsureTag(doc, "remarks", `Type: ${pretty}`);
     normalizeExampleTags(doc);
     bumpFix();
     return;
@@ -695,7 +729,7 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
       const decProps = readDeclaredPropsFromLiteral(lit);
       if (decProps.length > 0) {
         const lines = decProps.map(
-          (p) => `${p.name} (${p.optional ? "optional" : "required"}: ${p.typeText}) – TODO.`,
+          (p) => `${p.name} (${p.optional ? "optional" : "required"}: ${p.typeText}).`,
         );
         replacePropertyTags(doc, lines);
         normalizeExampleTags(doc);
@@ -732,7 +766,9 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
 
       if (typeText.length > MAX_TYPE_LEN) typeText = "complex type";
 
-      lines.push(`${p.getName()} (${isOptional ? "optional" : "required"}: ${typeText}) – TODO.`);
+      lines.push(
+        `${p.getName()} (${isOptional ? "optional" : "required"}: ${capDocType(typeText)})`,
+      );
     }
 
     if (lines.length > 0) {
@@ -747,31 +783,35 @@ function ensureTypeAliasDoc(sf: SourceFile, t: TypeAliasDeclaration) {
 
   // 3) Unions / intersections / everything else
   if (tt.isUnion()) {
-    const partsRaw = tt.getUnionTypes().map((u) => compactTypeText(t, u));
-    const parts = Array.from(new Set(partsRaw.map((p) => (p === "__object" ? "object" : p))));
+    let partsRaw = tt.getUnionTypes().map((u) => compactTypeText(t, u));
+    partsRaw = partsRaw.map((p) => (p === "__object" ? "object" : p));
+    const parts = Array.from(new Set(collapseBooleanParts(partsRaw)));
     const allObjects = parts.length > 0 && parts.every((p) => p === "object");
     const tooMany = parts.length > 8;
     const noisyParts = parts.some(looksNoisyType);
 
     if (allObjects || tooMany || noisyParts) {
-      // Prefer declared alias text if it’s clean; otherwise a short synthetic form
       const pref = preferredAliasDocText(t, sanitizeTypeTextForDocs(t.getName()));
       addOrEnsureTag(doc, "remarks", `Type: ${pref}`);
-      normalizeExampleTags(doc);
     } else {
-      addOrEnsureTag(doc, "remarks", `Variants:\n- ${parts.join("\n- ")}`);
-      normalizeExampleTags(doc);
+      const simpleAll = parts.every(isSimpleAtom);
+      if (simpleAll && parts.length <= 6) {
+        addOrEnsureTag(doc, "remarks", `Type: ${parts.join(" | ")}`);
+      } else {
+        addOrEnsureTag(doc, "remarks", `Variants:\n- ${parts.join("\n- ")}`);
+      }
     }
+    normalizeExampleTags(doc);
   } else if (tt.isIntersection()) {
     const parts = tt.getIntersectionTypes().map((u) => compactTypeText(t, u));
-    if (parts.length > 6 || parts.some(looksNoisyType)) {
+    const simpleAll = parts.every(isSimpleAtom);
+    if (simpleAll && parts.length <= 4) {
+      addOrEnsureTag(doc, "remarks", `Type: ${parts.join(" & ")}`);
+    } else {
       const pref = preferredAliasDocText(t, sanitizeTypeTextForDocs(t.getName()));
       addOrEnsureTag(doc, "remarks", `Type: ${pref}`);
-      normalizeExampleTags(doc);
-    } else {
-      addOrEnsureTag(doc, "remarks", `Intersection of ${parts.length} types.`);
-      normalizeExampleTags(doc);
     }
+    normalizeExampleTags(doc);
   } else {
     // Simple/non-composite: prefer alias node text if it’s clean
     if (aliasTextClean && !looksNoisyType(aliasTextClean)) {
@@ -800,14 +840,14 @@ function ensureInterfaceDoc(sf: SourceFile, i: InterfaceDeclaration) {
     return;
   }
 
-  const doc = ensureDocWithSummary(i, `TODO: document interface \`${name}\`.`);
+  const doc = ensureDocWithSummary(i, `Interface ${name}.`);
 
   const lines: string[] = [];
   i.getProperties().forEach((p) => {
     const opt = p.hasQuestionToken();
     const compact = compactTypeText(p, p.getType());
     const reqOpt = opt ? "optional" : "required";
-    lines.push(`${p.getName()} (${reqOpt}: ${compact}) – TODO.`);
+    lines.push(`${p.getName()} (${reqOpt}: ${capDocType(compact)})`);
   });
   replacePropertyTags(doc, lines);
   bumpFix();
@@ -827,7 +867,7 @@ function ensureEnumDoc(sf: SourceFile, e: EnumDeclaration) {
     return;
   }
 
-  const doc = ensureDocWithSummary(e, `TODO: document enum \`${name}\`.`);
+  const doc = ensureDocWithSummary(e, `Enum ${name}.`);
 
   const items = e.getMembers().map((m) => m.getName());
   addOrEnsureTag(doc, "remarks", `Members:\n- ${items.join("\n- ")}`);

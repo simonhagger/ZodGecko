@@ -8,7 +8,7 @@
  * - The minimal fetch client lives under a separate entry: `zodgecko/fetch`.
  * - Registry internals (generated data) are not exported from the root.
  * - Keep this barrel tight and predictable.
-  * @summary Index.
+ * @summary Index.
  */
 
 /* --------------------------------- Helpers -------------------------------- */

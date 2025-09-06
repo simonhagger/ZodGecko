@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/asset_platforms/base-response.ts
  * @module schemas/asset_platforms/base-response
-  * @summary Base Response.
+ * @summary Base Response.
  */
 
 /** Zod import */

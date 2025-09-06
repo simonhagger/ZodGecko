@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/simple.supported_vs_currencies/base-request.ts
  * @module schemas/simple.supported_vs_currencies/base-request
-  * @summary Base Request.
+ * @summary Base Request.
  */
 
 /** Zod import */

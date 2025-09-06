@@ -75,6 +75,7 @@
     "check:exports": "tsx scripts/enforce-jsdoc-exports.ts",
     "check:exports:dryrun": "tsx scripts/enforce-jsdoc-exports.ts --dry-run --out jsdoc-preview.txt",
     "fix:exports": "tsx scripts/enforce-jsdoc-exports.ts --write",
+    "fix:prettier": "npx prettier src/**/*.ts --write",
     "check:zod": "node scripts/check-zod-version.mjs",
     "check:examples": "tsc -p examples/tsconfig.json",
     "verify:docs": "npm run docs:registry && npm-run-all -l --continue-on-error check:*",

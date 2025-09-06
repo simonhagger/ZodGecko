@@ -1,7 +1,7 @@
 /**
  * @file src/schemas/simple.token_price.by-id/base-request.ts
  * @module schemas/simple.token_price.by-id/base-request
-  * @summary Base Request.
+ * @summary Base Request.
  */
 
 /** Zod import */
