@@ -56,7 +56,7 @@ if (-not ($IncludeRootConfigNames -contains $SelfName)) {
 }
 
 # Skip these by filename (noise/locks)
-$ExcludeNames = @("package-lock.json","yarn.lock","pnpm-lock.yaml","bun.lockb",".DS_Store")
+$ExcludeNames = @("package-lock.json","yarn.lock","pnpm-lock.yaml","bun.lockb",".DS_Store",".\_temp.md")
 # Also exclude the current output file name (so we don't ingest our own dump)
 $ExcludeNames += [System.IO.Path]::GetFileName($OutputFile)
 
@@ -64,7 +64,7 @@ $ExcludeNames += [System.IO.Path]::GetFileName($OutputFile)
 $SensitiveNameRegex = '^(?:\.env(?:\..*)?)$'
 
 # Skip paths that match these segments
-$ExcludePathRegex = "\\(node_modules|dist|\.git|coverage|.angular|out|build|tmp|.cache)\\"
+$ExcludePathRegex = "\\(node_modules|dist|\.git|coverage|.angular|out|build|tmp|.cache|(?<=\Sfixtures\\)(v[0-9]+.[0-9].[0-9]))\\"
 
 # ---- Prep ----
 if (Test-Path $OutputFile) { Remove-Item $OutputFile -Force }

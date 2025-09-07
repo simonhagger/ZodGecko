@@ -42,6 +42,10 @@
       "types": "./dist/endpoints/index.d.ts",
       "import": "./dist/endpoints/index.js"
     },
+    "./fetch": {
+      "types": "./dist/fetch/index.d.ts",
+      "import": "./dist/fetch/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -53,29 +57,33 @@
     "node": ">=18"
   },
   "scripts": {
-    "check:deps": "madge --circular src",
     "clean": "rimraf dist .tsbuildinfo",
     "build": "tsc -p tsconfig.build.json",
-    "docs:inventory": "tsx scripts/generate-endpoint-inventory-docs.ts",
+    "docs:registry": "tsx scripts/generate-registry-inventory.ts",
+    "gen:registry": "tsx scripts/gen-registry.ts",
+    "examples:basic": "tsx examples/basic-usage.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:core": "vitest run src/core/__tests__",
-    "test:runtime": "vitest run src/runtime/__tests__",
-    "test:endpoints": "vitest run src/endpoints/__tests__/endpoints.functional.test.ts",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "check:inventory": "tsx scripts/check-endpoint-inventory.ts",
+    "lint:scripts": "eslint \"scripts/**/*.{ts,tsx}\"",
+    "fix:headers": "tsx scripts/enforce-jsdoc-headers.ts --write",
+    "fix:exports": "tsx scripts/enforce-jsdoc-exports.ts --write",
+    "fix:tsdoc:dryrun": "tsx scripts/enforce-jsdoc.ts --dry-run",
+    "fix:tsdoc": "tsx scripts/enforce-jsdoc.ts --write",
+    "fix:prettier": "npx prettier \"src/**/*.{ts,tsx,md}\" --write",
+    "check:deps": "madge --circular src",
+    "check:registry": "tsx scripts/check-registry-inventory.ts",
     "check:tsdoc": "tsx scripts/check-tsdoc.ts",
     "check:zod": "node scripts/check-zod-version.mjs",
     "check:examples": "tsc -p examples/tsconfig.json",
-    "verify:docs": "npm run docs:inventory && npm-run-all -l --continue-on-error check:* && npm run check:inventory",
-    "format": "prettier --write \"src/**/*.{ts,tsx,md}\"",
+    "fullcheck": "npm run docs:registry && npm-run-all -l --continue-on-error check:*",
     "prepack": "npm run clean && npm run build && npm run test:coverage",
     "prepublishOnly": "npm run clean && npm run build && npm run test:coverage"
   },
   "peerDependencies": {
-    "zod": "^3.25.0 || ^4.0.0"
+    "zod": "4.1"
   },
   "peerDependenciesMeta": {
     "zod": {
@@ -101,8 +109,8 @@
     "ts-morph": "^26.0.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.40.0",
+    "typescript-eslint": "^8.42.0",
     "vitest": "^3.2.4",
-    "zod": "^4.0.0"
+    "zod": "4.1"
   }
 }

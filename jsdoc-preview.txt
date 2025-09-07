@@ -1,0 +1,2379 @@
+# JSDoc — Dry Run Report
+Generated: 2025-09-07T01:18:59.812Z
+
+===== FILE: src/types.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Type alias GeneratedRegistry.
+ * @remarks Type: ReadonlyArray<object>
+ */
+export type GeneratedRegistry = typeof GEN;
+--- AFTER (hunk) ----
+/**
+ * Type alias GeneratedRegistry.
+ * @remarks Type: typeof GEN
+ */
+export type GeneratedRegistry = typeof GEN;
+
+--- BEFORE (hunk) ---
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
+ */
+export type VersionPlanPair = Readonly<{
+  /** API version (e.g. "v3.0.1"). */
+  version: ApiVersion;
+  /** Plan/channel (e.g. "public" | "paid"). */
+  plan: ApiPlan;
+}>;
+
+/**
+ * String literal of the valid version/plan key (e.g. "v3.0.1/public").
+ * @remarks Type: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid"
+ */
+export type VersionPlanKey = `${ApiVersion}/${ApiPlan}`;
+
+/**
+ * Build a key from a {@link VersionPlanPair}.
+ * @remarks Type: VersionPlanKeyFromPair
+ */
+export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}/${V["plan"]}`;
+
+// ===========================================================================
+//  Query string primitives & Request shape
+// ===========================================================================
+
+/**
+ * Allowed primitive types in query strings.
+ * @remarks Type: string | number | boolean
+ */
+export type QueryPrimitive = string | number | boolean;
+/**
+ * Read‑only array of primitives (CSV‑style encodings).
+ * @remarks Type: ReadonlyArray<QueryPrimitive>
+ */
+export type QueryArray = readonly QueryPrimitive[];
+/**
+ * A single query value: a primitive or an immutable array of primitives.
+ * @remarks Type: string | number | boolean | ReadonlyArray
+ */
+export type QueryValue = QueryPrimitive | QueryArray;
+/**
+ * Read‑only map of query keys to values.
+ * @remarks Type: { readonly [x: string]: QueryValue; }
+ */
+export type QueryParams = Readonly<Record<string, QueryValue>>;
+/**
+ * Path parameters are strings (already URL‑encoded).
+ * @remarks Type: { readonly [x: string]: string; }
+ */
+export type PathParams = Readonly<Record<string, string>>;
+
+/**
+ * Canonical request shape used across helpers & client.
+ * @property path (optional: PathParams).
+ * @property query (optional: QueryParams).
+ * @example const req: RequestShape = {
+ *   path: { id: "bitcoin" },
+ *   query: { vs_currency: "usd", days: 1 }
+ * };
+ */
+export type RequestShape = Readonly<{
+  /** Path parameters (template substitutions). */
+  path?: PathParams;
+  /** Querystring parameters (before normalization). */
+  query?: QueryParams;
+}>;
+
+/**
+ * A concrete endpoint path template (API surface).
+ * @remarks Type: string
+ */
+export type EndpointPath = string; // e.g., "/coins/{id}/ohlc"
+
+// ===========================================================================
+//  Normalization policies & schema interfaces
+// ===========================================================================
+
+--- AFTER (hunk) ----
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
+ * @remarks Type: VersionPlanPair
+ */
+export type VersionPlanPair = Readonly<{
+  /** API version (e.g. "v3.0.1"). */
+  version: ApiVersion;
+  /** Plan/channel (e.g. "public" | "paid"). */
+  plan: ApiPlan;
+}>;
+
+/**
+ * String literal of the valid version/plan key (e.g. "v3.0.1/public").
+ * @remarks Type: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid"
+ */
+export type VersionPlanKey = `${ApiVersion}/${ApiPlan}`;
+
+/**
+ * Build a key from a {@link VersionPlanPair}.
+ * @remarks Type: VersionPlanKeyFromPair
+ */
+export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}/${V["plan"]}`;
+
+// ===========================================================================
+//  Query string primitives & Request shape
+// ===========================================================================
+
+/**
+ * Allowed primitive types in query strings.
+ * @remarks Type: string | number | boolean
+ */
+export type QueryPrimitive = string | number | boolean;
+/**
+ * Read‑only array of primitives (CSV‑style encodings).
+ * @remarks Type: QueryArray
+ */
+export type QueryArray = readonly QueryPrimitive[];
+/**
+ * A single query value: a primitive or an immutable array of primitives.
+ * @remarks Type: QueryPrimitive | QueryArray
+ */
+export type QueryValue = QueryPrimitive | QueryArray;
+/**
+ * Read‑only map of query keys to values.
+ * @remarks Type: QueryParams
+ */
+export type QueryParams = Readonly<Record<string, QueryValue>>;
+/**
+ * Path parameters are strings (already URL‑encoded).
+ * @remarks Type: PathParams
+ */
+export type PathParams = Readonly<Record<string, string>>;
+
+/**
+ * Canonical request shape used across helpers & client.
+ * @property path (optional: PathParams).
+ * @property query (optional: QueryParams).
+ * @example const req: RequestShape = {
+ *   path: { id: "bitcoin" },
+ *   query: { vs_currency: "usd", days: 1 }
+ * };
+ * @remarks Type: RequestShape
+ */
+export type RequestShape = Readonly<{
+  /** Path parameters (template substitutions). */
+  path?: PathParams;
+  /** Querystring parameters (before normalization). */
+  query?: QueryParams;
+}>;
+
+/**
+ * A concrete endpoint path template (API surface).
+ * @remarks Type: string
+ */
+export type EndpointPath = string; // e.g., "/coins/{id}/ohlc"
+
+// ===========================================================================
+//  Normalization policies & schema interfaces
+
+--- BEFORE (hunk) ---
+//  Normalization policies & schema interfaces
+// ===========================================================================
+
+/**
+ * Encoding policy for array‑like query params. MVP: "csv" only; extensible later.
+ * @remarks Type: "csv"
+ */
+export type ArrayEncoding = "csv";
+
+/**
+ * Minimal Zod‑like shape (no runtime dependency on zod).
+ * @property parse (required: (value: unknown) => T).
+ * @property safeParse (optional: (value: unknown) => { success: boolean; data?: T; error?: unknown }).
+ * @property _def (optional: unknown).
+ * @property def (optional: unknown).
+ */
+export type ZodLikeSchema<T = unknown> = Readonly<{
+  parse: (value: unknown) => T;
+  /** Optional: many places duck-type this in tests/introspection. */
+  safeParse?: (value: unknown) => { success: boolean; data?: T; error?: unknown };
+  /** Optional internals seen in different zod builds; kept for duck-typing only. */
+  _def?: unknown;
+  def?: unknown;
+}>;
+
+/**
+ * Minimal validator interface; can be backed by Zod internally.
+ * @property parse (required: (value: unknown) => T).
+ */
+export type Schema<T> = Readonly<{ parse: (value: unknown) => T }>;
+
+/**
+ * Declarative rule for a single query parameter.
+ * @property key (required: string).
+ * @property default (optional: QueryValue).
+ * @property dropWhenDefault (optional: boolean).
+ * @property arrayEncoding (optional: ArrayEncoding).
+ * @property required (optional: true).
+ */
+export type QueryRule = Readonly<{
+  /** Query key (as documented by CoinGecko). */
+  key: string;
+  /** Server default value (single source of truth) if any. */
+  default?: QueryValue;
+  /** Drop from querystring when value equals its default. Default: `true`. */
+  dropWhenDefault?: boolean;
+  /** Array serialization policy (MVP: CSV). */
+  arrayEncoding?: ArrayEncoding;
+  /** True when the key is mandatory in the querystring. */
+  required?: true;
+}>;
+
+/**
+ * HTTP methods used by the registry (most endpoints are GET).
+ * @remarks Variants:
+ * - "GET"
+ * - "POST"
+ * - "PUT"
+ * - "DELETE"
+ * - "PATCH"
+ * - "HEAD"
+ * - "OPTIONS"
+ */
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
+
+// ===========================================================================
+//  Registry descriptors (runtime shape)
+--- AFTER (hunk) ----
+
+// ===========================================================================
+//  Normalization policies & schema interfaces
+// ===========================================================================
+
+/**
+ * Encoding policy for array‑like query params. MVP: "csv" only; extensible later.
+ * @remarks Type: "csv"
+ */
+export type ArrayEncoding = "csv";
+
+/**
+ * Minimal Zod‑like shape (no runtime dependency on zod).
+ * @property parse (required: (value: unknown) => T).
+ * @property safeParse (optional: (value: unknown) => { success: boolean; data?: T; error?: unknown }).
+ * @property _def (optional: unknown).
+ * @property def (optional: unknown).
+ * @remarks Type: ZodLikeSchema
+ */
+export type ZodLikeSchema<T = unknown> = Readonly<{
+  parse: (value: unknown) => T;
+  /** Optional: many places duck-type this in tests/introspection. */
+  safeParse?: (value: unknown) => { success: boolean; data?: T; error?: unknown };
+  /** Optional internals seen in different zod builds; kept for duck-typing only. */
+  _def?: unknown;
+  def?: unknown;
+}>;
+
+/**
+ * Minimal validator interface; can be backed by Zod internally.
+ * @property parse (required: (value: unknown) => T).
+ * @remarks Type: Schema
+ */
+export type Schema<T> = Readonly<{ parse: (value: unknown) => T }>;
+
+/**
+ * Declarative rule for a single query parameter.
+ * @property key (required: string).
+ * @property default (optional: QueryValue).
+ * @property dropWhenDefault (optional: boolean).
+ * @property arrayEncoding (optional: ArrayEncoding).
+ * @property required (optional: true).
+ * @remarks Type: QueryRule
+ */
+export type QueryRule = Readonly<{
+  /** Query key (as documented by CoinGecko). */
+  key: string;
+  /** Server default value (single source of truth) if any. */
+  default?: QueryValue;
+  /** Drop from querystring when value equals its default. Default: `true`. */
+  dropWhenDefault?: boolean;
+  /** Array serialization policy (MVP: CSV). */
+  arrayEncoding?: ArrayEncoding;
+  /** True when the key is mandatory in the querystring. */
+  required?: true;
+}>;
+
+/**
+ * HTTP methods used by the registry (most endpoints are GET).
+ * @remarks Type: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS"
+ */
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
+
+// ===========================================================================
+//  Registry descriptors (runtime shape)
+// ===========================================================================
+
+
+--- BEFORE (hunk) ---
+
+// ===========================================================================
+//  Registry descriptors (runtime shape)
+// ===========================================================================
+
+/**
+ * A single endpoint definition in the runtime registry.
+ *
+ * @template Req - Parsed request type (schema output).
+ * @template Res - Parsed response type (schema output).
+ * @property id (required: string).
+ * @property validFor (required: VersionPlanPair).
+ * @property method (required: HttpMethod).
+ * @property pathTemplate (required: EndpointPath).
+ * @property requiredPath (required: readonly string[]).
+ * @property requiredQuery (required: readonly string[]).
+ * @property queryRules (required: readonly QueryRule[]).
+ * @property serverDefaults (required: Readonly<Record<string, QueryValue>>).
+ * @property requestSchema (required: Schema<Req>).
+ * @property responseSchema (required: Schema<Res>).
+ */
+export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
+  /** Dot + `by-<param>` slug, e.g. "coins.by-id.history". */
+  id: string;
+  /** Valid version/plan pair. */
+  validFor: VersionPlanPair;
+  /** HTTP method (usually GET). */
+  method: HttpMethod;
+  /** API path template, e.g. "/coins/{id}/history". */
+  pathTemplate: EndpointPath;
+  /** Required path param names (e.g., ["id", "contract_address"]). */
+  requiredPath: readonly string[];
+  /** Required query param names (as strings). */
+  requiredQuery: readonly string[];
+  /** Declarative query rules (defaults + drop policy + encoding). */
+  queryRules: readonly QueryRule[];
+  /** Raw map of server defaults (derived). */
+  serverDefaults: Readonly<Record<string, QueryValue>>;
+  /** Optional request validator (pluggable). */
+  requestSchema: Schema<Req>;
+  /** Optional response validator (pluggable). */
+  responseSchema: Schema<Res>;
+}>;
+
+// ===========================================================================
+//  Derived unions from the generated registry (paths/ids per version/plan)
+// ===========================================================================
+
+// -- Helpers to pluck version/plan literals from a pair or entry -------------
+/** Type alias VPVersion. */
+export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
+  ? Ver
+  : V extends { version: infer Ver2 extends string }
+    ? Ver2
+    : never;
+
+/** Type alias VPPlan. */
+export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
+  ? Pl
+  : V extends { plan: infer Pl2 extends string }
+    ? Pl2
+    : never;
+
+// /** Narrow entries to those matching a `{ version, plan }` pair. */
+// export type MatchByVersionPlan<E, V> = E extends {
+//   readonly validFor: { readonly version: VPVersion<V>; readonly plan: VPPlan<V> };
+// }
+//   ? E
+//   : never;
+
+/**
+ * Union of *all* path templates present in the registry (any version/plan).
+ * @remarks Type: RegistryEndpoint["pathTemplate"]
+ */
+export type AnyEndpointPath = RegistryEndpoint["pathTemplate"];
+
+/**
+ * Union of *all* endpoint ids present in the registry (any version/plan).
+ * @remarks Type: RegistryEndpoint["id"]
+ */
+export type AnyEndpointId = RegistryEndpoint["id"];
+
+// ===========================================================================
+//  Path‑template param extraction helpers (DX niceties)
+// ===========================================================================
+
+/**
+ * Extract the set of `{placeholder}` names from a path template.
+ * @remarks Type: `${string}{${infer K}}${infer R}`
+ */
+export type ExtractPathParams<
+  P extends string,
+  Acc extends string = never,
+> = P extends `${string}{${infer K}}${infer R}` ? ExtractPathParams<R, Acc | K> : Acc;
+
+/**
+ * Lint-safe empty object type (no keys permitted).
+ * @remarks Type: {}
+ */
+export type EmptyObject = Record<never, never>;
+
+/** Build the `path` shape for a given path template. */
+export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
+  ? EmptyObject
+  : { path: Readonly<Record<ExtractPathParams<P>, string>> };
+
+/**
+--- AFTER (hunk) ----
+//  Registry descriptors (runtime shape)
+// ===========================================================================
+
+/**
+ * A single endpoint definition in the runtime registry.
+ *
+ * @template Req - Parsed request type (schema output).
+ * @template Res - Parsed response type (schema output).
+ * @property id (required: string).
+ * @property validFor (required: VersionPlanPair).
+ * @property method (required: HttpMethod).
+ * @property pathTemplate (required: EndpointPath).
+ * @property requiredPath (required: readonly string[]).
+ * @property requiredQuery (required: readonly string[]).
+ * @property queryRules (required: readonly QueryRule[]).
+ * @property serverDefaults (required: Readonly<Record<string, QueryValue>>).
+ * @property requestSchema (required: Schema<Req>).
+ * @property responseSchema (required: Schema<Res>).
+ * @remarks Type: RegistryEndpoint
+ */
+export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
+  /** Dot + `by-<param>` slug, e.g. "coins.by-id.history". */
+  id: string;
+  /** Valid version/plan pair. */
+  validFor: VersionPlanPair;
+  /** HTTP method (usually GET). */
+  method: HttpMethod;
+  /** API path template, e.g. "/coins/{id}/history". */
+  pathTemplate: EndpointPath;
+  /** Required path param names (e.g., ["id", "contract_address"]). */
+  requiredPath: readonly string[];
+  /** Required query param names (as strings). */
+  requiredQuery: readonly string[];
+  /** Declarative query rules (defaults + drop policy + encoding). */
+  queryRules: readonly QueryRule[];
+  /** Raw map of server defaults (derived). */
+  serverDefaults: Readonly<Record<string, QueryValue>>;
+  /** Optional request validator (pluggable). */
+  requestSchema: Schema<Req>;
+  /** Optional response validator (pluggable). */
+  responseSchema: Schema<Res>;
+}>;
+
+// ===========================================================================
+//  Derived unions from the generated registry (paths/ids per version/plan)
+// ===========================================================================
+
+// -- Helpers to pluck version/plan literals from a pair or entry -------------
+/**
+ * Type alias VPVersion.
+ * @remarks Type: VPVersion
+ */
+export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
+  ? Ver
+  : V extends { version: infer Ver2 extends string }
+    ? Ver2
+    : never;
+
+/**
+ * Type alias VPPlan.
+ * @remarks Type: VPPlan
+ */
+export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
+  ? Pl
+  : V extends { plan: infer Pl2 extends string }
+    ? Pl2
+    : never;
+
+// /** Narrow entries to those matching a `{ version, plan }` pair. */
+// export type MatchByVersionPlan<E, V> = E extends {
+//   readonly validFor: { readonly version: VPVersion<V>; readonly plan: VPPlan<V> };
+// }
+//   ? E
+//   : never;
+
+/**
+ * Union of *all* path templates present in the registry (any version/plan).
+ * @remarks Type: RegistryEndpoint["pathTemplate"]
+ */
+export type AnyEndpointPath = RegistryEndpoint["pathTemplate"];
+
+/**
+ * Union of *all* endpoint ids present in the registry (any version/plan).
+ * @remarks Type: RegistryEndpoint["id"]
+ */
+export type AnyEndpointId = RegistryEndpoint["id"];
+
+// ===========================================================================
+//  Path‑template param extraction helpers (DX niceties)
+// ===========================================================================
+
+/**
+ * Extract the set of `{placeholder}` names from a path template.
+ * @remarks Type: ExtractPathParams
+ */
+export type ExtractPathParams<
+  P extends string,
+  Acc extends string = never,
+> = P extends `${string}{${infer K}}${infer R}` ? ExtractPathParams<R, Acc | K> : Acc;
+
+/**
+ * Lint-safe empty object type (no keys permitted).
+ * @remarks Type: {}
+ */
+export type EmptyObject = Record<never, never>;
+
+/**
+
+--- BEFORE (hunk) ---
+
+/**
+ * Request shape specialized for a given path template.
+ * @property query (optional: QueryParams)
+ */
+export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
+--- AFTER (hunk) ----
+
+/**
+ * Build the `path` shape for a given path template.
+ * @remarks Type: Array<unknown>
+ */
+export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
+
+--- BEFORE (hunk) ---
+ * @property query (optional: QueryParams)
+ */
+export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
+
+// ===========================================================================
+//  (Optional) Public re-exports for convenience
+// ===========================================================================
+
+export type {
+  // Aliases kept for back-compat in internal modules
+  RegistryEndpoint as RegistryEntry,
+};
+/**
+ * Type alias Registry.
+ * @remarks Type: ReadonlyArray<RegistryEndpoint>
+ */
+export type Registry = readonly RegistryEndpoint[];
+/**
+ * Type alias EndpointId.
+ * @remarks Type: RegistryEndpoint["id"]
+ */
+export type EndpointId = RegistryEndpoint["id"];
+/**
+ * Type alias Version.
+ * @remarks Type: "v3.0.1" | "v3.1.1"
+ */
+export type Version = RegistryEndpoint["validFor"]["version"];
+/**
+ * Type alias Plan.
+ * @remarks Type: "public" | "paid"
+ */
+export type Plan = RegistryEndpoint["validFor"]["plan"];
+
+// ===========================================================================
+//  Minimal, cross-env headers types (no DOM lib required).
+// ===========================================================================
+
+/**
+ * HeaderTuple is a tuple of two strings: `name` and `value`.
+ * @remarks Type: readonly [string, string]
+ */
+export type HeaderTuple = readonly [string, string];
+
+//** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
+/**
+ * Type alias HeadersLike.
+ * @remarks Type: { get(name: string): string | null; }
+ */
+export type HeadersLike = {
+  get(name: string): string | null; // enough for reads
+};
+
+/**
+--- AFTER (hunk) ----
+ * @remarks Type: Array<unknown>
+ */
+export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
+  ? EmptyObject
+  : { path: Readonly<Record<ExtractPathParams<P>, string>> };
+
+/**
+ * Request shape specialized for a given path template.
+ * @property query (optional: QueryParams)
+ * @remarks Type: RequestShapeFor
+ */
+export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
+
+// ===========================================================================
+//  (Optional) Public re-exports for convenience
+// ===========================================================================
+
+export type {
+  // Aliases kept for back-compat in internal modules
+  RegistryEndpoint as RegistryEntry,
+};
+/**
+ * Type alias Registry.
+     * @remarks Type: Registry
+     */
+export type Registry = readonly RegistryEndpoint[];
+/**
+ * Type alias EndpointId.
+ * @remarks Type: RegistryEndpoint["id"]
+ */
+export type EndpointId = RegistryEndpoint["id"];
+/**
+ * Type alias Version.
+ * @remarks Type: "v3.0.1" | "v3.1.1"
+ */
+export type Version = RegistryEndpoint["validFor"]["version"];
+/**
+ * Type alias Plan.
+ * @remarks Type: "public" | "paid"
+ */
+export type Plan = RegistryEndpoint["validFor"]["plan"];
+
+// ===========================================================================
+//  Minimal, cross-env headers types (no DOM lib required).
+// ===========================================================================
+
+/**
+ * HeaderTuple is a tuple of two strings: `name` and `value`.
+ * @remarks Type: readonly [string, string]
+ */
+export type HeaderTuple = readonly [string, string];
+
+//** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
+
+--- BEFORE (hunk) ---
+};
+
+/**
+ * HeadersInitLike is a type that can be used to represent a set of HTTP headers. With minimal functionality.
+ * @remarks Type: Readonly<Record<string, string>> | readonly HeaderTuple[] | HeadersLike
+ */
+export type HeadersInitLike =
+  | Readonly<Record<string, string>>
+  | readonly HeaderTuple[]
+  | HeadersLike; // structural: real Headers satisfies this
+
+// ---------------------------------------------------------------------------
+// Optional/metadata helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Type alias QMeta.
+ * @property arrayEncoding (optional: "csv").
+ * @property dropWhenDefault (optional: boolean).
+ */
+export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean }>;
+
+// ---------------------------------------------------------------------------
+// Unwrapping for defaults / shapes
+// ---------------------------------------------------------------------------
+
+/**
+ * Type alias UnwrapDefaultsResult.
+ * @property inner (required: unknown).
+ * @property defaultValue (optional: unknown).
+ * @property wasOptional (required: boolean).
+ * @property isArray (required: boolean).
+ */
+export type UnwrapDefaultsResult = Readonly<{
+  inner: unknown;
+  defaultValue?: unknown;
+  wasOptional: boolean;
+  isArray: boolean;
+}>;
+
+// ---------------------------------------------------------------------------
+// Module Discovery
+// ---------------------------------------------------------------------------
+/**
+ * Discovered Module type
+ * @property slug (required: string).
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
+ * @property file (required: string).
+ */
+export type DiscoveredModule = Readonly<{
+  slug: string;
+  version: ApiVersion;
+  plan: ApiPlan;
+  /** Absolute path to the `index.ts` entry for this variant. */
+  file: string;
+}>;
+/**
+ * Discovered Option type
+ * @property schemasDir (required: string).
+ * @property only (optional: ReadonlySet<string> | string[] | null).
+ * @property fsAccess (optional: (p: string) => Promise<boolean>).
+ */
+export type DiscoverOptions = Readonly<{
+--- AFTER (hunk) ----
+export type HeaderTuple = readonly [string, string];
+
+//** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
+/**
+ * Type alias HeadersLike.
+ * @remarks Type: { get(name: string): string | null; }
+ * @property get (required: get).
+ */
+export type HeadersLike = {
+  get(name: string): string | null; // enough for reads
+};
+
+/**
+ * HeadersInitLike is a type that can be used to represent a set of HTTP headers. With minimal functionality.
+ * @remarks Type: HeadersInitLike
+ */
+export type HeadersInitLike =
+  | Readonly<Record<string, string>>
+  | readonly HeaderTuple[]
+  | HeadersLike; // structural: real Headers satisfies this
+
+// ---------------------------------------------------------------------------
+// Optional/metadata helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Type alias QMeta.
+ * @property arrayEncoding (optional: "csv").
+ * @property dropWhenDefault (optional: boolean).
+ * @remarks Type: QMeta
+ */
+export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean }>;
+
+// ---------------------------------------------------------------------------
+// Unwrapping for defaults / shapes
+// ---------------------------------------------------------------------------
+
+/**
+ * Type alias UnwrapDefaultsResult.
+ * @property inner (required: unknown).
+ * @property defaultValue (optional: unknown).
+ * @property wasOptional (required: boolean).
+ * @property isArray (required: boolean).
+ * @remarks Type: UnwrapDefaultsResult
+ */
+export type UnwrapDefaultsResult = Readonly<{
+  inner: unknown;
+  defaultValue?: unknown;
+  wasOptional: boolean;
+  isArray: boolean;
+}>;
+
+// ---------------------------------------------------------------------------
+// Module Discovery
+// ---------------------------------------------------------------------------
+/**
+ * Discovered Module type
+ * @property slug (required: string).
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
+ * @property file (required: string).
+ * @remarks Type: DiscoveredModule
+ */
+export type DiscoveredModule = Readonly<{
+
+--- BEFORE (hunk) ---
+ * @property fsAccess (optional: (p: string) => Promise<boolean>).
+ */
+export type DiscoverOptions = Readonly<{
+  /** Absolute path to your `src/schemas` directory. */
+  schemasDir: string;
+  /** Optional allowlist of slugs to include. */
+  only?: ReadonlySet<string> | string[] | null;
+  /**
+   * Optional override for file existence checks (useful in tests).
+   * Defaults to `fs.access`.
+   */
+  fsAccess?: (p: string) => Promise<boolean>;
+}>;
+
+/**
+ * Type alias ClientOptions.
+ * @property validFor (required: V).
+ * @property baseURL (optional: string).
+ */
+export type ClientOptions<V extends VersionPlanPair> = Readonly<{
+  validFor: V;
+  baseURL?: string;
+}>;
+
+--- AFTER (hunk) ----
+ * @remarks Type: DiscoveredModule
+ */
+export type DiscoveredModule = Readonly<{
+  slug: string;
+  version: ApiVersion;
+  plan: ApiPlan;
+  /** Absolute path to the `index.ts` entry for this variant. */
+  file: string;
+}>;
+/**
+ * Discovered Option type
+ * @property schemasDir (required: string).
+ * @property only (optional: ReadonlySet<string> | string[] | null).
+ * @property fsAccess (optional: (p: string) => Promise<boolean>).
+ * @remarks Type: DiscoverOptions
+ */
+export type DiscoverOptions = Readonly<{
+  /** Absolute path to your `src/schemas` directory. */
+  schemasDir: string;
+  /** Optional allowlist of slugs to include. */
+  only?: ReadonlySet<string> | string[] | null;
+  /**
+   * Optional override for file existence checks (useful in tests).
+   * Defaults to `fs.access`.
+   */
+  fsAccess?: (p: string) => Promise<boolean>;
+}>;
+
+/**
+ * Type alias ClientOptions.
+ * @property validFor (required: V).
+ * @property baseURL (optional: string).
+ * @remarks Type: ClientOptions
+ */
+export type ClientOptions<V extends VersionPlanPair> = Readonly<{
+  validFor: V;
+  baseURL?: string;
+}>;
+
+
+===== FILE: src/client/defaults.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Function defaultBaseFor.
+ * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @returns string
+ */
+--- AFTER (hunk) ----
+/**
+ * Function defaultBaseFor.
+ * @param vp (required: VersionPlanKey | VersionPlanPair)
+ * @returns string
+ */
+
+===== FILE: src/client/factory.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: `${infer V}/${infer P}`
+ */
+export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
+--- AFTER (hunk) ----
+/**
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: KeyToPair
+ */
+export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
+
+--- BEFORE (hunk) ---
+ * Options when constructing via a VersionPlanKey (validFor is derived).
+ * @property baseURL (optional: string)
+ */
+export type KeyClientOptions<K extends VersionPlanKey> = Omit<
+  ClientOptions<KeyToPair<K>>,
+  "validFor"
+>;
+
+/**
+ * Options when constructing via a VersionPlanPair (already provided).
+ * @property baseURL (optional: string)
+ */
+export type PairClientOptions<V extends VersionPlanPair> = Omit<ClientOptions<V>, "validFor">;
+
+// Overloads
+export function createClient<K extends VersionPlanKey>(
+  key: K,
+  opts?: KeyClientOptions<K>,
+): ZodGecko<KeyToPair<K>>;
+export function createClient<V extends VersionPlanPair>(
+  pair: V,
+  opts?: PairClientOptions<V>,
+): ZodGecko<V>;
+
+// Impl
+/**
+ * Function createClient.
+ * @param arg (required: VersionPlanPair | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param opts (optional: { baseURL?: string; } | undefined)
+ * @returns ZodGecko
+ */
+export function createClient(
+  arg: VersionPlanKey | VersionPlanPair,
+  opts?: { baseURL?: string },
+): ZodGecko<VersionPlanPair> {
+  if (typeof arg === "string") {
+    const pair = parseVersionPlanKey(arg);
+    return new ZodGecko({ validFor: pair, baseURL: opts?.baseURL });
+  }
+  if (!isValidVersionPlan(arg)) {
+    throw new Error("Invalid VersionPlanPair passed to createClient()");
+  }
+  return new ZodGecko({ validFor: arg, baseURL: opts?.baseURL });
+}
+
+--- AFTER (hunk) ----
+ * Options when constructing via a VersionPlanKey (validFor is derived).
+ * @property baseURL (optional: string)
+ * @remarks Type: KeyClientOptions
+ */
+export type KeyClientOptions<K extends VersionPlanKey> = Omit<
+  ClientOptions<KeyToPair<K>>,
+  "validFor"
+>;
+
+/**
+ * Options when constructing via a VersionPlanPair (already provided).
+ * @property baseURL (optional: string)
+ * @remarks Type: PairClientOptions
+ */
+export type PairClientOptions<V extends VersionPlanPair> = Omit<ClientOptions<V>, "validFor">;
+
+// Overloads
+export function createClient<K extends VersionPlanKey>(
+  key: K,
+  opts?: KeyClientOptions<K>,
+): ZodGecko<KeyToPair<K>>;
+export function createClient<V extends VersionPlanPair>(
+  pair: V,
+  opts?: PairClientOptions<V>,
+): ZodGecko<V>;
+
+// Impl
+/**
+ * Function createClient.
+ * @param arg (required: VersionPlanKey | VersionPlanPair)
+ * @param opts (optional: { baseURL?: string })
+ * @returns ZodGecko<VersionPlanPair>
+ */
+export function createClient(
+  arg: VersionPlanKey | VersionPlanPair,
+  opts?: { baseURL?: string },
+): ZodGecko<VersionPlanPair> {
+  if (typeof arg === "string") {
+    const pair = parseVersionPlanKey(arg);
+    return new ZodGecko({ validFor: pair, baseURL: opts?.baseURL });
+  }
+  if (!isValidVersionPlan(arg)) {
+    throw new Error("Invalid VersionPlanPair passed to createClient()");
+  }
+  return new ZodGecko({ validFor: arg, baseURL: opts?.baseURL });
+}
+
+
+===== FILE: src/client/headers.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Function headerNameForPlan.
+ * @param plan (required: "public" | "paid")
+ * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key"
+ */
+--- AFTER (hunk) ----
+/**
+ * Function headerNameForPlan.
+ * @param plan (required: ApiPlan)
+ * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key"
+ */
+
+--- BEFORE (hunk) ---
+ * @property apiKey (optional: string).
+ * @property extra (optional: HeadersInitLike | (() => HeadersInitLike)).
+ */
+export type HeaderOptions = Readonly<{
+  /** API key to include; omit to send no auth header. */
+  apiKey?: string;
+  /** Extra headers to merge (later wins). */
+  extra?: HeadersInitLike | (() => HeadersInitLike);
+}>;
+
+/**
+ * Deterministic default headers for CoinGecko requests.
+ * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param opts (optional: undefined | object)
+ * @returns HeadersInitLike
+ */
+export function defaultHeadersFor(
+  vp: VersionPlanKey | VersionPlanPair,
+  opts?: HeaderOptions,
+): HeadersInitLike {
+  const base: Record<string, string> = { accept: "application/json" };
+
+  if (opts?.apiKey) {
+    base[headerNameForPlan(planOf(vp))] = opts.apiKey;
+  }
+
+  if (!opts?.extra) return base;
+  const more = typeof opts.extra === "function" ? opts.extra() : opts.extra;
+  return { ...base, ...more };
+}
+
+--- AFTER (hunk) ----
+ * @property apiKey (optional: string).
+ * @property extra (optional: HeadersInitLike | (() => HeadersInitLike)).
+ * @remarks Type: HeaderOptions
+ */
+export type HeaderOptions = Readonly<{
+  /** API key to include; omit to send no auth header. */
+  apiKey?: string;
+  /** Extra headers to merge (later wins). */
+  extra?: HeadersInitLike | (() => HeadersInitLike);
+}>;
+
+/**
+ * Deterministic default headers for CoinGecko requests.
+ * @param vp (required: VersionPlanKey | VersionPlanPair)
+ * @param opts (optional: HeaderOptions)
+ * @returns HeadersInitLike
+ */
+export function defaultHeadersFor(
+  vp: VersionPlanKey | VersionPlanPair,
+  opts?: HeaderOptions,
+): HeadersInitLike {
+  const base: Record<string, string> = { accept: "application/json" };
+
+  if (opts?.apiKey) {
+    base[headerNameForPlan(planOf(vp))] = opts.apiKey;
+  }
+
+  if (!opts?.extra) return base;
+  const more = typeof opts.extra === "function" ? opts.extra() : opts.extra;
+  return { ...base, ...more };
+}
+
+
+===== FILE: src/fetch/client.ts =====
+--- BEFORE (hunk) ---
+ * @property userAgent (optional: string).
+ * @property headers (optional: HeadersLike).
+ */
+export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
+  validFor: V;
+  baseURL?: string;
+  apiKey?: string;
+  userAgent?: string;
+  headers?: HeadersLike;
+}>;
+
+/**
+ * Build default headers for CoinGecko GET calls.
+ * @param opts (required: object)
+ * @returns object
+ */
+export function buildHeaders(opts: FetchClientOptions<VersionPlanPair>): Record<string, string> {
+  const base: Record<string, string> = headersToObject(opts.headers);
+
+  if (opts.apiKey) base["x-cg-pro-api-key"] = opts.apiKey;
+  if (opts.userAgent) base["user-agent"] = opts.userAgent;
+
+  return base;
+}
+
+/** Minimal networked client built on top of the core ZodGecko (no retries/caching). */
+export class ZodGeckoFetch<V extends VersionPlanPair> extends ZodGecko<V> {
+  private readonly defaultHeaders: Readonly<Record<string, string>>;
+
+  constructor(opts: FetchClientOptions<V>) {
+    super({ validFor: opts.validFor, baseURL: opts.baseURL });
+    this.defaultHeaders = buildHeaders(opts);
+  }
+
+  /** GET helper: build URL, fetch, parse request/response. */
+  async get<TPath extends EndpointPathFor<V>>(
+    path: TPath,
+    req: RequestShape,
+    init?: RequestInitLike,
+  ): Promise<unknown> {
+    // Validate & normalize request against the endpoint schema
+    const normalizedReq = parseRequest(path, req);
+
+    // Build URL with registry-aware path & query normalization
+    const url = this.url(path as EndpointPathFor<V>, normalizedReq);
+
+    // Merge headers deterministically
+    const mergedHeaders: Record<string, string> = {
+      ...this.defaultHeaders,
+      ...headersToObject(init?.headers),
+    };
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: mergedHeaders,
+      ...init,
+    } as unknown as RequestInit); // cast once at the boundary to satisfy runtime fetch
+
+    const json: unknown = await res.json();
+    return parseResponse(path as EndpointPathFor<V>, json);
+  }
+}
+
+--- AFTER (hunk) ----
+ * @property userAgent (optional: string).
+ * @property headers (optional: HeadersLike).
+ * @remarks Type: FetchClientOptions
+ */
+export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
+  validFor: V;
+  baseURL?: string;
+  apiKey?: string;
+  userAgent?: string;
+  headers?: HeadersLike;
+}>;
+
+/**
+ * Build default headers for CoinGecko GET calls.
+ * @param opts (required: FetchClientOptions<VersionPlanPair>)
+ * @returns Record<string, string>
+ */
+export function buildHeaders(opts: FetchClientOptions<VersionPlanPair>): Record<string, string> {
+  const base: Record<string, string> = headersToObject(opts.headers);
+
+  if (opts.apiKey) base["x-cg-pro-api-key"] = opts.apiKey;
+  if (opts.userAgent) base["user-agent"] = opts.userAgent;
+
+  return base;
+}
+
+/** Minimal networked client built on top of the core ZodGecko (no retries/caching). */
+export class ZodGeckoFetch<V extends VersionPlanPair> extends ZodGecko<V> {
+  private readonly defaultHeaders: Readonly<Record<string, string>>;
+
+  constructor(opts: FetchClientOptions<V>) {
+    super({ validFor: opts.validFor, baseURL: opts.baseURL });
+    this.defaultHeaders = buildHeaders(opts);
+  }
+
+  /** GET helper: build URL, fetch, parse request/response. */
+  async get<TPath extends EndpointPathFor<V>>(
+    path: TPath,
+    req: RequestShape,
+    init?: RequestInitLike,
+  ): Promise<unknown> {
+    // Validate & normalize request against the endpoint schema
+    const normalizedReq = parseRequest(path, req);
+
+    // Build URL with registry-aware path & query normalization
+    const url = this.url(path as EndpointPathFor<V>, normalizedReq);
+
+    // Merge headers deterministically
+    const mergedHeaders: Record<string, string> = {
+      ...this.defaultHeaders,
+      ...headersToObject(init?.headers),
+    };
+
+    const res = await fetch(url, {
+      method: "GET",
+      headers: mergedHeaders,
+      ...init,
+    } as unknown as RequestInit); // cast once at the boundary to satisfy runtime fetch
+
+    const json: unknown = await res.json();
+    return parseResponse(path as EndpointPathFor<V>, json);
+  }
+}
+
+
+===== FILE: src/fetch/factory.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: `${infer V}/${infer P}`
+ */
+export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
+--- AFTER (hunk) ----
+/**
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: KeyToPair
+ */
+export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
+
+--- BEFORE (hunk) ---
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
+ */
+export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
+  FetchClientOptions<KeyToPair<K>>,
+  "validFor"
+>;
+
+/**
+ * Options when constructing via a VersionPlanPair (already provided).
+ * @property baseURL (optional: string)
+ * @property apiKey (optional: string)
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
+ */
+export type PairFetchOptions<V extends VersionPlanPair> = Omit<FetchClientOptions<V>, "validFor">;
+
+/** Overload: create using an enum/string key like "v3.1.1/paid". */
+export function createFetchClient<K extends VersionPlanKey>(
+  key: K,
+  opts?: KeyFetchOptions<K>,
+): ZodGeckoFetch<KeyToPair<K>>;
+
+/** Overload: create using a structured VersionPlanPair. */
+export function createFetchClient<V extends VersionPlanPair>(
+  pair: V,
+  opts?: PairFetchOptions<V>,
+): ZodGeckoFetch<V>;
+
+/**
+ * Implementation.
+ * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param opts (optional: undefined | object)
+ * @returns ZodGeckoFetch
+ */
+export function createFetchClient(
+  arg: VersionPlanKey | VersionPlanPair,
+  opts?: Omit<FetchClientOptions<VersionPlanPair>, "validFor">,
+): ZodGeckoFetch<VersionPlanPair> {
+  if (typeof arg === "string") {
+    const pair = parseVersionPlanKey(arg);
+    return new ZodGeckoFetch({ validFor: pair, ...opts });
+  }
+  if (!isValidVersionPlan(arg)) {
+    throw new Error("Invalid VersionPlanPair passed to createFetchClient()");
+  }
+  return new ZodGeckoFetch({ validFor: arg, ...opts });
+}
+
+--- AFTER (hunk) ----
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
+ * @remarks Type: KeyFetchOptions
+ */
+export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
+  FetchClientOptions<KeyToPair<K>>,
+  "validFor"
+>;
+
+/**
+ * Options when constructing via a VersionPlanPair (already provided).
+ * @property baseURL (optional: string)
+ * @property apiKey (optional: string)
+ * @property userAgent (optional: string)
+ * @property headers (optional: HeadersLike)
+ * @remarks Type: PairFetchOptions
+ */
+export type PairFetchOptions<V extends VersionPlanPair> = Omit<FetchClientOptions<V>, "validFor">;
+
+/** Overload: create using an enum/string key like "v3.1.1/paid". */
+export function createFetchClient<K extends VersionPlanKey>(
+  key: K,
+  opts?: KeyFetchOptions<K>,
+): ZodGeckoFetch<KeyToPair<K>>;
+
+/** Overload: create using a structured VersionPlanPair. */
+export function createFetchClient<V extends VersionPlanPair>(
+  pair: V,
+  opts?: PairFetchOptions<V>,
+): ZodGeckoFetch<V>;
+
+/**
+ * Implementation.
+ * @param arg (required: VersionPlanKey | VersionPlanPair)
+ * @param opts (optional: Omit<FetchClientOptions<VersionPlanPair>, "validFor">)
+ * @returns ZodGeckoFetch<VersionPlanPair>
+ */
+export function createFetchClient(
+  arg: VersionPlanKey | VersionPlanPair,
+  opts?: Omit<FetchClientOptions<VersionPlanPair>, "validFor">,
+): ZodGeckoFetch<VersionPlanPair> {
+  if (typeof arg === "string") {
+    const pair = parseVersionPlanKey(arg);
+    return new ZodGeckoFetch({ validFor: pair, ...opts });
+  }
+  if (!isValidVersionPlan(arg)) {
+    throw new Error("Invalid VersionPlanPair passed to createFetchClient()");
+  }
+  return new ZodGeckoFetch({ validFor: arg, ...opts });
+}
+
+
+===== FILE: src/fetch/rate-limit.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Read a header by name. For plain objects, match case-insensitively.
+ * @param h (required: object | HeadersLike)
+ * @param name (required: string)
+ * @returns string | null
+--- AFTER (hunk) ----
+/**
+ * Read a header by name. For plain objects, match case-insensitively.
+ * @param h (required: HeadersLike | Record<string, unknown>)
+ * @param name (required: string)
+ * @returns string | null
+
+--- BEFORE (hunk) ---
+/**
+ * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
+ * @param h (required: object | HeadersLike)
+ * @returns object
+ */
+export function parseRateLimitHeaders(
+--- AFTER (hunk) ----
+/**
+ * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
+ * @param h (required: HeadersLike | Record<string, unknown>)
+ * @returns RateLimitHeadersType
+ */
+export function parseRateLimitHeaders(
+
+--- BEFORE (hunk) ---
+ * @property remaining (optional: number).
+ * @property reset (optional: number).
+ */
+export type RateLimitNumbers = Readonly<{
+  limit?: number;
+  remaining?: number;
+  reset?: number;
+}>;
+
+/**
+ * Numeric convenience view (keeps `undefined` when absent).
+ * @param h (required: object | HeadersLike)
+ * @returns object
+ */
+export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>): RateLimitNumbers {
+  const rl = parseRateLimitHeaders(h);
+  const num = (s: string | undefined): number | undefined =>
+    s !== undefined ? Number(s) : undefined;
+  return {
+    limit: num(rl["x-cgpro-api-limit"]),
+    remaining: num(rl["x-cgpro-api-remaining"]),
+    reset: num(rl["x-cgpro-api-reset"]),
+  };
+}
+
+--- AFTER (hunk) ----
+ * @property remaining (optional: number).
+ * @property reset (optional: number).
+ * @remarks Type: RateLimitNumbers
+ */
+export type RateLimitNumbers = Readonly<{
+  limit?: number;
+  remaining?: number;
+  reset?: number;
+}>;
+
+/**
+ * Numeric convenience view (keeps `undefined` when absent).
+ * @param h (required: HeadersLike | Record<string, unknown>)
+ * @returns RateLimitNumbers
+ */
+export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>): RateLimitNumbers {
+  const rl = parseRateLimitHeaders(h);
+  const num = (s: string | undefined): number | undefined =>
+    s !== undefined ? Number(s) : undefined;
+  return {
+    limit: num(rl["x-cgpro-api-limit"]),
+    remaining: num(rl["x-cgpro-api-remaining"]),
+    reset: num(rl["x-cgpro-api-reset"]),
+  };
+}
+
+
+===== FILE: src/helpers/constants.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Supported API versions. Keep in sync with codegen & docs.
+ * @remarks Type: readonly ["v3.0.1", "v3.1.1"]
+ */
+export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
+--- AFTER (hunk) ----
+/**
+ * Supported API versions. Keep in sync with codegen & docs.
+ * @remarks Type: readonly [[], []]
+ */
+export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
+
+--- BEFORE (hunk) ---
+/**
+ * Supported API plans/channels.
+ * @remarks Type: readonly ["public", "paid"]
+ */
+export const PLANS = ["public", "paid"] as const;
+--- AFTER (hunk) ----
+/**
+ * Supported API plans/channels.
+ * @remarks Type: readonly [[], []]
+ */
+export const PLANS = ["public", "paid"] as const;
+
+--- BEFORE (hunk) ---
+/**
+ * Mapping of supported version as strong typing → plan (only valid combos live here).
+ * @remarks Type: { readonly "v3.0.1": "public" | "paid"; readonly "v3.1.1": "public" | "paid"; }
+ */
+export type VERSION_TO_PLAN = typeof VERSION_TO_PLAN;
+--- AFTER (hunk) ----
+/**
+ * Mapping of supported version as strong typing → plan (only valid combos live here).
+ * @remarks Type: typeof VERSION_TO_PLAN
+ */
+export type VERSION_TO_PLAN = typeof VERSION_TO_PLAN;
+
+===== FILE: src/helpers/discovery.ts =====
+--- BEFORE (hunk) ---
+ *   only = null,
+ *   fsAccess,
+ * } (required: object)
+ * @returns Promise
+ */
+export async function discoverSchemaModules({
+--- AFTER (hunk) ----
+ *   only = null,
+ *   fsAccess,
+ * } (required: DiscoverOptions)
+ * @returns Promise<DiscoveredModule[]>
+ */
+export async function discoverSchemaModules({
+
+===== FILE: src/helpers/format-params.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Core variant: registry-agnostic normalization.
+ * @param params (required: object)
+ * @returns object
+ */
+export function formatParams(params: QueryInput): Record<string, string> {
+--- AFTER (hunk) ----
+/**
+ * Core variant: registry-agnostic normalization.
+ * @param params (required: QueryInput)
+ * @returns Record<string, string>
+ */
+export function formatParams(params: QueryInput): Record<string, string> {
+
+--- BEFORE (hunk) ---
+ * Registry-aware variant: drops params equal to server defaults per rules.
+ * @param endpointId (required: string)
+ * @param params (required: object)
+ * @returns object
+ */
+export function formatParamsForEndpoint(
+--- AFTER (hunk) ----
+ * Registry-aware variant: drops params equal to server defaults per rules.
+ * @param endpointId (required: string)
+ * @param params (required: QueryInput)
+ * @returns Record<string, string>
+ */
+export function formatParamsForEndpoint(
+
+===== FILE: src/helpers/format-path.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Type alias PathParams.
+ * @remarks Type: { readonly [x: string]: string | number; }
+ */
+export type PathParams = Readonly<Record<string, string | number>>;
+--- AFTER (hunk) ----
+/**
+ * Type alias PathParams.
+ * @remarks Type: PathParams
+ */
+export type PathParams = Readonly<Record<string, string | number>>;
+
+--- BEFORE (hunk) ---
+ * Function formatPath.
+ * @param template (required: string)
+ * @param params (optional: object) [default={}]
+ * @returns string
+ */
+--- AFTER (hunk) ----
+ * Function formatPath.
+ * @param template (required: string)
+ * @param params (optional: PathParams) [default={}]
+ * @returns string
+ */
+
+===== FILE: src/helpers/get-request-for.ts =====
+--- BEFORE (hunk) ---
+ * Build a discoverable request object for an endpoint from the registry.
+ * @param endpointPath (required: string)
+ * @param opts (optional: undefined | object)
+ * @returns object
+ */
+export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
+--- AFTER (hunk) ----
+ * Build a discoverable request object for an endpoint from the registry.
+ * @param endpointPath (required: string)
+ * @param opts (optional: GetRequestForOptions)
+ * @returns RequestSurface
+ */
+export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
+
+===== FILE: src/helpers/get-schemas.ts =====
+--- BEFORE (hunk) ---
+ * Return schemas for an endpoint id.
+ * @param id (required: string)
+ * @returns object
+ */
+export function getSchemas(id: string): Readonly<{
+  requestSchema: ZodLikeSchema | null;
+  responseSchema: ZodLikeSchema | null;
+}> {
+  const response = getResponseSchema(id) ?? null;
+  if (!response) {
+    throw new Error(`Unknown endpoint or missing response schema: ${id}`);
+  }
+  const request = getRequestSchema(id) ?? null;
+  if (!request) {
+    throw new Error(`Unknown endpoint or missing request schema: ${id}`);
+  }
+  return { requestSchema: request, responseSchema: response } as const;
+}
+
+--- AFTER (hunk) ----
+ * Return schemas for an endpoint id.
+ * @param id (required: string)
+ * @returns Readonly<{
+ *   requestSchema: ZodLikeSchema | null;
+ *   responseSchema: ZodLikeSchema | null;
+ * }>
+ */
+export function getSchemas(id: string): Readonly<{
+  requestSchema: ZodLikeSchema | null;
+  responseSchema: ZodLikeSchema | null;
+}> {
+  const response = getResponseSchema(id) ?? null;
+  if (!response) {
+    throw new Error(`Unknown endpoint or missing response schema: ${id}`);
+  }
+  const request = getRequestSchema(id) ?? null;
+  if (!request) {
+    throw new Error(`Unknown endpoint or missing request schema: ${id}`);
+  }
+  return { requestSchema: request, responseSchema: response } as const;
+}
+
+
+===== FILE: src/helpers/introspection.ts =====
+--- BEFORE (hunk) ---
+ * Get an internal Zod-like definition object (if present).
+ * @param s (required: unknown)
+ * @returns undefined | object
+ */
+export function getDef(s: unknown): Record<string, unknown> | undefined {
+--- AFTER (hunk) ----
+ * Get an internal Zod-like definition object (if present).
+ * @param s (required: unknown)
+ * @returns Record<string, unknown> | undefined
+ */
+export function getDef(s: unknown): Record<string, unknown> | undefined {
+
+--- BEFORE (hunk) ---
+ * Returns `null` when absent or malformed.
+ * @param schema (required: unknown)
+ * @returns null | object
+ */
+export function getQMeta(schema: unknown): QMeta | null {
+--- AFTER (hunk) ----
+ * Returns `null` when absent or malformed.
+ * @param schema (required: unknown)
+ * @returns QMeta | null
+ */
+export function getQMeta(schema: unknown): QMeta | null {
+
+--- BEFORE (hunk) ---
+ * the first default discovered while unwrapping.
+ * @param s (required: unknown)
+ * @returns object
+ */
+export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
+--- AFTER (hunk) ----
+ * the first default discovered while unwrapping.
+ * @param s (required: unknown)
+ * @returns UnwrapDefaultsResult
+ */
+export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
+
+--- BEFORE (hunk) ---
+ * Accepts either a ZodObject or a wrapper around it.
+ * @param s (required: unknown)
+ * @returns null | object
+ */
+export function getObjectShape(s: unknown): Record<string, unknown> | null {
+--- AFTER (hunk) ----
+ * Accepts either a ZodObject or a wrapper around it.
+ * @param s (required: unknown)
+ * @returns Record<string, unknown> | null
+ */
+export function getObjectShape(s: unknown): Record<string, unknown> | null {
+
+===== FILE: src/helpers/object.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Narrow record type for Object.* helpers (string keys only).
+ * @remarks Type: { [x: string]: unknown; }
+ */
+export type AnyRecord = Record<string, unknown>;
+--- AFTER (hunk) ----
+/**
+ * Narrow record type for Object.* helpers (string keys only).
+ * @remarks Type: AnyRecord
+ */
+export type AnyRecord = Record<string, unknown>;
+
+--- BEFORE (hunk) ---
+ * Typed Object.keys — string keys only (symbols are intentionally excluded).
+ * @param o (required: T)
+ * @returns Array
+ */
+export const keysOf = <T extends AnyRecord>(o: T): Array<keyof T & string> =>
+--- AFTER (hunk) ----
+ * Typed Object.keys — string keys only (symbols are intentionally excluded).
+ * @param o (required: T)
+ * @returns Array<keyof T & string>
+ */
+export const keysOf = <T extends AnyRecord>(o: T): Array<keyof T & string> =>
+
+--- BEFORE (hunk) ---
+ * Typed Object.entries — string keys only.
+ * @param o (required: T)
+ * @returns Array
+ */
+export const entriesOf = <T extends AnyRecord>(o: T): Array<[keyof T & string, T[keyof T]]> =>
+--- AFTER (hunk) ----
+ * Typed Object.entries — string keys only.
+ * @param o (required: T)
+ * @returns Array<[keyof T & string, T[keyof T]]>
+ */
+export const entriesOf = <T extends AnyRecord>(o: T): Array<[keyof T & string, T[keyof T]]> =>
+
+--- BEFORE (hunk) ---
+ * Typed Object.values.
+ * @param o (required: T)
+ * @returns Array
+ */
+export const valuesOf = <T extends AnyRecord>(o: T): Array<T[keyof T]> =>
+--- AFTER (hunk) ----
+ * Typed Object.values.
+ * @param o (required: T)
+ * @returns Array<T[keyof T]>
+ */
+export const valuesOf = <T extends AnyRecord>(o: T): Array<T[keyof T]> =>
+
+--- BEFORE (hunk) ---
+/**
+ * Strict, typed fromEntries for string keys (no `any`, no unsafe access).
+ * @param entries (required: Iterable)
+ * @returns object
+ */
+export function fromEntriesStrict<K extends string, V>(
+--- AFTER (hunk) ----
+/**
+ * Strict, typed fromEntries for string keys (no `any`, no unsafe access).
+ * @param entries (required: Iterable<readonly [K, V]>)
+ * @returns Record<K, V>
+ */
+export function fromEntriesStrict<K extends string, V>(
+
+--- BEFORE (hunk) ---
+/**
+ * List the supported versions (for menus or validation).
+ * @returns ReadonlyArray
+ */
+export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
+--- AFTER (hunk) ----
+/**
+ * List the supported versions (for menus or validation).
+ * @returns ReadonlyArray<ApiVersion>
+ */
+export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
+
+--- BEFORE (hunk) ---
+/**
+ * List the supported plans (for menus or validation).
+ * @returns ReadonlyArray
+ */
+export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
+--- AFTER (hunk) ----
+/**
+ * List the supported plans (for menus or validation).
+ * @returns ReadonlyArray<ApiPlan>
+ */
+export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
+
+--- BEFORE (hunk) ---
+/**
+ * List the supported (version, plan) pairs (derived from VERSION_TO_PLAN).
+ * @returns ReadonlyArray
+ */
+export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
+--- AFTER (hunk) ----
+/**
+ * List the supported (version, plan) pairs (derived from VERSION_TO_PLAN).
+ * @returns ReadonlyArray<VersionPlanPair>
+ */
+export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
+
+... (more hunks omitted)
+===== FILE: src/helpers/parse-request.ts =====
+--- BEFORE (hunk) ---
+ * - Returns a shallow-normalized shape (no default filling here)
+ * @param endpointPath (required: string)
+ * @param input (required: object)
+ * @returns object
+ */
+export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
+--- AFTER (hunk) ----
+ * - Returns a shallow-normalized shape (no default filling here)
+ * @param endpointPath (required: string)
+ * @param input (required: Readonly<RequestShape>)
+ * @returns RequestShape
+ */
+export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
+
+===== FILE: src/helpers/to-url.ts =====
+--- BEFORE (hunk) ---
+ * @param base (required: string)
+ * @param path (required: string)
+ * @param query (optional: object) [default={}]
+ * @returns string
+ */
+--- AFTER (hunk) ----
+ * @param base (required: string)
+ * @param path (required: string)
+ * @param query (optional: Readonly<Record<string, string>>) [default={}]
+ * @returns string
+ */
+
+===== FILE: src/registry/define.ts =====
+--- BEFORE (hunk) ---
+ * @property requestSchema (optional: z.ZodTypeAny).
+ * @property responseSchema (required: z.ZodTypeAny).
+ */
+export type DefineEndpointInput = Readonly<{
+  id: string;
+  validFor: VersionPlanPair;
+  method?: HttpMethod; // defaults to "GET"
+  pathTemplate: string;
+  requiredPath?: ReadonlyArray<string>;
+  requiredQuery?: ReadonlyArray<string>;
+  queryRules?: ReadonlyArray<QueryRule>;
+  serverDefaults?: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>;
+  requestSchema?: z.ZodTypeAny;
+  responseSchema: z.ZodTypeAny;
+}>;
+
+/**
+ * Create a normalized RegistryEndpoint from minimal inputs.
+ * @param input (required: object)
+ * @returns object
+ */
+export function defineEndpoint(input: DefineEndpointInput): RegistryEndpoint {
+  const method = input.method ?? "GET";
+  const requiredPath = input.requiredPath ?? extractParams(input.pathTemplate);
+  const queryRules = input.queryRules ?? [];
+  const requiredQuery = input.requiredQuery ?? [];
+  const serverDefaults = input.serverDefaults ?? {};
+
+  return {
+    id: input.id,
+    validFor: input.validFor,
+    method,
+    pathTemplate: input.pathTemplate,
+    requiredPath,
+    requiredQuery,
+    queryRules,
+    serverDefaults,
+    requestSchema: input.requestSchema ?? EmptyRequest,
+    responseSchema: input.responseSchema ?? EmptyResponse,
+  };
+}
+
+/** Extract `{param}` names from a path template. */
+function extractParams(tpl: string): string[] {
+  const out = new Set<string>();
+  const re = /\{([^}]+)\}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(tpl))) out.add(m[1]);
+  return Array.from(out);
+}
+
+--- AFTER (hunk) ----
+ * @property requestSchema (optional: z.ZodTypeAny).
+ * @property responseSchema (required: z.ZodTypeAny).
+ * @remarks Type: DefineEndpointInput
+ */
+export type DefineEndpointInput = Readonly<{
+  id: string;
+  validFor: VersionPlanPair;
+  method?: HttpMethod; // defaults to "GET"
+  pathTemplate: string;
+  requiredPath?: ReadonlyArray<string>;
+  requiredQuery?: ReadonlyArray<string>;
+  queryRules?: ReadonlyArray<QueryRule>;
+  serverDefaults?: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>;
+  requestSchema?: z.ZodTypeAny;
+  responseSchema: z.ZodTypeAny;
+}>;
+
+/**
+ * Create a normalized RegistryEndpoint from minimal inputs.
+ * @param input (required: DefineEndpointInput)
+ * @returns RegistryEndpoint
+ */
+export function defineEndpoint(input: DefineEndpointInput): RegistryEndpoint {
+  const method = input.method ?? "GET";
+  const requiredPath = input.requiredPath ?? extractParams(input.pathTemplate);
+  const queryRules = input.queryRules ?? [];
+  const requiredQuery = input.requiredQuery ?? [];
+  const serverDefaults = input.serverDefaults ?? {};
+
+  return {
+    id: input.id,
+    validFor: input.validFor,
+    method,
+    pathTemplate: input.pathTemplate,
+    requiredPath,
+    requiredQuery,
+    queryRules,
+    serverDefaults,
+    requestSchema: input.requestSchema ?? EmptyRequest,
+    responseSchema: input.responseSchema ?? EmptyResponse,
+  };
+}
+
+/** Extract `{param}` names from a path template. */
+function extractParams(tpl: string): string[] {
+  const out = new Set<string>();
+  const re = /\{([^}]+)\}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(tpl))) out.add(m[1]);
+  return Array.from(out);
+}
+
+
+===== FILE: src/registry/index.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Function listEndpoints.
+ * @param filter (optional: undefined | object)
+ * @returns ReadonlyArray
+ */
+export function listEndpoints(
+--- AFTER (hunk) ----
+/**
+ * Function listEndpoints.
+ * @param filter (optional: Partial<VersionPlanPair>)
+ * @returns ReadonlyArray<(typeof GENERATED_REGISTRY)[number]>
+ */
+export function listEndpoints(
+
+--- BEFORE (hunk) ---
+ * Function getEndpointDefinition.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | object
+ */
+export function getEndpointDefinition(
+--- AFTER (hunk) ----
+ * Function getEndpointDefinition.
+ * @param path (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns (typeof GENERATED_REGISTRY)[number] | null
+ */
+export function getEndpointDefinition(
+
+--- BEFORE (hunk) ---
+ * Function getServerDefaults.
+ * @param id (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | object
+ */
+export function getServerDefaults(
+--- AFTER (hunk) ----
+ * Function getServerDefaults.
+ * @param id (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>> | null
+ */
+export function getServerDefaults(
+
+--- BEFORE (hunk) ---
+ * Function getQueryRules.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns null | ReadonlyArray
+ */
+export function getQueryRules(
+--- AFTER (hunk) ----
+ * Function getQueryRules.
+ * @param path (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns RegistryEndpoint["queryRules"] | null
+ */
+export function getQueryRules(
+
+--- BEFORE (hunk) ---
+ * Function getPathInfo.
+ * @param path (required: string)
+ * @param validFor (optional: undefined | object)
+ * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string>; } | null
+ */
+export function getPathInfo(
+--- AFTER (hunk) ----
+ * Function getPathInfo.
+ * @param path (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string> } | null
+ */
+export function getPathInfo(
+
+--- BEFORE (hunk) ---
+ * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns undefined | object
+ */
+export function getResponseSchema(path: string): ZodLikeSchema | undefined {
+--- AFTER (hunk) ----
+ * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns ZodLikeSchema | undefined
+ */
+export function getResponseSchema(path: string): ZodLikeSchema | undefined {
+
+--- BEFORE (hunk) ---
+ * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns undefined | object
+ */
+export function getRequestSchema(path: string): ZodLikeSchema | undefined {
+--- AFTER (hunk) ----
+ * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns ZodLikeSchema | undefined
+ */
+export function getRequestSchema(path: string): ZodLikeSchema | undefined {
+
+===== FILE: src/registry/path-from-slug.ts =====
+--- BEFORE (hunk) ---
+ * @property template (required: string).
+ * @property requiredParams (required: ReadonlyArray<string>).
+ */
+export type PathFromSlug = Readonly<{
+  template: string; // e.g. "/coins/{id}/history"
+  requiredParams: ReadonlyArray<string>; // e.g. ["id"]
+}>;
+
+/**
+ * Build a URL path template from a slug using dot + `by-<param>` rules.
+ * @param slug (required: string)
+ * @returns object
+ */
+export function pathTemplateFromSlug(slug: string): PathFromSlug {
+  const parts = slug.split(".");
+  const segments: string[] = [];
+  const params: string[] = [];
+
+  for (const p of parts) {
+    if (p.startsWith("by-")) {
+      const name = p.slice(3);
+      if (name.length === 0) throw new Error(`Invalid slug segment "${p}" in "${slug}"`);
+      params.push(name);
+      segments.push(`{${name}}`);
+    } else {
+      segments.push(p);
+    }
+  }
+  return { template: `/${segments.join("/")}`, requiredParams: params };
+}
+
+--- AFTER (hunk) ----
+ * @property template (required: string).
+ * @property requiredParams (required: ReadonlyArray<string>).
+ * @remarks Type: PathFromSlug
+ */
+export type PathFromSlug = Readonly<{
+  template: string; // e.g. "/coins/{id}/history"
+  requiredParams: ReadonlyArray<string>; // e.g. ["id"]
+}>;
+
+/**
+ * Build a URL path template from a slug using dot + `by-<param>` rules.
+ * @param slug (required: string)
+ * @returns PathFromSlug
+ */
+export function pathTemplateFromSlug(slug: string): PathFromSlug {
+  const parts = slug.split(".");
+  const segments: string[] = [];
+  const params: string[] = [];
+
+  for (const p of parts) {
+    if (p.startsWith("by-")) {
+      const name = p.slice(3);
+      if (name.length === 0) throw new Error(`Invalid slug segment "${p}" in "${slug}"`);
+      params.push(name);
+      segments.push(`{${name}}`);
+    } else {
+      segments.push(p);
+    }
+  }
+  return { template: `/${segments.join("/")}`, requiredParams: params };
+}
+
+
+===== FILE: src/registry/select.ts =====
+--- BEFORE (hunk) ---
+ * Function selectEntries.
+ * @param validFor (required: V)
+ * @returns ReadonlyArray
+ */
+export function selectEntries<V extends VersionPlanPair>(validFor: V): ReadonlyArray<EntryFor<V>> {
+--- AFTER (hunk) ----
+ * Function selectEntries.
+ * @param validFor (required: V)
+ * @returns ReadonlyArray<EntryFor<V>>
+ */
+export function selectEntries<V extends VersionPlanPair>(validFor: V): ReadonlyArray<EntryFor<V>> {
+
+--- BEFORE (hunk) ---
+ * Function selectEntryMap.
+ * @param validFor (required: V)
+ * @returns object
+ */
+export function selectEntryMap<V extends VersionPlanPair>(
+--- AFTER (hunk) ----
+ * Function selectEntryMap.
+ * @param validFor (required: V)
+ * @returns Readonly<Record<EndpointIdFor<V>, RegistryEntry>>
+ */
+export function selectEntryMap<V extends VersionPlanPair>(
+
+===== FILE: src/testkit/default-request.ts =====
+--- BEFORE (hunk) ---
+ * Returns null if required path params are missing.
+ * @param endpointId (required: string)
+ * @returns null | object
+ */
+export function synthesizeDefaultRequest(endpointId: string): RequestShape | null {
+--- AFTER (hunk) ----
+ * Returns null if required path params are missing.
+ * @param endpointId (required: string)
+ * @returns RequestShape | null
+ */
+export function synthesizeDefaultRequest(endpointId: string): RequestShape | null {
+
+===== FILE: src/testkit/discover.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Discover a single endpoint's fixtures (defaults + scenarios).
+ * @param validFor (required: object)
+ * @param endpointSlug (required: string)
+ * @returns Promise
+--- AFTER (hunk) ----
+/**
+ * Discover a single endpoint's fixtures (defaults + scenarios).
+ * @param validFor (required: VersionPlanPair)
+ * @param endpointSlug (required: string)
+ * @returns Promise<EndpointFixtureRoot | null>
+
+--- BEFORE (hunk) ---
+ * @param validFor (required: object)
+ * @param endpointSlug (required: string)
+ * @returns Promise
+ */
+export async function discoverEndpointFixtures(
+--- AFTER (hunk) ----
+ * @param validFor (required: VersionPlanPair)
+ * @param endpointSlug (required: string)
+ * @returns Promise<EndpointFixtureRoot | null>
+ */
+export async function discoverEndpointFixtures(
+
+--- BEFORE (hunk) ---
+/**
+ * Build concrete test plans for an endpoint fixture root.
+ * @param root (required: object)
+ * @returns Promise
+ */
+export async function buildTestPlans(root: EndpointFixtureRoot): Promise<TestPlan[]> {
+--- AFTER (hunk) ----
+/**
+ * Build concrete test plans for an endpoint fixture root.
+ * @param root (required: EndpointFixtureRoot)
+ * @returns Promise<TestPlan[]>
+ */
+export async function buildTestPlans(root: EndpointFixtureRoot): Promise<TestPlan[]> {
+
+===== FILE: src/testkit/fs.ts =====
+--- BEFORE (hunk) ---
+ * Function pathExists.
+ * @param p (required: string)
+ * @returns Promise
+ */
+export async function pathExists(p: string): Promise<boolean> {
+--- AFTER (hunk) ----
+ * Function pathExists.
+ * @param p (required: string)
+ * @returns Promise<boolean>
+ */
+export async function pathExists(p: string): Promise<boolean> {
+
+--- BEFORE (hunk) ---
+ * Function readJSON.
+ * @param p (required: string)
+ * @returns Promise
+ */
+export async function readJSON<T>(p: string): Promise<T> {
+--- AFTER (hunk) ----
+ * Function readJSON.
+ * @param p (required: string)
+ * @returns Promise<T>
+ */
+export async function readJSON<T>(p: string): Promise<T> {
+
+--- BEFORE (hunk) ---
+ * Function listFiles.
+ * @param p (required: string)
+ * @returns Promise
+ */
+export async function listFiles(p: string): Promise<string[]> {
+--- AFTER (hunk) ----
+ * Function listFiles.
+ * @param p (required: string)
+ * @returns Promise<string[]>
+ */
+export async function listFiles(p: string): Promise<string[]> {
+
+===== FILE: src/testkit/run.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Function runDefaultTest.
+ * @param plan (required: object)
+ * @returns Promise
+ */
+export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResult> {
+--- AFTER (hunk) ----
+/**
+ * Function runDefaultTest.
+ * @param plan (required: DefaultTestPlan)
+ * @returns Promise<DefaultResult>
+ */
+export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResult> {
+
+--- BEFORE (hunk) ---
+/**
+ * Function runScenarioTest.
+ * @param plan (required: object)
+ * @returns Promise
+ */
+export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
+--- AFTER (hunk) ----
+/**
+ * Function runScenarioTest.
+ * @param plan (required: ScenarioTestPlan)
+ * @returns Promise<ScenarioResult>
+ */
+export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
+
+===== FILE: src/testkit/types.ts =====
+--- BEFORE (hunk) ---
+ * Optional scenario metadata.
+ * @property expect (optional: "pass" | "fail").
+ */
+export type ScenarioMeta = Readonly<{
+  /** Expected validator outcome. Default inferred from presence of error.response fixture. */
+  expect?: "pass" | "fail";
+}>;
+
+/**
+ * A discovered scenario file group (request + response variants).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property metaPath (required: string | null).
+ */
+export type ScenarioFilePair = Readonly<{
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  metaPath: string | null;
+}>;
+
+/**
+ * Root info for an endpoint’s fixtures.
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>).
+ * @property scenarios (required: ReadonlyArray<ScenarioFilePair>).
+ */
+export type EndpointFixtureRoot = Readonly<{
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  defaults: Readonly<{
+    requestPath: string | null;
+    responsePath: string | null;
+  }>;
+  scenarios: ReadonlyArray<ScenarioFilePair>;
+}>;
+
+/**
+ * Default (docs) test plan.
+ * @property kind (required: "default").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property requestPath (required: string | null).
+ * @property responsePath (required: string).
+ */
+export type DefaultTestPlan = Readonly<{
+  kind: "default";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  requestPath: string | null;
+  responsePath: string;
+}>;
+
+/**
+ * Scenario (variant) test plan.
+ * @property kind (required: "scenario").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property meta (required: Readonly<{ expect: "pass" | "fail" }>).
+ */
+export type ScenarioTestPlan = Readonly<{
+  kind: "scenario";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  meta: Readonly<{ expect: "pass" | "fail" }>;
+}>;
+
+/**
+ * Union of supported plans.
+ * @remarks Type: DefaultTestPlan | ScenarioTestPlan
+ */
+export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
+
+/** Re-export for tests that import only from testkit. */
+export type { RequestShape } from "../types.js";
+export type { VersionPlanPair } from "../types.js";
+
+--- AFTER (hunk) ----
+ * Optional scenario metadata.
+ * @property expect (optional: "pass" | "fail").
+ * @remarks Type: ScenarioMeta
+ */
+export type ScenarioMeta = Readonly<{
+  /** Expected validator outcome. Default inferred from presence of error.response fixture. */
+  expect?: "pass" | "fail";
+}>;
+
+/**
+ * A discovered scenario file group (request + response variants).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property metaPath (required: string | null).
+ * @remarks Type: ScenarioFilePair
+ */
+export type ScenarioFilePair = Readonly<{
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  metaPath: string | null;
+}>;
+
+/**
+ * Root info for an endpoint’s fixtures.
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>).
+ * @property scenarios (required: ReadonlyArray<ScenarioFilePair>).
+ * @remarks Type: EndpointFixtureRoot
+ */
+export type EndpointFixtureRoot = Readonly<{
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  defaults: Readonly<{
+    requestPath: string | null;
+    responsePath: string | null;
+  }>;
+  scenarios: ReadonlyArray<ScenarioFilePair>;
+}>;
+
+/**
+ * Default (docs) test plan.
+ * @property kind (required: "default").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property requestPath (required: string | null).
+ * @property responsePath (required: string).
+ * @remarks Type: DefaultTestPlan
+ */
+export type DefaultTestPlan = Readonly<{
+  kind: "default";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  requestPath: string | null;
+  responsePath: string;
+}>;
+
+/**
+ * Scenario (variant) test plan.
+ * @property kind (required: "scenario").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property meta (required: Readonly<{ expect: "pass" | "fail" }>).
+ * @remarks Type: ScenarioTestPlan
+ */
+export type ScenarioTestPlan = Readonly<{
+  kind: "scenario";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  meta: Readonly<{ expect: "pass" | "fail" }>;
+}>;
+
+/**
+ * Union of supported plans.
+ * @remarks Type: DefaultTestPlan | ScenarioTestPlan
+ */
+export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
+
+/** Re-export for tests that import only from testkit. */
+export type { RequestShape } from "../types.js";
+export type { VersionPlanPair } from "../types.js";
+

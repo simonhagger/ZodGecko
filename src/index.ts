@@ -1,53 +1,53 @@
 /**
  * @file src/index.ts
- * @module root
+ * @module index
  *
- * Package root — consolidated public API.
+ * Public API — helpers + registry readers + types.
  *
- * Design:
- * - Re-export **core** (pure utilities) and **runtime** (endpoint-aware) surfaces.
- * - Re-export **endpoints** namespaces for direct schema access (e.g. `coins.schemas.*`).
- * - Explicitly re-export URL helpers from **runtime** at the end so that
- *   root-level consumers get the runtime-aware variants by default.
- *
- * @example
- * import { getSchemas, formatPath, toURL, DEFAULT_BASE } from "zodgecko";
- *
- * // Derive request/response schemas for an endpoint
- * const { req, res } = getSchemas("/coins/{id}/ohlc");
- *
- * // Parse & validate request params
- * const parsed = req.parse({ id: "bitcoin", vs_currency: "usd", days: 1 });
- *
- * // Build a safe path from the template + params
- * const path = formatPath("/coins/{id}/ohlc", parsed);
- *
- * // Build a full URL with normalized query string, using DEFAULT_BASE
- * const url = toURL(DEFAULT_BASE, path, parsed);
- *
- * // Later: validate a response payload
- * const validated = res.parse(await fetchJSON(url));
+ * Notes:
+ * - The minimal fetch client lives under a separate entry: `zodgecko/fetch`.
+ * - Registry internals (generated data) are not exported from the root.
+ * - Keep this barrel tight and predictable.
+ * @summary Index.
  */
 
-// Core (pure, framework-agnostic helpers)
-export * from "./core/index.js";
+/* --------------------------------- Helpers -------------------------------- */
 
-// Runtime (endpoint-aware helpers: buildQuery, defaults, validators, etc.)
-export * from "./runtime/index.js";
+export { explainError } from "./helpers/explain-error.js";
+export { formatParams, formatParamsForEndpoint } from "./helpers/format-params.js";
+export { formatPath } from "./helpers/format-path.js";
+export { getRequestFor } from "./helpers/get-request-for.js";
+export { parseRequest } from "./helpers/parse-request.js";
+export { parseResponse } from "./helpers/parse-response.js";
+export { toURL } from "./helpers/to-url.js";
+export { getSchemas } from "./helpers/get-schemas.js";
 
-// Endpoint namespaces (e.g., coins.schemas.*, exchanges.schemas.*, …)
-export * from "./endpoints/index.js";
+/* ------------------------------- Registry I/O ------------------------------ */
+/* Read-only accessors for endpoint metadata; useful for advanced consumers. */
 
-/**
- * Prefer runtime URL helpers at the root (over core ones).
- * These explicit re-exports ensure the root surface uses the runtime-aware path utilities.
- * Note: core also exports some of these names; placing this block last ensures
- * the runtime versions are the ones exposed at the package root.
- */
 export {
-  DEFAULT_BASE,
-  formatPath, // runtime re-export (delegates to core)
-  joinBaseAndPath, // runtime re-export (delegates to core)
-  toURL,
-  qsString,
-} from "./runtime/url.js";
+  getPathInfo,
+  getQueryRules,
+  getResponseSchema,
+  getRequestSchema,
+  getServerDefaults,
+  listEndpoints,
+} from "./registry/index.js";
+
+/* ---------------------------------- Types --------------------------------- */
+
+export type {
+  ApiPlan,
+  ApiVersion,
+  QueryPrimitive,
+  QueryValue,
+  RequestShape,
+  VersionPlanPair,
+} from "./types.js";
+
+export { PLANS, VERSIONS, VERSION_TO_PLAN } from "./helpers/constants.js";
+export { isValidVersionPlan } from "./helpers/object.js";
+
+/* --------------------------------- Fetch API ------------------------------- */
+/* Intentionally not re-exported here:
+   import from "zodgecko/fetch" for the minimal fetch client. */
