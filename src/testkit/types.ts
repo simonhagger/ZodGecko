@@ -95,7 +95,7 @@ export type ScenarioTestPlan = Readonly<{
 
 /**
  * Union of supported plans.
- * @remarks Type: __type
+ * @remarks Type: DefaultTestPlan | ScenarioTestPlan
  */
 export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
 

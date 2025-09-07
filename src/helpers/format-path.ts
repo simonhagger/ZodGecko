@@ -3,6 +3,7 @@
  * @module helpers/format-path
  * @summary Format Path.
  */
+
 /**
  * Type alias PathParams.
  * @remarks Type: { readonly [x: string]: string | number; }

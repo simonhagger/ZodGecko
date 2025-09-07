@@ -33,4 +33,4 @@ Columns:
 | `simple.token_price.by-id` | `v3.0.1/public` | `GET` | `/simple/token_price/{id}` | `id` | `contract_addresses`, `vs_currencies` | `include_24hr_change=false`, `include_24hr_vol=false`, `include_last_updated_at=false`, `include_market_cap=false` | `precision` |
 | `token_lists.by-asset_platform_id.all.json` | `v3.0.1/public` | `GET` | `token_lists/{asset_platform_id}/all.json` | `asset_platform_id` | `id` | *(none)* | *(none)* |
 
-_Generated on 2025-09-05 15:13:27.884 UTC._
+_Generated on 2025-09-06 21:46:33.194 UTC._

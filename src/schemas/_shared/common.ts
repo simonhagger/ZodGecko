@@ -365,7 +365,7 @@ export const ImageUrls = z
 /** Localization record: { "en": "...", "de": "...", ... } (values can sometimes be null) */
 export const Localization = z.record(z.string(), z.string().nullable());
 
-//** Platforms entry record: { "ethereum": "0x1234...", "polygon-pos": "0x1234..." } */
+/** Platforms entry record: { "ethereum": "0x1234...", "polygon-pos": "0x1234..." } */
 export const PlatformsEntry = z.record(z.string(), ContractAddress.nullish());
 
 /** Market chart family (prices, market_caps, total_volumes) */

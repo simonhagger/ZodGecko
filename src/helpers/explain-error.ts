@@ -3,6 +3,7 @@
  * @module helpers/explain-error
  * @summary Explain Error.
  */
+
 /**
  * Function explainError.
  * @param err (required: unknown)

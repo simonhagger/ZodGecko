@@ -47,7 +47,7 @@ export function createClient<V extends VersionPlanPair>(
 // Impl
 /**
  * Function createClient.
- * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param arg (required: VersionPlanPair | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @param opts (optional: { baseURL?: string; } | undefined)
  * @returns ZodGecko
  */

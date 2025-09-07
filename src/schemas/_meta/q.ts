@@ -5,7 +5,8 @@
  */
 import type { z } from "zod";
 
-export type ArrayEncoding = "csv"; // extensible later
+/** ArrayEncoding NOTE: currently "csv" only but may be extensible later */
+export type ArrayEncoding = "csv";
 
 type QMeta = Readonly<{
   arrayEncoding?: ArrayEncoding;
@@ -14,6 +15,7 @@ type QMeta = Readonly<{
 
 const QMETA = Symbol.for("zodgecko.qmeta");
 
+/** getQMeta */
 export function getQMeta(schema: unknown): QMeta | null {
   return (schema && (schema as { [QMETA]?: QMeta })[QMETA]) ?? null;
 }

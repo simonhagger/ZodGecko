@@ -16,7 +16,7 @@ export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, str
 
 /**
  * Function defaultBaseFor.
- * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @returns string
  */
 export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {

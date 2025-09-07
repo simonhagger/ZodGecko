@@ -1,94 +1,21 @@
-# JSDoc Exports — Dry Run Report
-Mode: DRY RUN (no files written)
-Files changed: 27
-Generated at: 2025-09-06T10:35:56.322Z
+# JSDoc — Dry Run Report
+Generated: 2025-09-07T01:18:59.812Z
 
 ===== FILE: src/types.ts =====
---- BEFORE ---
-/**
- * @file src/types.ts
- * @module types
- * @summary Canonical shared types for ZodGecko.
- *
- * @remarks
- * One file to rule them all:
- *  - Version/plan pairs & helpers
- *  - Query primitives & request shape
- *  - Normalization policies & schema interfaces
- *  - Registry descriptors (runtime shape)
- *  - **Derived unions** from the generated registry (paths/ids per version/plan)
- *
- * Design principles:
- *  - No runtime imports from test code.
- *  - Keep this module **types-first**; the only import is a *types-only* import
- *    from the generated registry for derived unions. This avoids runtime cycles.
- */
-// ===========================================================================
-//  Version / Plan (single source of truth) + Registry Config
-// ===========================================================================
-import type { PLANS, VERSIONS } from "./helpers/constants.js";
-import type { GENERATED_REGISTRY as GEN } from "./registry/generated.js";
-
-// ===========================================================================
-//  Derived unions from the generated registry (paths/ids per version/plan)
-// ===========================================================================
-
+--- BEFORE (hunk) ---
 /**
  * Type alias GeneratedRegistry.
  * @remarks Type: ReadonlyArray<object>
  */
 export type GeneratedRegistry = typeof GEN;
+--- AFTER (hunk) ----
 /**
- * Type alias GeneratedEntry.
- * @remarks Type: GeneratedRegistry[number]
+ * Type alias GeneratedRegistry.
+ * @remarks Type: typeof GEN
  */
-export type GeneratedEntry = GeneratedRegistry[number];
+export type GeneratedRegistry = typeof GEN;
 
-/**
- * Narrow entries to those matching a `{ version, plan }` pair using the generated tuple.
- * @remarks Type: EntryFor
- */
-export type EntryFor<V extends VersionPlanPair> = Extract<GeneratedEntry, { readonly validFor: V }>;
-
-/**
- * Union of API path templates valid for a given `{ version, plan }`.
- * @remarks Type: EntryFor<V>["pathTemplate"]
- */
-export type EndpointPathFor<V extends VersionPlanPair> = EntryFor<V>["pathTemplate"];
-
-/**
- * Union of endpoint ids valid for a given `{ version, plan }`.
- * @remarks Type: EntryFor<V>["id"]
- */
-export type EndpointIdFor<V extends VersionPlanPair> = EntryFor<V>["id"];
-
-/**
- * Union of all version/plan keys present in the generated registry.
- * @remarks Type: `${Ver}/${Pl}`
- */
-export type DerivedVersionPlanKey = GeneratedEntry extends {
-  readonly validFor: {
-    readonly version: infer Ver extends string;
-    readonly plan: infer Pl extends string;
-  };
-}
-  ? `${Ver}/${Pl}`
-  : never;
-
-/**
- * Union of supported API versions.
- * @remarks Type: "v3.0.1" | "v3.1.1"
- */
-export type ApiVersion = (typeof VERSIONS)[number];
-
-/**
- * Union of supported API plans.
- * @remarks Type: "public" | "paid"
- */
-export type ApiPlan = (typeof PLANS)[number];
-
-/**
- * Structured pair describing a specific API surface (version + plan).
+--- BEFORE (hunk) ---
  * @property version (required: ApiVersion).
  * @property plan (required: ApiPlan).
  */
@@ -167,397 +94,10 @@ export type EndpointPath = string; // e.g., "/coins/{id}/ohlc"
 //  Normalization policies & schema interfaces
 // ===========================================================================
 
-/**
- * Encoding policy for array‑like query params. MVP: "csv" only; extensible later.
- * @remarks Type: "csv"
- */
-export type ArrayEncoding = "csv";
-
-/**
- * Minimal Zod‑like shape (no runtime dependency on zod).
- * @property parse (required: (value: unknown) => T).
- * @property safeParse (optional: (value: unknown) => { success: boolean; data?: T; error?: unknown }).
- * @property _def (optional: unknown).
- * @property def (optional: unknown).
- */
-export type ZodLikeSchema<T = unknown> = Readonly<{
-  parse: (value: unknown) => T;
-  /** Optional: many places duck-type this in tests/introspection. */
-  safeParse?: (value: unknown) => { success: boolean; data?: T; error?: unknown };
-  /** Optional internals seen in different zod builds; kept for duck-typing only. */
-  _def?: unknown;
-  def?: unknown;
-}>;
-
-/**
- * Minimal validator interface; can be backed by Zod internally.
- * @property parse (required: (value: unknown) => T).
- */
-export type Schema<T> = Readonly<{ parse: (value: unknown) => T }>;
-
-/**
- * Declarative rule for a single query parameter.
- * @property key (required: string).
- * @property default (optional: QueryValue).
- * @property dropWhenDefault (optional: boolean).
- * @property arrayEncoding (optional: ArrayEncoding).
- * @property required (optional: true).
- */
-export type QueryRule = Readonly<{
-  /** Query key (as documented by CoinGecko). */
-  key: string;
-  /** Server default value (single source of truth) if any. */
-  default?: QueryValue;
-  /** Drop from querystring when value equals its default. Default: `true`. */
-  dropWhenDefault?: boolean;
-  /** Array serialization policy (MVP: CSV). */
-  arrayEncoding?: ArrayEncoding;
-  /** True when the key is mandatory in the querystring. */
-  required?: true;
-}>;
-
-/**
- * HTTP methods used by the registry (most endpoints are GET).
- * @remarks Variants:
- * - "GET"
- * - "POST"
- * - "PUT"
- * - "DELETE"
- * - "PATCH"
- * - "HEAD"
- * - "OPTIONS"
- */
-export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
-
-// ===========================================================================
-//  Registry descriptors (runtime shape)
-// ===========================================================================
-
-/**
- * A single endpoint definition in the runtime registry.
- *
- * @template Req - Parsed request type (schema output).
- * @template Res - Parsed response type (schema output).
- * @property id (required: string).
- * @property validFor (required: VersionPlanPair).
- * @property method (required: HttpMethod).
- * @property pathTemplate (required: EndpointPath).
- * @property requiredPath (required: readonly string[]).
- * @property requiredQuery (required: readonly string[]).
- * @property queryRules (required: readonly QueryRule[]).
- * @property serverDefaults (required: Readonly<Record<string, QueryValue>>).
- * @property requestSchema (required: Schema<Req>).
- * @property responseSchema (required: Schema<Res>).
- */
-export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
-  /** Dot + `by-<param>` slug, e.g. "coins.by-id.history". */
-  id: string;
-  /** Valid version/plan pair. */
-  validFor: VersionPlanPair;
-  /** HTTP method (usually GET). */
-  method: HttpMethod;
-  /** API path template, e.g. "/coins/{id}/history". */
-  pathTemplate: EndpointPath;
-  /** Required path param names (e.g., ["id", "contract_address"]). */
-  requiredPath: readonly string[];
-  /** Required query param names (as strings). */
-  requiredQuery: readonly string[];
-  /** Declarative query rules (defaults + drop policy + encoding). */
-  queryRules: readonly QueryRule[];
-  /** Raw map of server defaults (derived). */
-  serverDefaults: Readonly<Record<string, QueryValue>>;
-  /** Optional request validator (pluggable). */
-  requestSchema: Schema<Req>;
-  /** Optional response validator (pluggable). */
-  responseSchema: Schema<Res>;
-}>;
-
-// ===========================================================================
-//  Derived unions from the generated registry (paths/ids per version/plan)
-// ===========================================================================
-
-// -- Helpers to pluck version/plan literals from a pair or entry -------------
-/** Type alias VPVersion. */
-export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
-  ? Ver
-  : V extends { version: infer Ver2 extends string }
-    ? Ver2
-    : never;
-
-/** Type alias VPPlan. */
-export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
-  ? Pl
-  : V extends { plan: infer Pl2 extends string }
-    ? Pl2
-    : never;
-
-// /** Narrow entries to those matching a `{ version, plan }` pair. */
-// export type MatchByVersionPlan<E, V> = E extends {
-//   readonly validFor: { readonly version: VPVersion<V>; readonly plan: VPPlan<V> };
-// }
-//   ? E
-//   : never;
-
-/**
- * Union of *all* path templates present in the registry (any version/plan).
- * @remarks Type: RegistryEndpoint["pathTemplate"]
- */
-export type AnyEndpointPath = RegistryEndpoint["pathTemplate"];
-
-/**
- * Union of *all* endpoint ids present in the registry (any version/plan).
- * @remarks Type: RegistryEndpoint["id"]
- */
-export type AnyEndpointId = RegistryEndpoint["id"];
-
-// ===========================================================================
-//  Path‑template param extraction helpers (DX niceties)
-// ===========================================================================
-
-/**
- * Extract the set of `{placeholder}` names from a path template.
- * @remarks Type: `${string}{${infer K}}${infer R}`
- */
-export type ExtractPathParams<
-  P extends string,
-  Acc extends string = never,
-> = P extends `${string}{${infer K}}${infer R}` ? ExtractPathParams<R, Acc | K> : Acc;
-
-/**
- * Lint-safe empty object type (no keys permitted).
- * @remarks Type: {}
- */
-export type EmptyObject = Record<never, never>;
-
-/** Build the `path` shape for a given path template. */
-export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
-  ? EmptyObject
-  : { path: Readonly<Record<ExtractPathParams<P>, string>> };
-
-/**
- * Request shape specialized for a given path template.
- * @property query (optional: QueryParams)
- */
-export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
-
-// ===========================================================================
-//  (Optional) Public re-exports for convenience
-// ===========================================================================
-
-export type {
-  // Aliases kept for back-compat in internal modules
-  RegistryEndpoint as RegistryEntry,
-};
-/**
- * Type alias Registry.
- * @remarks Type: ReadonlyArray<RegistryEndpoint>
- */
-export type Registry = readonly RegistryEndpoint[];
-/**
- * Type alias EndpointId.
- * @remarks Type: RegistryEndpoint["id"]
- */
-export type EndpointId = RegistryEndpoint["id"];
-/**
- * Type alias Version.
- * @remarks Type: "v3.0.1" | "v3.1.1"
- */
-export type Version = RegistryEndpoint["validFor"]["version"];
-/**
- * Type alias Plan.
- * @remarks Type: "public" | "paid"
- */
-export type Plan = RegistryEndpoint["validFor"]["plan"];
-
-// ===========================================================================
-//  Minimal, cross-env headers types (no DOM lib required).
-// ===========================================================================
-
-/**
- * HeaderTuple is a tuple of two strings: `name` and `value`.
- * @remarks Type: readonly [string, string]
- */
-export type HeaderTuple = readonly [string, string];
-
-//** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
-/**
- * Type alias HeadersLike.
- * @remarks Type: { get(name: string): string | null; }
- */
-export type HeadersLike = {
-  get(name: string): string | null; // enough for reads
-};
-
-/**
- * HeadersInitLike is a type that can be used to represent a set of HTTP headers. With minimal functionality.
- * @remarks Type: Readonly<Record<string, string>> | readonly HeaderTuple[] | HeadersLike
- */
-export type HeadersInitLike =
-  | Readonly<Record<string, string>>
-  | readonly HeaderTuple[]
-  | HeadersLike; // structural: real Headers satisfies this
-
-// ---------------------------------------------------------------------------
-// Optional/metadata helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Type alias QMeta.
- * @property arrayEncoding (optional: "csv").
- * @property dropWhenDefault (optional: boolean).
- */
-export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean }>;
-
-// ---------------------------------------------------------------------------
-// Unwrapping for defaults / shapes
-// ---------------------------------------------------------------------------
-
-/**
- * Type alias UnwrapDefaultsResult.
- * @property inner (required: unknown).
- * @property defaultValue (optional: unknown).
- * @property wasOptional (required: boolean).
- * @property isArray (required: boolean).
- */
-export type UnwrapDefaultsResult = Readonly<{
-  inner: unknown;
-  defaultValue?: unknown;
-  wasOptional: boolean;
-  isArray: boolean;
-}>;
-
-// ---------------------------------------------------------------------------
-// Module Discovery
-// ---------------------------------------------------------------------------
-/**
- * Discovered Module type
- * @property slug (required: string).
+--- AFTER (hunk) ----
  * @property version (required: ApiVersion).
  * @property plan (required: ApiPlan).
- * @property file (required: string).
- */
-export type DiscoveredModule = Readonly<{
-  slug: string;
-  version: ApiVersion;
-  plan: ApiPlan;
-  /** Absolute path to the `index.ts` entry for this variant. */
-  file: string;
-}>;
-/**
- * Discovered Option type
- * @property schemasDir (required: string).
- * @property only (optional: ReadonlySet<string> | string[] | null).
- * @property fsAccess (optional: (p: string) => Promise<boolean>).
- */
-export type DiscoverOptions = Readonly<{
-  /** Absolute path to your `src/schemas` directory. */
-  schemasDir: string;
-  /** Optional allowlist of slugs to include. */
-  only?: ReadonlySet<string> | string[] | null;
-  /**
-   * Optional override for file existence checks (useful in tests).
-   * Defaults to `fs.access`.
-   */
-  fsAccess?: (p: string) => Promise<boolean>;
-}>;
-
-/**
- * Type alias ClientOptions.
- * @property validFor (required: V).
- * @property baseURL (optional: string).
- */
-export type ClientOptions<V extends VersionPlanPair> = Readonly<{
-  validFor: V;
-  baseURL?: string;
-}>;
-
---- AFTER ----
-/**
- * @file src/types.ts
- * @module types
- * @summary Canonical shared types for ZodGecko.
- *
- * @remarks
- * One file to rule them all:
- *  - Version/plan pairs & helpers
- *  - Query primitives & request shape
- *  - Normalization policies & schema interfaces
- *  - Registry descriptors (runtime shape)
- *  - **Derived unions** from the generated registry (paths/ids per version/plan)
- *
- * Design principles:
- *  - No runtime imports from test code.
- *  - Keep this module **types-first**; the only import is a *types-only* import
- *    from the generated registry for derived unions. This avoids runtime cycles.
- */
-// ===========================================================================
-//  Version / Plan (single source of truth) + Registry Config
-// ===========================================================================
-import type { PLANS, VERSIONS } from "./helpers/constants.js";
-import type { GENERATED_REGISTRY as GEN } from "./registry/generated.js";
-
-// ===========================================================================
-//  Derived unions from the generated registry (paths/ids per version/plan)
-// ===========================================================================
-
-/**
- * Type alias GeneratedRegistry.
- * @remarks Type: ReadonlyArray<object>
- */
-export type GeneratedRegistry = typeof GEN;
-/**
- * Type alias GeneratedEntry.
- * @remarks Type: GeneratedRegistry[number]
- */
-export type GeneratedEntry = GeneratedRegistry[number];
-
-/**
- * Narrow entries to those matching a `{ version, plan }` pair using the generated tuple.
- * @remarks Type: EntryFor
- */
-export type EntryFor<V extends VersionPlanPair> = Extract<GeneratedEntry, { readonly validFor: V }>;
-
-/**
- * Union of API path templates valid for a given `{ version, plan }`.
- * @remarks Type: EntryFor<V>["pathTemplate"]
- */
-export type EndpointPathFor<V extends VersionPlanPair> = EntryFor<V>["pathTemplate"];
-
-/**
- * Union of endpoint ids valid for a given `{ version, plan }`.
- * @remarks Type: EntryFor<V>["id"]
- */
-export type EndpointIdFor<V extends VersionPlanPair> = EntryFor<V>["id"];
-
-/**
- * Union of all version/plan keys present in the generated registry.
- * @remarks Type: `${Ver}/${Pl}`
- */
-export type DerivedVersionPlanKey = GeneratedEntry extends {
-  readonly validFor: {
-    readonly version: infer Ver extends string;
-    readonly plan: infer Pl extends string;
-  };
-}
-  ? `${Ver}/${Pl}`
-  : never;
-
-/**
- * Union of supported API versions.
- * @remarks Type: "v3.0.1" | "v3.1.1"
- */
-export type ApiVersion = (typeof VERSIONS)[number];
-
-/**
- * Union of supported API plans.
- * @remarks Type: "public" | "paid"
- */
-export type ApiPlan = (typeof PLANS)[number];
-
-/**
- * Structured pair describing a specific API surface (version + plan).
- * @property version (required: ApiVersion).
- * @property plan (required: ApiPlan).
+ * @remarks Type: VersionPlanPair
  */
 export type VersionPlanPair = Readonly<{
   /** API version (e.g. "v3.0.1"). */
@@ -589,33 +129,34 @@ export type VersionPlanKeyFromPair<V extends VersionPlanPair> = `${V["version"]}
 export type QueryPrimitive = string | number | boolean;
 /**
  * Read‑only array of primitives (CSV‑style encodings).
- * @remarks Type: ReadonlyArray
+ * @remarks Type: QueryArray
  */
 export type QueryArray = readonly QueryPrimitive[];
 /**
  * A single query value: a primitive or an immutable array of primitives.
- * @remarks Type: string | number | boolean | ReadonlyArray
+ * @remarks Type: QueryPrimitive | QueryArray
  */
 export type QueryValue = QueryPrimitive | QueryArray;
 /**
  * Read‑only map of query keys to values.
- * @remarks Type: { readonly [x: string]: QueryValue; }
+ * @remarks Type: QueryParams
  */
 export type QueryParams = Readonly<Record<string, QueryValue>>;
 /**
  * Path parameters are strings (already URL‑encoded).
- * @remarks Type: { readonly [x: string]: string; }
+ * @remarks Type: PathParams
  */
 export type PathParams = Readonly<Record<string, string>>;
 
 /**
  * Canonical request shape used across helpers & client.
+ * @property path (optional: PathParams).
+ * @property query (optional: QueryParams).
  * @example const req: RequestShape = {
  *   path: { id: "bitcoin" },
  *   query: { vs_currency: "usd", days: 1 }
  * };
- * @property path (optional: PathParams).
- * @property query (optional: QueryParams).
+ * @remarks Type: RequestShape
  */
 export type RequestShape = Readonly<{
   /** Path parameters (template substitutions). */
@@ -631,6 +172,9 @@ export type RequestShape = Readonly<{
 export type EndpointPath = string; // e.g., "/coins/{id}/ohlc"
 
 // ===========================================================================
+//  Normalization policies & schema interfaces
+
+--- BEFORE (hunk) ---
 //  Normalization policies & schema interfaces
 // ===========================================================================
 
@@ -698,6 +242,79 @@ export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | 
 
 // ===========================================================================
 //  Registry descriptors (runtime shape)
+--- AFTER (hunk) ----
+
+// ===========================================================================
+//  Normalization policies & schema interfaces
+// ===========================================================================
+
+/**
+ * Encoding policy for array‑like query params. MVP: "csv" only; extensible later.
+ * @remarks Type: "csv"
+ */
+export type ArrayEncoding = "csv";
+
+/**
+ * Minimal Zod‑like shape (no runtime dependency on zod).
+ * @property parse (required: (value: unknown) => T).
+ * @property safeParse (optional: (value: unknown) => { success: boolean; data?: T; error?: unknown }).
+ * @property _def (optional: unknown).
+ * @property def (optional: unknown).
+ * @remarks Type: ZodLikeSchema
+ */
+export type ZodLikeSchema<T = unknown> = Readonly<{
+  parse: (value: unknown) => T;
+  /** Optional: many places duck-type this in tests/introspection. */
+  safeParse?: (value: unknown) => { success: boolean; data?: T; error?: unknown };
+  /** Optional internals seen in different zod builds; kept for duck-typing only. */
+  _def?: unknown;
+  def?: unknown;
+}>;
+
+/**
+ * Minimal validator interface; can be backed by Zod internally.
+ * @property parse (required: (value: unknown) => T).
+ * @remarks Type: Schema
+ */
+export type Schema<T> = Readonly<{ parse: (value: unknown) => T }>;
+
+/**
+ * Declarative rule for a single query parameter.
+ * @property key (required: string).
+ * @property default (optional: QueryValue).
+ * @property dropWhenDefault (optional: boolean).
+ * @property arrayEncoding (optional: ArrayEncoding).
+ * @property required (optional: true).
+ * @remarks Type: QueryRule
+ */
+export type QueryRule = Readonly<{
+  /** Query key (as documented by CoinGecko). */
+  key: string;
+  /** Server default value (single source of truth) if any. */
+  default?: QueryValue;
+  /** Drop from querystring when value equals its default. Default: `true`. */
+  dropWhenDefault?: boolean;
+  /** Array serialization policy (MVP: CSV). */
+  arrayEncoding?: ArrayEncoding;
+  /** True when the key is mandatory in the querystring. */
+  required?: true;
+}>;
+
+/**
+ * HTTP methods used by the registry (most endpoints are GET).
+ * @remarks Type: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS"
+ */
+export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "OPTIONS";
+
+// ===========================================================================
+//  Registry descriptors (runtime shape)
+// ===========================================================================
+
+
+--- BEFORE (hunk) ---
+
+// ===========================================================================
+//  Registry descriptors (runtime shape)
 // ===========================================================================
 
 /**
@@ -802,7 +419,131 @@ export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
   : { path: Readonly<Record<ExtractPathParams<P>, string>> };
 
 /**
+--- AFTER (hunk) ----
+//  Registry descriptors (runtime shape)
+// ===========================================================================
+
+/**
+ * A single endpoint definition in the runtime registry.
+ *
+ * @template Req - Parsed request type (schema output).
+ * @template Res - Parsed response type (schema output).
+ * @property id (required: string).
+ * @property validFor (required: VersionPlanPair).
+ * @property method (required: HttpMethod).
+ * @property pathTemplate (required: EndpointPath).
+ * @property requiredPath (required: readonly string[]).
+ * @property requiredQuery (required: readonly string[]).
+ * @property queryRules (required: readonly QueryRule[]).
+ * @property serverDefaults (required: Readonly<Record<string, QueryValue>>).
+ * @property requestSchema (required: Schema<Req>).
+ * @property responseSchema (required: Schema<Res>).
+ * @remarks Type: RegistryEndpoint
+ */
+export type RegistryEndpoint<Req = unknown, Res = unknown> = Readonly<{
+  /** Dot + `by-<param>` slug, e.g. "coins.by-id.history". */
+  id: string;
+  /** Valid version/plan pair. */
+  validFor: VersionPlanPair;
+  /** HTTP method (usually GET). */
+  method: HttpMethod;
+  /** API path template, e.g. "/coins/{id}/history". */
+  pathTemplate: EndpointPath;
+  /** Required path param names (e.g., ["id", "contract_address"]). */
+  requiredPath: readonly string[];
+  /** Required query param names (as strings). */
+  requiredQuery: readonly string[];
+  /** Declarative query rules (defaults + drop policy + encoding). */
+  queryRules: readonly QueryRule[];
+  /** Raw map of server defaults (derived). */
+  serverDefaults: Readonly<Record<string, QueryValue>>;
+  /** Optional request validator (pluggable). */
+  requestSchema: Schema<Req>;
+  /** Optional response validator (pluggable). */
+  responseSchema: Schema<Res>;
+}>;
+
+// ===========================================================================
+//  Derived unions from the generated registry (paths/ids per version/plan)
+// ===========================================================================
+
+// -- Helpers to pluck version/plan literals from a pair or entry -------------
+/**
+ * Type alias VPVersion.
+ * @remarks Type: VPVersion
+ */
+export type VPVersion<V> = V extends { readonly version: infer Ver extends string }
+  ? Ver
+  : V extends { version: infer Ver2 extends string }
+    ? Ver2
+    : never;
+
+/**
+ * Type alias VPPlan.
+ * @remarks Type: VPPlan
+ */
+export type VPPlan<V> = V extends { readonly plan: infer Pl extends string }
+  ? Pl
+  : V extends { plan: infer Pl2 extends string }
+    ? Pl2
+    : never;
+
+// /** Narrow entries to those matching a `{ version, plan }` pair. */
+// export type MatchByVersionPlan<E, V> = E extends {
+//   readonly validFor: { readonly version: VPVersion<V>; readonly plan: VPPlan<V> };
+// }
+//   ? E
+//   : never;
+
+/**
+ * Union of *all* path templates present in the registry (any version/plan).
+ * @remarks Type: RegistryEndpoint["pathTemplate"]
+ */
+export type AnyEndpointPath = RegistryEndpoint["pathTemplate"];
+
+/**
+ * Union of *all* endpoint ids present in the registry (any version/plan).
+ * @remarks Type: RegistryEndpoint["id"]
+ */
+export type AnyEndpointId = RegistryEndpoint["id"];
+
+// ===========================================================================
+//  Path‑template param extraction helpers (DX niceties)
+// ===========================================================================
+
+/**
+ * Extract the set of `{placeholder}` names from a path template.
+ * @remarks Type: ExtractPathParams
+ */
+export type ExtractPathParams<
+  P extends string,
+  Acc extends string = never,
+> = P extends `${string}{${infer K}}${infer R}` ? ExtractPathParams<R, Acc | K> : Acc;
+
+/**
+ * Lint-safe empty object type (no keys permitted).
+ * @remarks Type: {}
+ */
+export type EmptyObject = Record<never, never>;
+
+/**
+
+--- BEFORE (hunk) ---
+
+/**
  * Request shape specialized for a given path template.
+ * @property query (optional: QueryParams)
+ */
+export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
+--- AFTER (hunk) ----
+
+/**
+ * Build the `path` shape for a given path template.
+ * @remarks Type: Array<unknown>
+ */
+export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
+
+--- BEFORE (hunk) ---
  * @property query (optional: QueryParams)
  */
 export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
@@ -817,8 +558,8 @@ export type {
 };
 /**
  * Type alias Registry.
-     * @remarks Type: ReadonlyArray
-     */
+ * @remarks Type: ReadonlyArray<RegistryEndpoint>
+ */
 export type Registry = readonly RegistryEndpoint[];
 /**
  * Type alias EndpointId.
@@ -856,8 +597,67 @@ export type HeadersLike = {
 };
 
 /**
+--- AFTER (hunk) ----
+ * @remarks Type: Array<unknown>
+ */
+export type PathArgs<P extends string> = [ExtractPathParams<P>] extends [never]
+  ? EmptyObject
+  : { path: Readonly<Record<ExtractPathParams<P>, string>> };
+
+/**
+ * Request shape specialized for a given path template.
+ * @property query (optional: QueryParams)
+ * @remarks Type: RequestShapeFor
+ */
+export type RequestShapeFor<P extends string> = Readonly<PathArgs<P> & { query?: QueryParams }>;
+
+// ===========================================================================
+//  (Optional) Public re-exports for convenience
+// ===========================================================================
+
+export type {
+  // Aliases kept for back-compat in internal modules
+  RegistryEndpoint as RegistryEntry,
+};
+/**
+ * Type alias Registry.
+     * @remarks Type: Registry
+     */
+export type Registry = readonly RegistryEndpoint[];
+/**
+ * Type alias EndpointId.
+ * @remarks Type: RegistryEndpoint["id"]
+ */
+export type EndpointId = RegistryEndpoint["id"];
+/**
+ * Type alias Version.
+ * @remarks Type: "v3.0.1" | "v3.1.1"
+ */
+export type Version = RegistryEndpoint["validFor"]["version"];
+/**
+ * Type alias Plan.
+ * @remarks Type: "public" | "paid"
+ */
+export type Plan = RegistryEndpoint["validFor"]["plan"];
+
+// ===========================================================================
+//  Minimal, cross-env headers types (no DOM lib required).
+// ===========================================================================
+
+/**
+ * HeaderTuple is a tuple of two strings: `name` and `value`.
+ * @remarks Type: readonly [string, string]
+ */
+export type HeaderTuple = readonly [string, string];
+
+//** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
+
+--- BEFORE (hunk) ---
+};
+
+/**
  * HeadersInitLike is a type that can be used to represent a set of HTTP headers. With minimal functionality.
- * @remarks Type: Array<HeadersLike | Readonly<Record<string, string>> | readonly HeaderTuple>
+ * @remarks Type: Readonly<Record<string, string>> | readonly HeaderTuple[] | HeadersLike
  */
 export type HeadersInitLike =
   | Readonly<Record<string, string>>
@@ -917,6 +717,76 @@ export type DiscoveredModule = Readonly<{
  * @property fsAccess (optional: (p: string) => Promise<boolean>).
  */
 export type DiscoverOptions = Readonly<{
+--- AFTER (hunk) ----
+export type HeaderTuple = readonly [string, string];
+
+//** HeadersLike is a type that can be used to represent a set of HTTP headers. With minimal functionality. */
+/**
+ * Type alias HeadersLike.
+ * @remarks Type: { get(name: string): string | null; }
+ * @property get (required: get).
+ */
+export type HeadersLike = {
+  get(name: string): string | null; // enough for reads
+};
+
+/**
+ * HeadersInitLike is a type that can be used to represent a set of HTTP headers. With minimal functionality.
+ * @remarks Type: HeadersInitLike
+ */
+export type HeadersInitLike =
+  | Readonly<Record<string, string>>
+  | readonly HeaderTuple[]
+  | HeadersLike; // structural: real Headers satisfies this
+
+// ---------------------------------------------------------------------------
+// Optional/metadata helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Type alias QMeta.
+ * @property arrayEncoding (optional: "csv").
+ * @property dropWhenDefault (optional: boolean).
+ * @remarks Type: QMeta
+ */
+export type QMeta = Readonly<{ arrayEncoding?: "csv"; dropWhenDefault?: boolean }>;
+
+// ---------------------------------------------------------------------------
+// Unwrapping for defaults / shapes
+// ---------------------------------------------------------------------------
+
+/**
+ * Type alias UnwrapDefaultsResult.
+ * @property inner (required: unknown).
+ * @property defaultValue (optional: unknown).
+ * @property wasOptional (required: boolean).
+ * @property isArray (required: boolean).
+ * @remarks Type: UnwrapDefaultsResult
+ */
+export type UnwrapDefaultsResult = Readonly<{
+  inner: unknown;
+  defaultValue?: unknown;
+  wasOptional: boolean;
+  isArray: boolean;
+}>;
+
+// ---------------------------------------------------------------------------
+// Module Discovery
+// ---------------------------------------------------------------------------
+/**
+ * Discovered Module type
+ * @property slug (required: string).
+ * @property version (required: ApiVersion).
+ * @property plan (required: ApiPlan).
+ * @property file (required: string).
+ * @remarks Type: DiscoveredModule
+ */
+export type DiscoveredModule = Readonly<{
+
+--- BEFORE (hunk) ---
+ * @property fsAccess (optional: (p: string) => Promise<boolean>).
+ */
+export type DiscoverOptions = Readonly<{
   /** Absolute path to your `src/schemas` directory. */
   schemasDir: string;
   /** Optional allowlist of slugs to include. */
@@ -938,97 +808,76 @@ export type ClientOptions<V extends VersionPlanPair> = Readonly<{
   baseURL?: string;
 }>;
 
+--- AFTER (hunk) ----
+ * @remarks Type: DiscoveredModule
+ */
+export type DiscoveredModule = Readonly<{
+  slug: string;
+  version: ApiVersion;
+  plan: ApiPlan;
+  /** Absolute path to the `index.ts` entry for this variant. */
+  file: string;
+}>;
+/**
+ * Discovered Option type
+ * @property schemasDir (required: string).
+ * @property only (optional: ReadonlySet<string> | string[] | null).
+ * @property fsAccess (optional: (p: string) => Promise<boolean>).
+ * @remarks Type: DiscoverOptions
+ */
+export type DiscoverOptions = Readonly<{
+  /** Absolute path to your `src/schemas` directory. */
+  schemasDir: string;
+  /** Optional allowlist of slugs to include. */
+  only?: ReadonlySet<string> | string[] | null;
+  /**
+   * Optional override for file existence checks (useful in tests).
+   * Defaults to `fs.access`.
+   */
+  fsAccess?: (p: string) => Promise<boolean>;
+}>;
+
+/**
+ * Type alias ClientOptions.
+ * @property validFor (required: V).
+ * @property baseURL (optional: string).
+ * @remarks Type: ClientOptions
+ */
+export type ClientOptions<V extends VersionPlanPair> = Readonly<{
+  validFor: V;
+  baseURL?: string;
+}>;
+
 
 ===== FILE: src/client/defaults.ts =====
---- BEFORE ---
-/**
- * @file src/client/defaults.ts
- * @module client/defaults
- * @summary Defaults.
- */
-// src/client/defaults.ts
-import type { VersionPlanKey, VersionPlanPair, ApiPlan, DerivedVersionPlanKey } from "../types.js";
-
-/**
- * Constant DEFAULT_BASE_BY_VERSION.
- * @remarks Type: Readonly<Record<DerivedVersionPlanKey, string>>
- */
-export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
-  "v3.0.1/public": "https://api.coingecko.com/api/v3",
-} as const;
-
+--- BEFORE (hunk) ---
 /**
  * Function defaultBaseFor.
- * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param vp (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @returns string
  */
-export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {
-  const key = typeof vp === "string" ? vp : `${vp.version}/${vp.plan}`;
-  // fall back by plan just in case a new pair is added before this table is updated
-  const plan = typeof vp === "string" ? (key.split("/")[1] as ApiPlan) : vp.plan;
-  return (
-    (DEFAULT_BASE_BY_VERSION as Record<string, string>)[key] ??
-    (plan === "paid" ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3")
-  );
-}
-
---- AFTER ----
-/**
- * @file src/client/defaults.ts
- * @module client/defaults
- * @summary Defaults.
- */
-// src/client/defaults.ts
-import type { VersionPlanKey, VersionPlanPair, ApiPlan, DerivedVersionPlanKey } from "../types.js";
-
-/**
- * Constant DEFAULT_BASE_BY_VERSION.
- * @remarks Type: Readonly<Record<DerivedVersionPlanKey, string>>
- */
-export const DEFAULT_BASE_BY_VERSION: Readonly<Record<DerivedVersionPlanKey, string>> = {
-  "v3.0.1/public": "https://api.coingecko.com/api/v3",
-} as const;
-
+--- AFTER (hunk) ----
 /**
  * Function defaultBaseFor.
+ * @param vp (required: VersionPlanKey | VersionPlanPair)
  * @returns string
- * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  */
-export function defaultBaseFor(vp: VersionPlanKey | VersionPlanPair): string {
-  const key = typeof vp === "string" ? vp : `${vp.version}/${vp.plan}`;
-  // fall back by plan just in case a new pair is added before this table is updated
-  const plan = typeof vp === "string" ? (key.split("/")[1] as ApiPlan) : vp.plan;
-  return (
-    (DEFAULT_BASE_BY_VERSION as Record<string, string>)[key] ??
-    (plan === "paid" ? "https://pro-api.coingecko.com/api/v3" : "https://api.coingecko.com/api/v3")
-  );
-}
-
 
 ===== FILE: src/client/factory.ts =====
---- BEFORE ---
-/**
- * @file src/client/factory.ts
- * @module client/factory
- * @summary Factory.
- */
-// External imports
-// (none)
-
-// Internal imports
-import { ZodGecko } from "./api.js";
-import { isValidVersionPlan, parseVersionPlanKey } from "../helpers/object.js";
-import type { VersionPlanKey, VersionPlanPair, ClientOptions } from "../types.js";
-
+--- BEFORE (hunk) ---
 /**
  * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
  * @remarks Type: `${infer V}/${infer P}`
  */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
-  ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
-  : never;
-
+--- AFTER (hunk) ----
 /**
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: KeyToPair
+ */
+export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
+
+--- BEFORE (hunk) ---
  * Options when constructing via a VersionPlanKey (validFor is derived).
  * @property baseURL (optional: string)
  */
@@ -1056,7 +905,7 @@ export function createClient<V extends VersionPlanPair>(
 // Impl
 /**
  * Function createClient.
- * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
+ * @param arg (required: VersionPlanPair | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
  * @param opts (optional: { baseURL?: string; } | undefined)
  * @returns ZodGecko
  */
@@ -1074,31 +923,10 @@ export function createClient(
   return new ZodGecko({ validFor: arg, baseURL: opts?.baseURL });
 }
 
---- AFTER ----
-/**
- * @file src/client/factory.ts
- * @module client/factory
- * @summary Factory.
- */
-// External imports
-// (none)
-
-// Internal imports
-import { ZodGecko } from "./api.js";
-import { isValidVersionPlan, parseVersionPlanKey } from "../helpers/object.js";
-import type { VersionPlanKey, VersionPlanPair, ClientOptions } from "../types.js";
-
-/**
- * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
- * @remarks Type: `${infer V}/${infer P}`
- */
-export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
-  ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
-  : never;
-
-/**
+--- AFTER (hunk) ----
  * Options when constructing via a VersionPlanKey (validFor is derived).
  * @property baseURL (optional: string)
+ * @remarks Type: KeyClientOptions
  */
 export type KeyClientOptions<K extends VersionPlanKey> = Omit<
   ClientOptions<KeyToPair<K>>,
@@ -1108,6 +936,7 @@ export type KeyClientOptions<K extends VersionPlanKey> = Omit<
 /**
  * Options when constructing via a VersionPlanPair (already provided).
  * @property baseURL (optional: string)
+ * @remarks Type: PairClientOptions
  */
 export type PairClientOptions<V extends VersionPlanPair> = Omit<ClientOptions<V>, "validFor">;
 
@@ -1124,9 +953,9 @@ export function createClient<V extends VersionPlanPair>(
 // Impl
 /**
  * Function createClient.
- * @returns ZodGecko
- * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
- * @param opts (optional: { baseURL?: string; } | undefined)
+ * @param arg (required: VersionPlanKey | VersionPlanPair)
+ * @param opts (optional: { baseURL?: string })
+ * @returns ZodGecko<VersionPlanPair>
  */
 export function createClient(
   arg: VersionPlanKey | VersionPlanPair,
@@ -1144,30 +973,20 @@ export function createClient(
 
 
 ===== FILE: src/client/headers.ts =====
---- BEFORE ---
-/**
- * @file src/client/headers.ts
- * @module client/headers
- * @summary Headers.
- */
-// src/client/headers.ts
-import type { ApiPlan, HeadersInitLike, VersionPlanKey, VersionPlanPair } from "../types.js";
-
+--- BEFORE (hunk) ---
 /**
  * Function headerNameForPlan.
  * @param plan (required: "public" | "paid")
  * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key"
  */
-export function headerNameForPlan(plan: ApiPlan): "x-cg-demo-api-key" | "x-cg-pro-api-key" {
-  return plan === "paid" ? "x-cg-pro-api-key" : "x-cg-demo-api-key";
-}
-
-function planOf(vp: VersionPlanKey | VersionPlanPair): ApiPlan {
-  return typeof vp === "string" ? (vp.split("/")[1] as ApiPlan) : vp.plan;
-}
-
+--- AFTER (hunk) ----
 /**
- * Type alias HeaderOptions.
+ * Function headerNameForPlan.
+ * @param plan (required: ApiPlan)
+ * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key"
+ */
+
+--- BEFORE (hunk) ---
  * @property apiKey (optional: string).
  * @property extra (optional: HeadersInitLike | (() => HeadersInitLike)).
  */
@@ -1199,32 +1018,10 @@ export function defaultHeadersFor(
   return { ...base, ...more };
 }
 
---- AFTER ----
-/**
- * @file src/client/headers.ts
- * @module client/headers
- * @summary Headers.
- */
-// src/client/headers.ts
-import type { ApiPlan, HeadersInitLike, VersionPlanKey, VersionPlanPair } from "../types.js";
-
-/**
- * Function headerNameForPlan.
- * @returns "x-cg-demo-api-key" | "x-cg-pro-api-key"
- * @param plan (required: "public" | "paid")
- */
-export function headerNameForPlan(plan: ApiPlan): "x-cg-demo-api-key" | "x-cg-pro-api-key" {
-  return plan === "paid" ? "x-cg-pro-api-key" : "x-cg-demo-api-key";
-}
-
-function planOf(vp: VersionPlanKey | VersionPlanPair): ApiPlan {
-  return typeof vp === "string" ? (vp.split("/")[1] as ApiPlan) : vp.plan;
-}
-
-/**
- * Type alias HeaderOptions.
+--- AFTER (hunk) ----
  * @property apiKey (optional: string).
  * @property extra (optional: HeadersInitLike | (() => HeadersInitLike)).
+ * @remarks Type: HeaderOptions
  */
 export type HeaderOptions = Readonly<{
   /** API key to include; omit to send no auth header. */
@@ -1235,9 +1032,9 @@ export type HeaderOptions = Readonly<{
 
 /**
  * Deterministic default headers for CoinGecko requests.
+ * @param vp (required: VersionPlanKey | VersionPlanPair)
+ * @param opts (optional: HeaderOptions)
  * @returns HeadersInitLike
- * @param vp (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
- * @param opts (optional: undefined | object)
  */
 export function defaultHeadersFor(
   vp: VersionPlanKey | VersionPlanPair,
@@ -1256,108 +1053,7 @@ export function defaultHeadersFor(
 
 
 ===== FILE: src/fetch/client.ts =====
---- BEFORE ---
-/**
- * @file src/fetch/client.ts
- * @module fetch/client
- * @summary Client.
- */
-// src/fetch/client.ts
-
-// External imports
-// (none)
-
-// Internal imports
-import { ZodGecko } from "../client/api.js";
-import { parseRequest } from "../helpers/parse-request.js";
-import { parseResponse } from "../helpers/parse-response.js";
-import type { RequestShape, VersionPlanPair, EndpointPathFor } from "../types.js";
-
-/* --------------------------------- Types ---------------------------------- */
-
-/** Plain object form of headers (no DOM types). */
-type PlainHeaders = Readonly<Record<string, string | number | boolean>>;
-
-/** Tuple array form of headers ([key, value]) (no DOM types). */
-type TupleHeaders = ReadonlyArray<readonly [string, string | number | boolean]>;
-
-/** Minimal “Headers-like” interface we can detect at runtime (forEach only). */
-type ForEachHeaders = Readonly<{
-  forEach: (cb: (value: string, key: string) => void) => void;
-}>;
-
-/** Unified input for headers merging (covers common shapes without DOM). */
-type HeadersLike = PlainHeaders | TupleHeaders | ForEachHeaders;
-
-/** Minimal init we accept (keeps typing local; avoids DOM's RequestInit). */
-type RequestInitLike = Readonly<{
-  headers?: HeadersLike;
-}> &
-  Readonly<Record<string, unknown>>;
-
-/* ----------------------------- Type Guards -------------------------------- */
-
-function isForEachHeaders(x: unknown): x is ForEachHeaders {
-  return (
-    typeof x === "object" &&
-    x !== null &&
-    typeof (x as { forEach?: unknown }).forEach === "function"
-  );
-}
-
-function isTupleHeaders(x: unknown): x is TupleHeaders {
-  return Array.isArray(x) && x.every((e) => Array.isArray(e) && typeof e[0] === "string");
-}
-
-function isPlainHeaders(x: unknown): x is PlainHeaders {
-  if (typeof x !== "object" || x === null || Array.isArray(x)) return false;
-  // Quick shallow check: all values are primitive-ish
-  for (const [, v] of Object.entries(x as Record<string, unknown>)) {
-    const t = typeof v;
-    if (!(t === "string" || t === "number" || t === "boolean")) return false;
-  }
-  return true;
-}
-
-/* ------------------------------ Utilities --------------------------------- */
-
-/** Normalize various header inputs to a plain `{[k]: string}` without `any`. */
-function headersToObject(h?: HeadersLike): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!h) return out;
-
-  if (isForEachHeaders(h) && !isTupleHeaders(h) && !isPlainHeaders(h)) {
-    h.forEach((value: string, key: string): void => {
-      out[key] = value;
-    });
-    return out;
-  }
-
-  if (isTupleHeaders(h)) {
-    for (const [k, v] of h) {
-      out[k] = String(v);
-    }
-    return out;
-  }
-
-  if (isPlainHeaders(h)) {
-    for (const [k, v] of Object.entries(h)) {
-      out[k] = String(v);
-    }
-    return out;
-  }
-
-  // Fallback: ignore unknown shapes rather than risk unsafe coercion
-  return out;
-}
-
-/* --------------------------------- Client --------------------------------- */
-
-/**
- * Options for the minimal fetch client (no DOM types required).
- * @property validFor (required: V).
- * @property baseURL (optional: string).
- * @property apiKey (optional: string).
+--- BEFORE (hunk) ---
  * @property userAgent (optional: string).
  * @property headers (optional: HeadersLike).
  */
@@ -1421,110 +1117,10 @@ export class ZodGeckoFetch<V extends VersionPlanPair> extends ZodGecko<V> {
   }
 }
 
---- AFTER ----
-/**
- * @file src/fetch/client.ts
- * @module fetch/client
- * @summary Client.
- */
-// src/fetch/client.ts
-
-// External imports
-// (none)
-
-// Internal imports
-import { ZodGecko } from "../client/api.js";
-import { parseRequest } from "../helpers/parse-request.js";
-import { parseResponse } from "../helpers/parse-response.js";
-import type { RequestShape, VersionPlanPair, EndpointPathFor } from "../types.js";
-
-/* --------------------------------- Types ---------------------------------- */
-
-/** Plain object form of headers (no DOM types). */
-type PlainHeaders = Readonly<Record<string, string | number | boolean>>;
-
-/** Tuple array form of headers ([key, value]) (no DOM types). */
-type TupleHeaders = ReadonlyArray<readonly [string, string | number | boolean]>;
-
-/** Minimal “Headers-like” interface we can detect at runtime (forEach only). */
-type ForEachHeaders = Readonly<{
-  forEach: (cb: (value: string, key: string) => void) => void;
-}>;
-
-/** Unified input for headers merging (covers common shapes without DOM). */
-type HeadersLike = PlainHeaders | TupleHeaders | ForEachHeaders;
-
-/** Minimal init we accept (keeps typing local; avoids DOM's RequestInit). */
-type RequestInitLike = Readonly<{
-  headers?: HeadersLike;
-}> &
-  Readonly<Record<string, unknown>>;
-
-/* ----------------------------- Type Guards -------------------------------- */
-
-function isForEachHeaders(x: unknown): x is ForEachHeaders {
-  return (
-    typeof x === "object" &&
-    x !== null &&
-    typeof (x as { forEach?: unknown }).forEach === "function"
-  );
-}
-
-function isTupleHeaders(x: unknown): x is TupleHeaders {
-  return Array.isArray(x) && x.every((e) => Array.isArray(e) && typeof e[0] === "string");
-}
-
-function isPlainHeaders(x: unknown): x is PlainHeaders {
-  if (typeof x !== "object" || x === null || Array.isArray(x)) return false;
-  // Quick shallow check: all values are primitive-ish
-  for (const [, v] of Object.entries(x as Record<string, unknown>)) {
-    const t = typeof v;
-    if (!(t === "string" || t === "number" || t === "boolean")) return false;
-  }
-  return true;
-}
-
-/* ------------------------------ Utilities --------------------------------- */
-
-/** Normalize various header inputs to a plain `{[k]: string}` without `any`. */
-function headersToObject(h?: HeadersLike): Record<string, string> {
-  const out: Record<string, string> = {};
-  if (!h) return out;
-
-  if (isForEachHeaders(h) && !isTupleHeaders(h) && !isPlainHeaders(h)) {
-    h.forEach((value: string, key: string): void => {
-      out[key] = value;
-    });
-    return out;
-  }
-
-  if (isTupleHeaders(h)) {
-    for (const [k, v] of h) {
-      out[k] = String(v);
-    }
-    return out;
-  }
-
-  if (isPlainHeaders(h)) {
-    for (const [k, v] of Object.entries(h)) {
-      out[k] = String(v);
-    }
-    return out;
-  }
-
-  // Fallback: ignore unknown shapes rather than risk unsafe coercion
-  return out;
-}
-
-/* --------------------------------- Client --------------------------------- */
-
-/**
- * Options for the minimal fetch client (no DOM types required).
- * @property validFor (required: V).
- * @property baseURL (optional: string).
- * @property apiKey (optional: string).
+--- AFTER (hunk) ----
  * @property userAgent (optional: string).
  * @property headers (optional: HeadersLike).
+ * @remarks Type: FetchClientOptions
  */
 export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
   validFor: V;
@@ -1536,8 +1132,8 @@ export type FetchClientOptions<V extends VersionPlanPair> = Readonly<{
 
 /**
  * Build default headers for CoinGecko GET calls.
- * @returns object
- * @param opts (required: object)
+ * @param opts (required: FetchClientOptions<VersionPlanPair>)
+ * @returns Record<string, string>
  */
 export function buildHeaders(opts: FetchClientOptions<VersionPlanPair>): Record<string, string> {
   const base: Record<string, string> = headersToObject(opts.headers);
@@ -1588,34 +1184,20 @@ export class ZodGeckoFetch<V extends VersionPlanPair> extends ZodGecko<V> {
 
 
 ===== FILE: src/fetch/factory.ts =====
---- BEFORE ---
-/**
- * @file src/fetch/factory.ts
- * @module fetch/factory
- * @summary Factory.
- */
-// src/fetch/factory.ts
-
-// External imports
-// (none)
-
-// Internal imports
-import { ZodGeckoFetch, type FetchClientOptions } from "./client.js";
-import { isValidVersionPlan, parseVersionPlanKey } from "../helpers/object.js";
-import type { VersionPlanKey, VersionPlanPair } from "../types.js";
-
+--- BEFORE (hunk) ---
 /**
  * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
  * @remarks Type: `${infer V}/${infer P}`
  */
 export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
-  ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
-  : never;
-
+--- AFTER (hunk) ----
 /**
- * Options when constructing via a VersionPlanKey (validFor is derived).
- * @property baseURL (optional: string)
- * @property apiKey (optional: string)
+ * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
+ * @remarks Type: KeyToPair
+ */
+export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
+
+--- BEFORE (hunk) ---
  * @property userAgent (optional: string)
  * @property headers (optional: HeadersLike)
  */
@@ -1665,36 +1247,10 @@ export function createFetchClient(
   return new ZodGeckoFetch({ validFor: arg, ...opts });
 }
 
---- AFTER ----
-/**
- * @file src/fetch/factory.ts
- * @module fetch/factory
- * @summary Factory.
- */
-// src/fetch/factory.ts
-
-// External imports
-// (none)
-
-// Internal imports
-import { ZodGeckoFetch, type FetchClientOptions } from "./client.js";
-import { isValidVersionPlan, parseVersionPlanKey } from "../helpers/object.js";
-import type { VersionPlanKey, VersionPlanPair } from "../types.js";
-
-/**
- * Map a "vX.Y.Z/plan" key to a precise VersionPlanPair type.
- * @remarks Type: `${infer V}/${infer P}`
- */
-export type KeyToPair<K extends VersionPlanKey> = K extends `${infer V}/${infer P}`
-  ? { version: V & VersionPlanPair["version"]; plan: P & VersionPlanPair["plan"] }
-  : never;
-
-/**
- * Options when constructing via a VersionPlanKey (validFor is derived).
- * @property baseURL (optional: string)
- * @property apiKey (optional: string)
+--- AFTER (hunk) ----
  * @property userAgent (optional: string)
  * @property headers (optional: HeadersLike)
+ * @remarks Type: KeyFetchOptions
  */
 export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
   FetchClientOptions<KeyToPair<K>>,
@@ -1707,6 +1263,7 @@ export type KeyFetchOptions<K extends VersionPlanKey> = Omit<
  * @property apiKey (optional: string)
  * @property userAgent (optional: string)
  * @property headers (optional: HeadersLike)
+ * @remarks Type: PairFetchOptions
  */
 export type PairFetchOptions<V extends VersionPlanPair> = Omit<FetchClientOptions<V>, "validFor">;
 
@@ -1724,9 +1281,9 @@ export function createFetchClient<V extends VersionPlanPair>(
 
 /**
  * Implementation.
- * @returns ZodGeckoFetch
- * @param arg (required: object | "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
- * @param opts (optional: undefined | object)
+ * @param arg (required: VersionPlanKey | VersionPlanPair)
+ * @param opts (optional: Omit<FetchClientOptions<VersionPlanPair>, "validFor">)
+ * @returns ZodGeckoFetch<VersionPlanPair>
  */
 export function createFetchClient(
   arg: VersionPlanKey | VersionPlanPair,
@@ -1744,78 +1301,35 @@ export function createFetchClient(
 
 
 ===== FILE: src/fetch/rate-limit.ts =====
---- BEFORE ---
-/**
- * @file src/fetch/rate-limit.ts
- * @module fetch/rate-limit
- * @summary Rate Limit.
- */
-// src/fetch/rate-limit.ts
-import { RateLimitHeaders } from "../schemas/_shared/common.js";
-import type { RateLimitHeadersType } from "../schemas/_shared/common.js";
-import type { HeadersLike } from "../types.js";
-
-/** Structural check for a Headers-like object (no DOM types needed). */
-function isHeadersLike(x: unknown): x is HeadersLike {
-  return Boolean(x) && typeof (x as { get?: unknown }).get === "function";
-}
-
-/** Safe coercion to string (no object-to-[object Object] surprises). */
-function coerceHeaderValue(v: unknown): string | null {
-  if (typeof v === "string") return v;
-  if (typeof v === "number" || typeof v === "boolean") return String(v);
-  return null;
-}
-
+--- BEFORE (hunk) ---
 /**
  * Read a header by name. For plain objects, match case-insensitively.
  * @param h (required: object | HeadersLike)
  * @param name (required: string)
  * @returns string | null
- */
-export function getHeader(h: HeadersLike | Record<string, unknown>, name: string): string | null {
-  if (isHeadersLike(h)) {
-    const v = h.get(name);
-    return v === null ? null : v;
-  }
+--- AFTER (hunk) ----
+/**
+ * Read a header by name. For plain objects, match case-insensitively.
+ * @param h (required: HeadersLike | Record<string, unknown>)
+ * @param name (required: string)
+ * @returns string | null
 
-  const rec = h; // already narrowed to Record<string, unknown>
-
-  // exact match first
-  const v1 = coerceHeaderValue(rec[name]);
-  if (v1 !== null) return v1;
-
-  // then case-insensitive scan
-  const lower = name.toLowerCase();
-  for (const k of Object.keys(rec)) {
-    if (k.toLowerCase() === lower) {
-      return coerceHeaderValue(rec[k]) ?? null;
-    }
-  }
-  return null;
-}
-
+--- BEFORE (hunk) ---
 /**
  * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
  * @param h (required: object | HeadersLike)
  * @returns object
  */
 export function parseRateLimitHeaders(
-  h: HeadersLike | Record<string, unknown>,
-): RateLimitHeadersType {
-  const keys = ["x-cgpro-api-limit", "x-cgpro-api-remaining", "x-cgpro-api-reset"] as const;
-
-  const picked: Record<string, unknown> = {};
-  for (const k of keys) {
-    const v = getHeader(h, k);
-    if (v !== null) picked[k] = v;
-  }
-  return RateLimitHeaders.parse(picked);
-}
-
+--- AFTER (hunk) ----
 /**
- * Type alias RateLimitNumbers.
- * @property limit (optional: number).
+ * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
+ * @param h (required: HeadersLike | Record<string, unknown>)
+ * @returns RateLimitHeadersType
+ */
+export function parseRateLimitHeaders(
+
+--- BEFORE (hunk) ---
  * @property remaining (optional: number).
  * @property reset (optional: number).
  */
@@ -1841,80 +1355,10 @@ export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>):
   };
 }
 
---- AFTER ----
-/**
- * @file src/fetch/rate-limit.ts
- * @module fetch/rate-limit
- * @summary Rate Limit.
- */
-// src/fetch/rate-limit.ts
-import { RateLimitHeaders } from "../schemas/_shared/common.js";
-import type { RateLimitHeadersType } from "../schemas/_shared/common.js";
-import type { HeadersLike } from "../types.js";
-
-/** Structural check for a Headers-like object (no DOM types needed). */
-function isHeadersLike(x: unknown): x is HeadersLike {
-  return Boolean(x) && typeof (x as { get?: unknown }).get === "function";
-}
-
-/** Safe coercion to string (no object-to-[object Object] surprises). */
-function coerceHeaderValue(v: unknown): string | null {
-  if (typeof v === "string") return v;
-  if (typeof v === "number" || typeof v === "boolean") return String(v);
-  return null;
-}
-
-/**
- * Read a header by name. For plain objects, match case-insensitively.
- * @returns string | null
- * @param h (required: object | HeadersLike)
- * @param name (required: string)
- */
-export function getHeader(h: HeadersLike | Record<string, unknown>, name: string): string | null {
-  if (isHeadersLike(h)) {
-    const v = h.get(name);
-    return v === null ? null : v;
-  }
-
-  const rec = h; // already narrowed to Record<string, unknown>
-
-  // exact match first
-  const v1 = coerceHeaderValue(rec[name]);
-  if (v1 !== null) return v1;
-
-  // then case-insensitive scan
-  const lower = name.toLowerCase();
-  for (const k of Object.keys(rec)) {
-    if (k.toLowerCase() === lower) {
-      return coerceHeaderValue(rec[k]) ?? null;
-    }
-  }
-  return null;
-}
-
-/**
- * Parse CoinGecko rate-limit headers with Zod (tolerant to unknowns).
- * @returns object
- * @param h (required: object | HeadersLike)
- */
-export function parseRateLimitHeaders(
-  h: HeadersLike | Record<string, unknown>,
-): RateLimitHeadersType {
-  const keys = ["x-cgpro-api-limit", "x-cgpro-api-remaining", "x-cgpro-api-reset"] as const;
-
-  const picked: Record<string, unknown> = {};
-  for (const k of keys) {
-    const v = getHeader(h, k);
-    if (v !== null) picked[k] = v;
-  }
-  return RateLimitHeaders.parse(picked);
-}
-
-/**
- * Type alias RateLimitNumbers.
- * @property limit (optional: number).
+--- AFTER (hunk) ----
  * @property remaining (optional: number).
  * @property reset (optional: number).
+ * @remarks Type: RateLimitNumbers
  */
 export type RateLimitNumbers = Readonly<{
   limit?: number;
@@ -1924,8 +1368,8 @@ export type RateLimitNumbers = Readonly<{
 
 /**
  * Numeric convenience view (keeps `undefined` when absent).
- * @returns object
- * @param h (required: object | HeadersLike)
+ * @param h (required: HeadersLike | Record<string, unknown>)
+ * @returns RateLimitNumbers
  */
 export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>): RateLimitNumbers {
   const rl = parseRateLimitHeaders(h);
@@ -1938,895 +1382,139 @@ export function parseRateLimitNumbers(h: HeadersLike | Record<string, unknown>):
   };
 }
 
+
+===== FILE: src/helpers/constants.ts =====
+--- BEFORE (hunk) ---
+/**
+ * Supported API versions. Keep in sync with codegen & docs.
+ * @remarks Type: readonly ["v3.0.1", "v3.1.1"]
+ */
+export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
+--- AFTER (hunk) ----
+/**
+ * Supported API versions. Keep in sync with codegen & docs.
+ * @remarks Type: readonly [[], []]
+ */
+export const VERSIONS = ["v3.0.1", "v3.1.1"] as const;
+
+--- BEFORE (hunk) ---
+/**
+ * Supported API plans/channels.
+ * @remarks Type: readonly ["public", "paid"]
+ */
+export const PLANS = ["public", "paid"] as const;
+--- AFTER (hunk) ----
+/**
+ * Supported API plans/channels.
+ * @remarks Type: readonly [[], []]
+ */
+export const PLANS = ["public", "paid"] as const;
+
+--- BEFORE (hunk) ---
+/**
+ * Mapping of supported version as strong typing → plan (only valid combos live here).
+ * @remarks Type: { readonly "v3.0.1": "public" | "paid"; readonly "v3.1.1": "public" | "paid"; }
+ */
+export type VERSION_TO_PLAN = typeof VERSION_TO_PLAN;
+--- AFTER (hunk) ----
+/**
+ * Mapping of supported version as strong typing → plan (only valid combos live here).
+ * @remarks Type: typeof VERSION_TO_PLAN
+ */
+export type VERSION_TO_PLAN = typeof VERSION_TO_PLAN;
 
 ===== FILE: src/helpers/discovery.ts =====
---- BEFORE ---
-/**
- * src/helpers/discovery.ts
- * ---------------------------------------------------------------------------
- * Node-only helpers for discovering schema modules under `src/schemas`.
- * Extracted from the registry generator so other tooling (tests, CLIs) can
- * reuse a single, deterministic discovery implementation.
- * @file src/helpers/discovery.ts
- * @module helpers/discovery
- * @summary Discovery.
- */
-
-import { promises as fs } from "node:fs";
-import * as path from "node:path";
-
-import { SLUG_RE, PLANS, VERSIONS, VERSION_TO_PLAN } from "../helpers/constants.js";
-import type { ApiVersion, DiscoverOptions, DiscoveredModule } from "../types.js";
-
-const defaultAccess = async (p: string): Promise<boolean> => {
-  try {
-    await fs.access(p);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const VERSION_SET = new Set(VERSIONS as readonly string[]);
-const PLAN_SET = new Set(PLANS as readonly string[]);
-const SCHEMA_ENTRY = "index.ts" as const;
-const ACCESS_CONCURRENCY = 8 as const;
-
-// Narrowing guard for optional fsAccess implementation
-const isAccessFn = (fn: unknown): fn is (p: string) => Promise<boolean> => typeof fn === "function";
-
-/**
- * Discover all schema variants present on disk.
- *
- * Scans: `${schemasDir}/{slug}/{version}/{plan}/index.ts`
- * - `slug` must match {@link SLUG_RE}
- * - `version` must be one of {@link VERSIONS}
- * - `plan` is derived from {@link VERSION_TO_PLAN}
- * @param {
- *   schemasDir,
+--- BEFORE (hunk) ---
  *   only = null,
  *   fsAccess,
  * } (required: object)
  * @returns Promise
  */
 export async function discoverSchemaModules({
-  schemasDir,
-  only = null,
-  fsAccess,
-}: DiscoverOptions): Promise<DiscoveredModule[]> {
-  if (typeof schemasDir !== "string") {
-    throw new TypeError("discoverSchemaModules: `schemasDir` must be a string");
-  }
-
-  let onlySet: ReadonlySet<string> | null = null;
-  if (only instanceof Set) {
-    onlySet = only;
-  } else if (Array.isArray(only)) {
-    onlySet = new Set<string>(only);
-  }
-
-  let checkAccess: (p: string) => Promise<boolean> = defaultAccess;
-  if (isAccessFn(fsAccess)) {
-    const f = fsAccess;
-    checkAccess = (p: string) => f(p);
-  }
-
-  const out: DiscoveredModule[] = [];
-  const slugs = (await fs.readdir(schemasDir)).filter((d) => !d.startsWith("_")).sort();
-
-  for (const slug of slugs) {
-    if (onlySet && !onlySet.has(slug)) continue;
-    if (!SLUG_RE.test(slug)) throw new Error(`Invalid slug folder name: ${slug}`);
-
-    const slugDir = path.join(schemasDir, slug);
-    const versions = (await fs.readdir(slugDir)).sort();
-    const candidates: DiscoveredModule[] = [];
-
-    for (const v of versions) {
-      if (!VERSION_SET.has(v)) continue;
-      const version = v as ApiVersion;
-
-      const plan = VERSION_TO_PLAN[version];
-      if (!PLAN_SET.has(plan)) continue;
-
-      const file = path.join(slugDir, version, plan, SCHEMA_ENTRY);
-      candidates.push({ slug, version, plan, file });
-    }
-    // Check existence with small-batch concurrency
-    for (let i = 0; i < candidates.length; i += ACCESS_CONCURRENCY) {
-      const batch = candidates.slice(i, i + ACCESS_CONCURRENCY);
-      const hits = await Promise.all(batch.map((c) => checkAccess(c.file)));
-      for (let j = 0; j < batch.length; j += 1) if (hits[j]) out.push(batch[j]);
-    }
-  }
-
-  // Deterministic order
-  const cmpDiscovered = (a: DiscoveredModule, b: DiscoveredModule): number => {
-    if (a.slug !== b.slug) return a.slug.localeCompare(b.slug);
-    if (a.version !== b.version) return a.version.localeCompare(b.version);
-    return a.plan.localeCompare(b.plan);
-  };
-  out.sort(cmpDiscovered);
-
-  // Duplicate guard
-  const seen = new Set<string>();
-  for (const { slug, version, plan } of out) {
-    const key = `${slug}__${version}__${plan}`;
-    if (seen.has(key)) throw new Error(`Duplicate schema variant: ${key}`);
-    seen.add(key);
-  }
-
-  return out;
-}
-
---- AFTER ----
-/**
- * src/helpers/discovery.ts
- * ---------------------------------------------------------------------------
- * Node-only helpers for discovering schema modules under `src/schemas`.
- * Extracted from the registry generator so other tooling (tests, CLIs) can
- * reuse a single, deterministic discovery implementation.
- * @file src/helpers/discovery.ts
- * @module helpers/discovery
- * @summary Discovery.
- */
-
-import { promises as fs } from "node:fs";
-import * as path from "node:path";
-
-import { SLUG_RE, PLANS, VERSIONS, VERSION_TO_PLAN } from "../helpers/constants.js";
-import type { ApiVersion, DiscoverOptions, DiscoveredModule } from "../types.js";
-
-const defaultAccess = async (p: string): Promise<boolean> => {
-  try {
-    await fs.access(p);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const VERSION_SET = new Set(VERSIONS as readonly string[]);
-const PLAN_SET = new Set(PLANS as readonly string[]);
-const SCHEMA_ENTRY = "index.ts" as const;
-const ACCESS_CONCURRENCY = 8 as const;
-
-// Narrowing guard for optional fsAccess implementation
-const isAccessFn = (fn: unknown): fn is (p: string) => Promise<boolean> => typeof fn === "function";
-
-/**
- * Discover all schema variants present on disk.
- *
- * Scans: `${schemasDir}/{slug}/{version}/{plan}/index.ts`
- * - `slug` must match {@link SLUG_RE}
- * - `version` must be one of {@link VERSIONS}
- * - `plan` is derived from {@link VERSION_TO_PLAN}
- * @returns Promise
- * @param {
- *   schemasDir,
+--- AFTER (hunk) ----
  *   only = null,
  *   fsAccess,
- * } (required: object)
+ * } (required: DiscoverOptions)
+ * @returns Promise<DiscoveredModule[]>
  */
 export async function discoverSchemaModules({
-  schemasDir,
-  only = null,
-  fsAccess,
-}: DiscoverOptions): Promise<DiscoveredModule[]> {
-  if (typeof schemasDir !== "string") {
-    throw new TypeError("discoverSchemaModules: `schemasDir` must be a string");
-  }
-
-  let onlySet: ReadonlySet<string> | null = null;
-  if (only instanceof Set) {
-    onlySet = only;
-  } else if (Array.isArray(only)) {
-    onlySet = new Set<string>(only);
-  }
-
-  let checkAccess: (p: string) => Promise<boolean> = defaultAccess;
-  if (isAccessFn(fsAccess)) {
-    const f = fsAccess;
-    checkAccess = (p: string) => f(p);
-  }
-
-  const out: DiscoveredModule[] = [];
-  const slugs = (await fs.readdir(schemasDir)).filter((d) => !d.startsWith("_")).sort();
-
-  for (const slug of slugs) {
-    if (onlySet && !onlySet.has(slug)) continue;
-    if (!SLUG_RE.test(slug)) throw new Error(`Invalid slug folder name: ${slug}`);
-
-    const slugDir = path.join(schemasDir, slug);
-    const versions = (await fs.readdir(slugDir)).sort();
-    const candidates: DiscoveredModule[] = [];
-
-    for (const v of versions) {
-      if (!VERSION_SET.has(v)) continue;
-      const version = v as ApiVersion;
-
-      const plan = VERSION_TO_PLAN[version];
-      if (!PLAN_SET.has(plan)) continue;
-
-      const file = path.join(slugDir, version, plan, SCHEMA_ENTRY);
-      candidates.push({ slug, version, plan, file });
-    }
-    // Check existence with small-batch concurrency
-    for (let i = 0; i < candidates.length; i += ACCESS_CONCURRENCY) {
-      const batch = candidates.slice(i, i + ACCESS_CONCURRENCY);
-      const hits = await Promise.all(batch.map((c) => checkAccess(c.file)));
-      for (let j = 0; j < batch.length; j += 1) if (hits[j]) out.push(batch[j]);
-    }
-  }
-
-  // Deterministic order
-  const cmpDiscovered = (a: DiscoveredModule, b: DiscoveredModule): number => {
-    if (a.slug !== b.slug) return a.slug.localeCompare(b.slug);
-    if (a.version !== b.version) return a.version.localeCompare(b.version);
-    return a.plan.localeCompare(b.plan);
-  };
-  out.sort(cmpDiscovered);
-
-  // Duplicate guard
-  const seen = new Set<string>();
-  for (const { slug, version, plan } of out) {
-    const key = `${slug}__${version}__${plan}`;
-    if (seen.has(key)) throw new Error(`Duplicate schema variant: ${key}`);
-    seen.add(key);
-  }
-
-  return out;
-}
-
-
-===== FILE: src/helpers/explain-error.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/explain-error.ts
- * @module helpers/explain-error
- * @summary Explain Error.
- */
-/**
- * Function explainError.
- * @param err (required: unknown)
- * @returns string
- */
-export function explainError(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
-}
-
---- AFTER ----
-/**
- * @file src/helpers/explain-error.ts
- * @module helpers/explain-error
- * @summary Explain Error.
- */
-/**
- * Function explainError.
- * @returns string
- * @param err (required: unknown)
- */
-export function explainError(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return String(err);
-  }
-}
-
 
 ===== FILE: src/helpers/format-params.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/format-params.ts
- * @module helpers/format-params
- * @summary Format Params.
- */
-// src/helpers/format-params.ts
-import { getQueryRules, getServerDefaults } from "../registry/index.js";
-import type { QueryPrimitive } from "../types.js";
-
-type QueryValue = QueryPrimitive | ReadonlyArray<QueryPrimitive>;
-type QueryInput = Readonly<Record<string, QueryValue>>;
-
-function atomToString(x: QueryPrimitive): string | null {
-  if (typeof x === "boolean") return x ? "true" : "false";
-  if (typeof x === "number") return Number.isFinite(x) ? String(x) : null;
-  // string
-  return x;
-}
-
-function arrayToCsv(values: ReadonlyArray<QueryPrimitive>): string {
-  const atoms = values.map((v) => atomToString(v)).filter((v): v is string => v !== null);
-
-  // dedupe + sort for determinism
-  const csv = Array.from(new Set(atoms)).sort().join(",");
-  return csv;
-}
-
-/** Normalize mixed query inputs to a sorted string map (drops empties/non-finite). */
-function normalize(obj: QueryInput): Record<string, string> {
-  const out: Record<string, string> = {};
-
-  for (const key of Object.keys(obj)) {
-    const v = obj[key];
-
-    if (Array.isArray(v)) {
-      if (v.length === 0) continue;
-      const csv = arrayToCsv(v);
-      if (csv.length > 0) out[key] = csv;
-      continue;
-    }
-
-    if (typeof v === "boolean") {
-      out[key] = v ? "true" : "false";
-      continue;
-    }
-
-    if (typeof v === "number") {
-      if (Number.isFinite(v)) out[key] = String(v);
-      continue;
-    }
-
-    // string only; drop empty
-    if (typeof v === "string" && v.length > 0) {
-      out[key] = v;
-    }
-  }
-
-  // sort keys for determinism
-  return Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));
-}
-
+--- BEFORE (hunk) ---
 /**
  * Core variant: registry-agnostic normalization.
  * @param params (required: object)
  * @returns object
  */
 export function formatParams(params: QueryInput): Record<string, string> {
-  return normalize(params);
-}
-
-/**
- * Registry-aware variant: drops params equal to server defaults per rules.
- * @param endpointId (required: string)
- * @param params (required: object)
- * @returns object
- */
-export function formatParamsForEndpoint(
-  endpointId: string,
-  params: QueryInput,
-): Record<string, string> {
-  const normalized = normalize(params);
-
-  const rules = getQueryRules(endpointId);
-  const defaults = getServerDefaults(endpointId);
-  if (!rules || !defaults) return normalized;
-
-  // Normalize defaults using the same logic as inputs for apples-to-apples compare.
-  const normalizedDefaults: Record<string, string> = {};
-  for (const r of rules) {
-    const dv = defaults[r.key];
-    if (dv === undefined) continue;
-
-    // Build a single-key object to normalize that default value
-    const nv = normalize({ [r.key]: dv } as Readonly<Record<string, QueryValue>>);
-    const val = nv[r.key];
-    if (val !== undefined) {
-      normalizedDefaults[r.key] = val;
-    }
-  }
-
-  // Keep entries when (a) rule disallows dropping, or (b) value != normalized default.
-  const outEntries = Object.entries(normalized).filter(([k, v]) => {
-    const rule = rules.find((r) => r.key === k);
-    const allowDrop = rule ? rule.dropWhenDefault !== false : true;
-    return allowDrop ? normalizedDefaults[k] !== v : true;
-  });
-
-  return Object.fromEntries(outEntries);
-}
-
---- AFTER ----
-/**
- * @file src/helpers/format-params.ts
- * @module helpers/format-params
- * @summary Format Params.
- */
-// src/helpers/format-params.ts
-import { getQueryRules, getServerDefaults } from "../registry/index.js";
-import type { QueryPrimitive } from "../types.js";
-
-type QueryValue = QueryPrimitive | ReadonlyArray<QueryPrimitive>;
-type QueryInput = Readonly<Record<string, QueryValue>>;
-
-function atomToString(x: QueryPrimitive): string | null {
-  if (typeof x === "boolean") return x ? "true" : "false";
-  if (typeof x === "number") return Number.isFinite(x) ? String(x) : null;
-  // string
-  return x;
-}
-
-function arrayToCsv(values: ReadonlyArray<QueryPrimitive>): string {
-  const atoms = values.map((v) => atomToString(v)).filter((v): v is string => v !== null);
-
-  // dedupe + sort for determinism
-  const csv = Array.from(new Set(atoms)).sort().join(",");
-  return csv;
-}
-
-/** Normalize mixed query inputs to a sorted string map (drops empties/non-finite). */
-function normalize(obj: QueryInput): Record<string, string> {
-  const out: Record<string, string> = {};
-
-  for (const key of Object.keys(obj)) {
-    const v = obj[key];
-
-    if (Array.isArray(v)) {
-      if (v.length === 0) continue;
-      const csv = arrayToCsv(v);
-      if (csv.length > 0) out[key] = csv;
-      continue;
-    }
-
-    if (typeof v === "boolean") {
-      out[key] = v ? "true" : "false";
-      continue;
-    }
-
-    if (typeof v === "number") {
-      if (Number.isFinite(v)) out[key] = String(v);
-      continue;
-    }
-
-    // string only; drop empty
-    if (typeof v === "string" && v.length > 0) {
-      out[key] = v;
-    }
-  }
-
-  // sort keys for determinism
-  return Object.fromEntries(Object.entries(out).sort(([a], [b]) => a.localeCompare(b)));
-}
-
+--- AFTER (hunk) ----
 /**
  * Core variant: registry-agnostic normalization.
- * @returns object
- * @param params (required: object)
+ * @param params (required: QueryInput)
+ * @returns Record<string, string>
  */
 export function formatParams(params: QueryInput): Record<string, string> {
-  return normalize(params);
-}
 
-/**
+--- BEFORE (hunk) ---
  * Registry-aware variant: drops params equal to server defaults per rules.
- * @returns object
  * @param endpointId (required: string)
  * @param params (required: object)
+ * @returns object
  */
 export function formatParamsForEndpoint(
-  endpointId: string,
-  params: QueryInput,
-): Record<string, string> {
-  const normalized = normalize(params);
-
-  const rules = getQueryRules(endpointId);
-  const defaults = getServerDefaults(endpointId);
-  if (!rules || !defaults) return normalized;
-
-  // Normalize defaults using the same logic as inputs for apples-to-apples compare.
-  const normalizedDefaults: Record<string, string> = {};
-  for (const r of rules) {
-    const dv = defaults[r.key];
-    if (dv === undefined) continue;
-
-    // Build a single-key object to normalize that default value
-    const nv = normalize({ [r.key]: dv } as Readonly<Record<string, QueryValue>>);
-    const val = nv[r.key];
-    if (val !== undefined) {
-      normalizedDefaults[r.key] = val;
-    }
-  }
-
-  // Keep entries when (a) rule disallows dropping, or (b) value != normalized default.
-  const outEntries = Object.entries(normalized).filter(([k, v]) => {
-    const rule = rules.find((r) => r.key === k);
-    const allowDrop = rule ? rule.dropWhenDefault !== false : true;
-    return allowDrop ? normalizedDefaults[k] !== v : true;
-  });
-
-  return Object.fromEntries(outEntries);
-}
-
+--- AFTER (hunk) ----
+ * Registry-aware variant: drops params equal to server defaults per rules.
+ * @param endpointId (required: string)
+ * @param params (required: QueryInput)
+ * @returns Record<string, string>
+ */
+export function formatParamsForEndpoint(
 
 ===== FILE: src/helpers/format-path.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/format-path.ts
- * @module helpers/format-path
- * @summary Format Path.
- */
+--- BEFORE (hunk) ---
 /**
  * Type alias PathParams.
  * @remarks Type: { readonly [x: string]: string | number; }
  */
 export type PathParams = Readonly<Record<string, string | number>>;
-
-/**
- * Function formatPath.
- * @param template (required: string)
- * @param params (optional: object) [default={}]
- * @returns string
- */
-export function formatPath(template: string, params: PathParams = {}): string {
-  return template
-    .replace(/^\//, "")
-    .split("/")
-    .filter(Boolean)
-    .map((seg) => {
-      const m = seg.match(/^\{(.+?)\}$/);
-      if (!m) return encodeURIComponent(seg);
-      const key = m[1];
-      const raw = params[key];
-      if (raw === undefined || raw === null) {
-        throw new Error(`Missing path param: ${key}`);
-      }
-      return encodeURIComponent(String(raw));
-    })
-    .join("/");
-}
-
---- AFTER ----
-/**
- * @file src/helpers/format-path.ts
- * @module helpers/format-path
- * @summary Format Path.
- */
+--- AFTER (hunk) ----
 /**
  * Type alias PathParams.
- * @remarks Type: { readonly [x: string]: string | number; }
+ * @remarks Type: PathParams
  */
 export type PathParams = Readonly<Record<string, string | number>>;
 
-/**
+--- BEFORE (hunk) ---
  * Function formatPath.
- * @returns string
  * @param template (required: string)
  * @param params (optional: object) [default={}]
+ * @returns string
  */
-export function formatPath(template: string, params: PathParams = {}): string {
-  return template
-    .replace(/^\//, "")
-    .split("/")
-    .filter(Boolean)
-    .map((seg) => {
-      const m = seg.match(/^\{(.+?)\}$/);
-      if (!m) return encodeURIComponent(seg);
-      const key = m[1];
-      const raw = params[key];
-      if (raw === undefined || raw === null) {
-        throw new Error(`Missing path param: ${key}`);
-      }
-      return encodeURIComponent(String(raw));
-    })
-    .join("/");
-}
-
+--- AFTER (hunk) ----
+ * Function formatPath.
+ * @param template (required: string)
+ * @param params (optional: PathParams) [default={}]
+ * @returns string
+ */
 
 ===== FILE: src/helpers/get-request-for.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/get-request-for.ts
- * @module helpers/get-request-for
- * @summary Get Request For.
- */
-// src/helpers/get-request-for.ts
-
-import { getPathInfo, getQueryRules, getServerDefaults } from "../registry/index.js";
-import type { QueryPrimitive } from "../types.js";
-
-/** Options shaping how the request object is generated. */
-type GetRequestForOptions = Readonly<{
-  includeUndefinedOptionals?: boolean;
-  fillServerDefaults?: boolean;
-  /** If true, drop any fields that equal their server default (query only). */
-  omitDefaultedFields?: boolean;
-}>;
-
-/** Return shape for discoverable request surface (includes optional pathTemplate). */
-type RequestSurface = Readonly<{
-  pathTemplate?: string;
-  path: Readonly<Record<string, string>>;
-  query: Readonly<Record<string, QueryValue>>;
-}>;
-
-type QueryValue = QueryPrimitive | readonly QueryPrimitive[];
-
-/* --------------------------- helpers (no any) --------------------------- */
-
-function isQueryScalar(v: unknown): v is QueryPrimitive {
-  return typeof v === "string" || typeof v === "number" || typeof v === "boolean";
-}
-
-function isQueryArray(v: unknown): v is readonly QueryPrimitive[] {
-  return Array.isArray(v) && v.every(isQueryScalar);
-}
-
-function deepEqualQueryValue(a: QueryValue, b: unknown): boolean {
-  if (isQueryArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i += 1) {
-      if (a[i] !== (b as unknown[])[i]) return false;
-    }
-    return true;
-  }
-  return isQueryScalar(b) ? a === b : false;
-}
-
-/** Decide if a key should use an array placeholder. */
-function shouldUseArrayPlaceholder(
-  key: string,
-  ruleHasArrayEncoding: boolean,
-  serverDefaults: Readonly<Record<string, unknown>>,
-): boolean {
-  if (ruleHasArrayEncoding) return true;
-  const dv = serverDefaults[key];
-  return Array.isArray(dv);
-}
-
-/* ------------------------------ main API ------------------------------- */
-
-/**
+--- BEFORE (hunk) ---
  * Build a discoverable request object for an endpoint from the registry.
  * @param endpointPath (required: string)
  * @param opts (optional: undefined | object)
  * @returns object
  */
 export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
-  const options = {
-    includeUndefinedOptionals: true,
-    fillServerDefaults: true,
-    omitDefaultedFields: false,
-    ...opts,
-  };
-
-  const pathInfo = getPathInfo(endpointPath);
-  const rules = getQueryRules(endpointPath) ?? [];
-  const defaults = getServerDefaults(endpointPath) ?? {};
-
-  // Path: include all required path params as empty strings for discoverability
-  const path: Record<string, string> = {};
-  if (pathInfo) {
-    for (const k of pathInfo.requiredPath) {
-      path[k] = "";
-    }
-  }
-
-  // Query: 1) lay down defaults (server + rule defaults), 2) add placeholders, 3) optionally prune
-  const query: Record<string, QueryValue> = {};
-
-  if (options.fillServerDefaults) {
-    // 1a) serverDefaults first
-    for (const [k, v] of Object.entries(defaults)) {
-      if (isQueryArray(v)) {
-        query[k] = [...v] as readonly QueryPrimitive[];
-      } else if (isQueryScalar(v)) {
-        query[k] = v;
-      }
-    }
-
-    // 1b) then rules that declare a `default`, but only if not already set
-    for (const r of rules) {
-      const maybeDefault = (r as { default?: unknown }).default;
-      if (maybeDefault === undefined) continue;
-      if (Object.prototype.hasOwnProperty.call(query, r.key)) continue;
-
-      const v = maybeDefault;
-      if (isQueryArray(v)) {
-        query[r.key] = [...v] as readonly QueryPrimitive[];
-      } else if (isQueryScalar(v)) {
-        query[r.key] = v;
-      }
-      // Non-scalar/array defaults are ignored (not expected in our schemas)
-    }
-  }
-
-  // 2) Add placeholders for any keys not set yet (for discoverability)
-  if (options.includeUndefinedOptionals) {
-    for (const r of rules) {
-      const k = r.key;
-      if (Object.prototype.hasOwnProperty.call(query, k)) continue;
-
-      const useArray = shouldUseArrayPlaceholder(k, Boolean(r.arrayEncoding), defaults);
-      query[k] = useArray ? ([] as readonly QueryPrimitive[]) : "";
-    }
-  }
-
-  // 3) If requested, prune values that exactly equal the server defaults
-  if (options.omitDefaultedFields && options.fillServerDefaults) {
-    for (const [k, dv] of Object.entries(defaults)) {
-      if (Object.prototype.hasOwnProperty.call(query, k) && deepEqualQueryValue(query[k], dv)) {
-        delete query[k];
-      }
-    }
-  }
-
-  return {
-    pathTemplate: pathInfo?.pathTemplate,
-    path,
-    query,
-  };
-}
-
---- AFTER ----
-/**
- * @file src/helpers/get-request-for.ts
- * @module helpers/get-request-for
- * @summary Get Request For.
- */
-// src/helpers/get-request-for.ts
-
-import { getPathInfo, getQueryRules, getServerDefaults } from "../registry/index.js";
-import type { QueryPrimitive } from "../types.js";
-
-/** Options shaping how the request object is generated. */
-type GetRequestForOptions = Readonly<{
-  includeUndefinedOptionals?: boolean;
-  fillServerDefaults?: boolean;
-  /** If true, drop any fields that equal their server default (query only). */
-  omitDefaultedFields?: boolean;
-}>;
-
-/** Return shape for discoverable request surface (includes optional pathTemplate). */
-type RequestSurface = Readonly<{
-  pathTemplate?: string;
-  path: Readonly<Record<string, string>>;
-  query: Readonly<Record<string, QueryValue>>;
-}>;
-
-type QueryValue = QueryPrimitive | readonly QueryPrimitive[];
-
-/* --------------------------- helpers (no any) --------------------------- */
-
-function isQueryScalar(v: unknown): v is QueryPrimitive {
-  return typeof v === "string" || typeof v === "number" || typeof v === "boolean";
-}
-
-function isQueryArray(v: unknown): v is readonly QueryPrimitive[] {
-  return Array.isArray(v) && v.every(isQueryScalar);
-}
-
-function deepEqualQueryValue(a: QueryValue, b: unknown): boolean {
-  if (isQueryArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i += 1) {
-      if (a[i] !== (b as unknown[])[i]) return false;
-    }
-    return true;
-  }
-  return isQueryScalar(b) ? a === b : false;
-}
-
-/** Decide if a key should use an array placeholder. */
-function shouldUseArrayPlaceholder(
-  key: string,
-  ruleHasArrayEncoding: boolean,
-  serverDefaults: Readonly<Record<string, unknown>>,
-): boolean {
-  if (ruleHasArrayEncoding) return true;
-  const dv = serverDefaults[key];
-  return Array.isArray(dv);
-}
-
-/* ------------------------------ main API ------------------------------- */
-
-/**
+--- AFTER (hunk) ----
  * Build a discoverable request object for an endpoint from the registry.
- * @returns object
  * @param endpointPath (required: string)
- * @param opts (optional: undefined | object)
+ * @param opts (optional: GetRequestForOptions)
+ * @returns RequestSurface
  */
 export function getRequestFor(endpointPath: string, opts?: GetRequestForOptions): RequestSurface {
-  const options = {
-    includeUndefinedOptionals: true,
-    fillServerDefaults: true,
-    omitDefaultedFields: false,
-    ...opts,
-  };
-
-  const pathInfo = getPathInfo(endpointPath);
-  const rules = getQueryRules(endpointPath) ?? [];
-  const defaults = getServerDefaults(endpointPath) ?? {};
-
-  // Path: include all required path params as empty strings for discoverability
-  const path: Record<string, string> = {};
-  if (pathInfo) {
-    for (const k of pathInfo.requiredPath) {
-      path[k] = "";
-    }
-  }
-
-  // Query: 1) lay down defaults (server + rule defaults), 2) add placeholders, 3) optionally prune
-  const query: Record<string, QueryValue> = {};
-
-  if (options.fillServerDefaults) {
-    // 1a) serverDefaults first
-    for (const [k, v] of Object.entries(defaults)) {
-      if (isQueryArray(v)) {
-        query[k] = [...v] as readonly QueryPrimitive[];
-      } else if (isQueryScalar(v)) {
-        query[k] = v;
-      }
-    }
-
-    // 1b) then rules that declare a `default`, but only if not already set
-    for (const r of rules) {
-      const maybeDefault = (r as { default?: unknown }).default;
-      if (maybeDefault === undefined) continue;
-      if (Object.prototype.hasOwnProperty.call(query, r.key)) continue;
-
-      const v = maybeDefault;
-      if (isQueryArray(v)) {
-        query[r.key] = [...v] as readonly QueryPrimitive[];
-      } else if (isQueryScalar(v)) {
-        query[r.key] = v;
-      }
-      // Non-scalar/array defaults are ignored (not expected in our schemas)
-    }
-  }
-
-  // 2) Add placeholders for any keys not set yet (for discoverability)
-  if (options.includeUndefinedOptionals) {
-    for (const r of rules) {
-      const k = r.key;
-      if (Object.prototype.hasOwnProperty.call(query, k)) continue;
-
-      const useArray = shouldUseArrayPlaceholder(k, Boolean(r.arrayEncoding), defaults);
-      query[k] = useArray ? ([] as readonly QueryPrimitive[]) : "";
-    }
-  }
-
-  // 3) If requested, prune values that exactly equal the server defaults
-  if (options.omitDefaultedFields && options.fillServerDefaults) {
-    for (const [k, dv] of Object.entries(defaults)) {
-      if (Object.prototype.hasOwnProperty.call(query, k) && deepEqualQueryValue(query[k], dv)) {
-        delete query[k];
-      }
-    }
-  }
-
-  return {
-    pathTemplate: pathInfo?.pathTemplate,
-    path,
-    query,
-  };
-}
-
 
 ===== FILE: src/helpers/get-schemas.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/get-schemas.ts
- * @description Convenience helper to fetch request/response schemas for an endpoint id.
- * Returns `{ requestSchema, responseSchema }`. Throws if the endpoint/response schema is missing.
- * @module helpers/get-schemas
- * @summary Get Schemas.
- */
-
-// External imports
-// (none)
-
-// Internal imports
-import { getRequestSchema, getResponseSchema } from "../registry/index.js";
-import type { ZodLikeSchema } from "../types.js";
-
-/**
+--- BEFORE (hunk) ---
  * Return schemas for an endpoint id.
  * @param id (required: string)
  * @returns object
@@ -2846,26 +1534,13 @@ export function getSchemas(id: string): Readonly<{
   return { requestSchema: request, responseSchema: response } as const;
 }
 
---- AFTER ----
-/**
- * @file src/helpers/get-schemas.ts
- * @description Convenience helper to fetch request/response schemas for an endpoint id.
- * Returns `{ requestSchema, responseSchema }`. Throws if the endpoint/response schema is missing.
- * @module helpers/get-schemas
- * @summary Get Schemas.
- */
-
-// External imports
-// (none)
-
-// Internal imports
-import { getRequestSchema, getResponseSchema } from "../registry/index.js";
-import type { ZodLikeSchema } from "../types.js";
-
-/**
+--- AFTER (hunk) ----
  * Return schemas for an endpoint id.
- * @returns object
  * @param id (required: string)
+ * @returns Readonly<{
+ *   requestSchema: ZodLikeSchema | null;
+ *   responseSchema: ZodLikeSchema | null;
+ * }>
  */
 export function getSchemas(id: string): Readonly<{
   requestSchema: ZodLikeSchema | null;
@@ -2884,1093 +1559,198 @@ export function getSchemas(id: string): Readonly<{
 
 
 ===== FILE: src/helpers/introspection.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/introspection.ts
- * @summary Runtime-safe schema introspection utilities (Zod-duck-typed).
- *
- * These helpers work with Zod-like objects **without importing Zod**. They are
- * used both by code generation and runtime helpers to derive defaults and
- * shapes in a tolerant, side-effect-free way.
- * @module helpers/introspection
- */
-
-import type { QMeta, UnwrapDefaultsResult } from "../types.js";
-
-// ---------------------------------------------------------------------------
-// Basic guards & utilities
-// ---------------------------------------------------------------------------
-
-function isObject(x: unknown): x is Record<string, unknown> {
-  return typeof x === "object" && x !== null;
-}
-
-function hasOwnKey(obj: unknown, key: PropertyKey): boolean {
-  return isObject(obj) && Object.prototype.hasOwnProperty.call(obj, key);
-}
-
-/**
+--- BEFORE (hunk) ---
  * Get an internal Zod-like definition object (if present).
  * @param s (required: unknown)
  * @returns undefined | object
  */
 export function getDef(s: unknown): Record<string, unknown> | undefined {
-  if (!isObject(s)) return undefined;
-
-  const def1 = Reflect.get(s as object, "_def") as unknown;
-  if (isObject(def1)) return def1;
-
-  const def2 = Reflect.get(s as object, "def") as unknown;
-  if (isObject(def2)) return def2;
-
-  return undefined;
-}
-
-function getCtorName(s: unknown): string | undefined {
-  if (!isObject(s)) return undefined;
-  const ctor = (s as { constructor?: { name?: unknown } }).constructor;
-  return typeof ctor?.name === "string" ? ctor.name : undefined;
-}
-
-/**
- * Best-effort type name for Zod-like nodes. Prefers `_def.typeName`, else falls
- * back to a constructor beginning with `Zod`.
- * @param s (required: unknown)
- * @returns string | undefined
- */
-export function getTypeName(s: unknown): string | undefined {
-  const d = getDef(s);
-  const tnVal = d ? (Reflect.get(d as object, "typeName") as unknown) : undefined;
-  if (typeof tnVal === "string") return tnVal;
-  const ctor = getCtorName(s);
-  return ctor && ctor.startsWith("Zod") ? ctor : undefined;
-}
-
-// ---------------------------------------------------------------------------
-// Optional/metadata helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Read optional query metadata attached to a schema via a well-known symbol.
- * Returns `null` when absent or malformed.
- * @param schema (required: unknown)
- * @returns null | object
- */
-export function getQMeta(schema: unknown): QMeta | null {
-  if (!isObject(schema)) return null;
-  const key = Symbol.for("zodgecko.qmeta");
-  const raw = Reflect.get(schema as object, key) as unknown;
-  if (!isObject(raw)) return null;
-
-  const out: { arrayEncoding?: "csv"; dropWhenDefault?: boolean } = {};
-  const enc = Reflect.get(raw as object, "arrayEncoding") as unknown;
-  if (enc === "csv") out.arrayEncoding = "csv";
-  const dwd = Reflect.get(raw as object, "dropWhenDefault") as unknown;
-  if (typeof dwd === "boolean" && dwd === false) out.dropWhenDefault = false;
-  return Object.keys(out).length > 0 ? (out as QMeta) : null;
-}
-
-/** Type guard for objects that expose a `safeParse` function. */
-function hasSafeParse(x: unknown): x is { safeParse: (val: unknown) => unknown } {
-  return (
-    isObject(x) &&
-    "safeParse" in x &&
-    typeof (x as { safeParse?: unknown }).safeParse === "function"
-  );
-}
-
-/**
- * Heuristic: does `schema.safeParse(undefined)` succeed?
- * @param schema (required: unknown)
- * @returns boolean
- */
-export function isOptionalish(schema: unknown): boolean {
-  if (!hasSafeParse(schema)) return false;
-  try {
-    const res = schema.safeParse(undefined);
-    return isObject(res) && "success" in res && (res as { success?: boolean }).success === true;
-  } catch {
-    return false;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Unwrapping for defaults / shapes
-// ---------------------------------------------------------------------------
-
-/**
- * Handle chained wrappers (Default / Optional / Effects / Branded) and surface
- * the first default discovered while unwrapping.
- * @param s (required: unknown)
- * @returns object
- */
-export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
-  let node: unknown = s;
-  let defaultValue: unknown;
-  let wasOptional = false;
-
-  for (let i = 0; i < 16; i += 1) {
-    const t = getTypeName(node);
-    const d = getDef(node);
-
-    // capture default if present at this level
-    let dv: unknown;
-    if (d && hasOwnKey(d, "defaultValue")) {
-      dv = Reflect.get(d as object, "defaultValue");
-      if (dv !== undefined) {
-        defaultValue = typeof dv === "function" ? (dv as () => unknown)() : dv;
-      }
-    }
-
-    // wrappers that imply optional-ish semantics
-    if (t === "ZodOptional" || t === "ZodNullable" || t === "ZodNullish") {
-      wasOptional = true;
-    }
-
-    // unions including undefined also imply optional-ish
-    let opts: unknown;
-    if (d && hasOwnKey(d, "options")) {
-      opts = Reflect.get(d as object, "options");
-    }
-    if ((t === "ZodUnion" || t === "ZodDiscriminatedUnion") && Array.isArray(opts)) {
-      if ((opts as unknown[]).some((o) => getTypeName(o) === "ZodUndefined")) wasOptional = true;
-    }
-
-    // unwrap known wrappers
-    if (t === "ZodDefault" || typeof dv !== "undefined") {
-      const inner = d ? (Reflect.get(d as object, "innerType") as unknown) : undefined;
-      const schema = d ? (Reflect.get(d as object, "schema") as unknown) : undefined;
-      const type = d ? (Reflect.get(d as object, "type") as unknown) : undefined;
-      node = inner ?? schema ?? type ?? node;
-      continue;
-    }
-    if (t === "ZodOptional" || t === "ZodNullable" || t === "ZodNullish") {
-      const inner = d ? (Reflect.get(d as object, "innerType") as unknown) : undefined;
-      node = inner ?? node;
-      continue;
-    }
-    if (t === "ZodEffects") {
-      const schema = d ? (Reflect.get(d as object, "schema") as unknown) : undefined;
-      node = schema ?? node;
-      continue;
-    }
-    if (t === "ZodBranded") {
-      const type = d ? (Reflect.get(d as object, "type") as unknown) : undefined;
-      node = type ?? node;
-      continue;
-    }
-
-    // last resort: generic inner pointers if present
-    if (!t && d && (hasOwnKey(d, "innerType") || hasOwnKey(d, "schema") || hasOwnKey(d, "type"))) {
-      const inner = Reflect.get(d as object, "innerType") as unknown;
-      const schema = Reflect.get(d as object, "schema") as unknown;
-      const type = Reflect.get(d as object, "type") as unknown;
-      node = inner ?? schema ?? type ?? node;
-      continue;
-    }
-
-    break;
-  }
-
-  const isArray = getTypeName(node) === "ZodArray";
-  return { inner: node, defaultValue, wasOptional, isArray };
-}
-
-/**
- * Unwrap until a ZodObject or give up (returns the last node seen).
- * @param s (required: unknown)
- * @returns unknown
- */
-export function unwrapObjectForShapeDeep(s: unknown): unknown {
-  let node: unknown = s;
-  for (let i = 0; i < 12; i += 1) {
-    const t = getTypeName(node);
-    if (t === "ZodObject") return node;
-    const d = getDef(node);
-    if (t === "ZodDefault" || t === "ZodOptional") {
-      const inner = d ? (Reflect.get(d as object, "innerType") as unknown) : undefined;
-      node = inner ?? node;
-      continue;
-    }
-    if (t === "ZodEffects") {
-      const schema = d ? (Reflect.get(d as object, "schema") as unknown) : undefined;
-      node = schema ?? node;
-      continue;
-    }
-    if (t === "ZodBranded") {
-      const type = d ? (Reflect.get(d as object, "type") as unknown) : undefined;
-      node = type ?? node;
-      continue;
-    }
-    // generic fallbacks
-    if (!t && d) {
-      const inner = Reflect.get(d as object, "innerType") as unknown;
-      const schema = Reflect.get(d as object, "schema") as unknown;
-      const type = Reflect.get(d as object, "type") as unknown;
-      const next = inner ?? schema ?? type;
-      if (next && next !== node) {
-        node = next;
-        continue;
-      }
-    }
-    break;
-  }
-  return node;
-}
-
-function shapeFromCandidate(candidate: unknown): Record<string, unknown> | null {
-  if (typeof candidate === "function") {
-    try {
-      const res = (candidate as () => Record<string, unknown>)();
-      return isObject(res) ? res : null;
-    } catch {
-      return null;
-    }
-  }
-  return isObject(candidate) ? candidate : null;
-}
-
-/**
- * Accepts either a ZodObject or a wrapper around it.
- * @param s (required: unknown)
- * @returns null | object
- */
-export function getObjectShape(s: unknown): Record<string, unknown> | null {
-  const root = unwrapObjectForShapeDeep(s);
-  if (getTypeName(root) !== "ZodObject") return null;
-
-  const d = getDef(root);
-  const fromDef = d ? (Reflect.get(d as object, "shape") as unknown) : undefined;
-  const fromRoot = Reflect.get(root as object, "shape") as unknown;
-  const candidate = typeof fromDef !== "undefined" ? fromDef : fromRoot;
-  return shapeFromCandidate(candidate);
-}
-
---- AFTER ----
-/**
- * @file src/helpers/introspection.ts
- * @summary Runtime-safe schema introspection utilities (Zod-duck-typed).
- *
- * These helpers work with Zod-like objects **without importing Zod**. They are
- * used both by code generation and runtime helpers to derive defaults and
- * shapes in a tolerant, side-effect-free way.
- * @module helpers/introspection
- */
-
-import type { QMeta, UnwrapDefaultsResult } from "../types.js";
-
-// ---------------------------------------------------------------------------
-// Basic guards & utilities
-// ---------------------------------------------------------------------------
-
-function isObject(x: unknown): x is Record<string, unknown> {
-  return typeof x === "object" && x !== null;
-}
-
-function hasOwnKey(obj: unknown, key: PropertyKey): boolean {
-  return isObject(obj) && Object.prototype.hasOwnProperty.call(obj, key);
-}
-
-/**
+--- AFTER (hunk) ----
  * Get an internal Zod-like definition object (if present).
- * @returns undefined | object
  * @param s (required: unknown)
+ * @returns Record<string, unknown> | undefined
  */
 export function getDef(s: unknown): Record<string, unknown> | undefined {
-  if (!isObject(s)) return undefined;
 
-  const def1 = Reflect.get(s as object, "_def") as unknown;
-  if (isObject(def1)) return def1;
-
-  const def2 = Reflect.get(s as object, "def") as unknown;
-  if (isObject(def2)) return def2;
-
-  return undefined;
-}
-
-function getCtorName(s: unknown): string | undefined {
-  if (!isObject(s)) return undefined;
-  const ctor = (s as { constructor?: { name?: unknown } }).constructor;
-  return typeof ctor?.name === "string" ? ctor.name : undefined;
-}
-
-/**
- * Best-effort type name for Zod-like nodes. Prefers `_def.typeName`, else falls
- * back to a constructor beginning with `Zod`.
- * @returns string | undefined
- * @param s (required: unknown)
- */
-export function getTypeName(s: unknown): string | undefined {
-  const d = getDef(s);
-  const tnVal = d ? (Reflect.get(d as object, "typeName") as unknown) : undefined;
-  if (typeof tnVal === "string") return tnVal;
-  const ctor = getCtorName(s);
-  return ctor && ctor.startsWith("Zod") ? ctor : undefined;
-}
-
-// ---------------------------------------------------------------------------
-// Optional/metadata helpers
-// ---------------------------------------------------------------------------
-
-/**
- * Read optional query metadata attached to a schema via a well-known symbol.
+--- BEFORE (hunk) ---
  * Returns `null` when absent or malformed.
- * @returns null | object
  * @param schema (required: unknown)
+ * @returns null | object
  */
 export function getQMeta(schema: unknown): QMeta | null {
-  if (!isObject(schema)) return null;
-  const key = Symbol.for("zodgecko.qmeta");
-  const raw = Reflect.get(schema as object, key) as unknown;
-  if (!isObject(raw)) return null;
-
-  const out: { arrayEncoding?: "csv"; dropWhenDefault?: boolean } = {};
-  const enc = Reflect.get(raw as object, "arrayEncoding") as unknown;
-  if (enc === "csv") out.arrayEncoding = "csv";
-  const dwd = Reflect.get(raw as object, "dropWhenDefault") as unknown;
-  if (typeof dwd === "boolean" && dwd === false) out.dropWhenDefault = false;
-  return Object.keys(out).length > 0 ? (out as QMeta) : null;
-}
-
-/** Type guard for objects that expose a `safeParse` function. */
-function hasSafeParse(x: unknown): x is { safeParse: (val: unknown) => unknown } {
-  return (
-    isObject(x) &&
-    "safeParse" in x &&
-    typeof (x as { safeParse?: unknown }).safeParse === "function"
-  );
-}
-
-/**
- * Heuristic: does `schema.safeParse(undefined)` succeed?
- * @returns boolean
+--- AFTER (hunk) ----
+ * Returns `null` when absent or malformed.
  * @param schema (required: unknown)
+ * @returns QMeta | null
  */
-export function isOptionalish(schema: unknown): boolean {
-  if (!hasSafeParse(schema)) return false;
-  try {
-    const res = schema.safeParse(undefined);
-    return isObject(res) && "success" in res && (res as { success?: boolean }).success === true;
-  } catch {
-    return false;
-  }
-}
+export function getQMeta(schema: unknown): QMeta | null {
 
-// ---------------------------------------------------------------------------
-// Unwrapping for defaults / shapes
-// ---------------------------------------------------------------------------
-
-/**
- * Handle chained wrappers (Default / Optional / Effects / Branded) and surface
+--- BEFORE (hunk) ---
  * the first default discovered while unwrapping.
- * @returns object
  * @param s (required: unknown)
+ * @returns object
  */
 export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
-  let node: unknown = s;
-  let defaultValue: unknown;
-  let wasOptional = false;
-
-  for (let i = 0; i < 16; i += 1) {
-    const t = getTypeName(node);
-    const d = getDef(node);
-
-    // capture default if present at this level
-    let dv: unknown;
-    if (d && hasOwnKey(d, "defaultValue")) {
-      dv = Reflect.get(d as object, "defaultValue");
-      if (dv !== undefined) {
-        defaultValue = typeof dv === "function" ? (dv as () => unknown)() : dv;
-      }
-    }
-
-    // wrappers that imply optional-ish semantics
-    if (t === "ZodOptional" || t === "ZodNullable" || t === "ZodNullish") {
-      wasOptional = true;
-    }
-
-    // unions including undefined also imply optional-ish
-    let opts: unknown;
-    if (d && hasOwnKey(d, "options")) {
-      opts = Reflect.get(d as object, "options");
-    }
-    if ((t === "ZodUnion" || t === "ZodDiscriminatedUnion") && Array.isArray(opts)) {
-      if ((opts as unknown[]).some((o) => getTypeName(o) === "ZodUndefined")) wasOptional = true;
-    }
-
-    // unwrap known wrappers
-    if (t === "ZodDefault" || typeof dv !== "undefined") {
-      const inner = d ? (Reflect.get(d as object, "innerType") as unknown) : undefined;
-      const schema = d ? (Reflect.get(d as object, "schema") as unknown) : undefined;
-      const type = d ? (Reflect.get(d as object, "type") as unknown) : undefined;
-      node = inner ?? schema ?? type ?? node;
-      continue;
-    }
-    if (t === "ZodOptional" || t === "ZodNullable" || t === "ZodNullish") {
-      const inner = d ? (Reflect.get(d as object, "innerType") as unknown) : undefined;
-      node = inner ?? node;
-      continue;
-    }
-    if (t === "ZodEffects") {
-      const schema = d ? (Reflect.get(d as object, "schema") as unknown) : undefined;
-      node = schema ?? node;
-      continue;
-    }
-    if (t === "ZodBranded") {
-      const type = d ? (Reflect.get(d as object, "type") as unknown) : undefined;
-      node = type ?? node;
-      continue;
-    }
-
-    // last resort: generic inner pointers if present
-    if (!t && d && (hasOwnKey(d, "innerType") || hasOwnKey(d, "schema") || hasOwnKey(d, "type"))) {
-      const inner = Reflect.get(d as object, "innerType") as unknown;
-      const schema = Reflect.get(d as object, "schema") as unknown;
-      const type = Reflect.get(d as object, "type") as unknown;
-      node = inner ?? schema ?? type ?? node;
-      continue;
-    }
-
-    break;
-  }
-
-  const isArray = getTypeName(node) === "ZodArray";
-  return { inner: node, defaultValue, wasOptional, isArray };
-}
-
-/**
- * Unwrap until a ZodObject or give up (returns the last node seen).
- * @returns unknown
+--- AFTER (hunk) ----
+ * the first default discovered while unwrapping.
  * @param s (required: unknown)
+ * @returns UnwrapDefaultsResult
  */
-export function unwrapObjectForShapeDeep(s: unknown): unknown {
-  let node: unknown = s;
-  for (let i = 0; i < 12; i += 1) {
-    const t = getTypeName(node);
-    if (t === "ZodObject") return node;
-    const d = getDef(node);
-    if (t === "ZodDefault" || t === "ZodOptional") {
-      const inner = d ? (Reflect.get(d as object, "innerType") as unknown) : undefined;
-      node = inner ?? node;
-      continue;
-    }
-    if (t === "ZodEffects") {
-      const schema = d ? (Reflect.get(d as object, "schema") as unknown) : undefined;
-      node = schema ?? node;
-      continue;
-    }
-    if (t === "ZodBranded") {
-      const type = d ? (Reflect.get(d as object, "type") as unknown) : undefined;
-      node = type ?? node;
-      continue;
-    }
-    // generic fallbacks
-    if (!t && d) {
-      const inner = Reflect.get(d as object, "innerType") as unknown;
-      const schema = Reflect.get(d as object, "schema") as unknown;
-      const type = Reflect.get(d as object, "type") as unknown;
-      const next = inner ?? schema ?? type;
-      if (next && next !== node) {
-        node = next;
-        continue;
-      }
-    }
-    break;
-  }
-  return node;
-}
+export function unwrapForDefaultsDeep(s: unknown): UnwrapDefaultsResult {
 
-function shapeFromCandidate(candidate: unknown): Record<string, unknown> | null {
-  if (typeof candidate === "function") {
-    try {
-      const res = (candidate as () => Record<string, unknown>)();
-      return isObject(res) ? res : null;
-    } catch {
-      return null;
-    }
-  }
-  return isObject(candidate) ? candidate : null;
-}
-
-/**
+--- BEFORE (hunk) ---
  * Accepts either a ZodObject or a wrapper around it.
- * @returns null | object
  * @param s (required: unknown)
+ * @returns null | object
  */
 export function getObjectShape(s: unknown): Record<string, unknown> | null {
-  const root = unwrapObjectForShapeDeep(s);
-  if (getTypeName(root) !== "ZodObject") return null;
-
-  const d = getDef(root);
-  const fromDef = d ? (Reflect.get(d as object, "shape") as unknown) : undefined;
-  const fromRoot = Reflect.get(root as object, "shape") as unknown;
-  const candidate = typeof fromDef !== "undefined" ? fromDef : fromRoot;
-  return shapeFromCandidate(candidate);
-}
-
+--- AFTER (hunk) ----
+ * Accepts either a ZodObject or a wrapper around it.
+ * @param s (required: unknown)
+ * @returns Record<string, unknown> | null
+ */
+export function getObjectShape(s: unknown): Record<string, unknown> | null {
 
 ===== FILE: src/helpers/object.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/object.ts
- * @module helpers/object
- * @summary Object.
- */
-// src/helpers/object.ts
-
-import type { ApiVersion, ApiPlan, VersionPlanPair, VersionPlanKey } from "../types.js";
-import { VERSIONS, PLANS, VERSION_TO_PLAN } from "./constants.js";
-
+--- BEFORE (hunk) ---
 /**
  * Narrow record type for Object.* helpers (string keys only).
  * @remarks Type: { [x: string]: unknown; }
  */
 export type AnyRecord = Record<string, unknown>;
-
+--- AFTER (hunk) ----
 /**
+ * Narrow record type for Object.* helpers (string keys only).
+ * @remarks Type: AnyRecord
+ */
+export type AnyRecord = Record<string, unknown>;
+
+--- BEFORE (hunk) ---
  * Typed Object.keys — string keys only (symbols are intentionally excluded).
  * @param o (required: T)
  * @returns Array
  */
 export const keysOf = <T extends AnyRecord>(o: T): Array<keyof T & string> =>
-  Object.keys(o) as Array<keyof T & string>;
+--- AFTER (hunk) ----
+ * Typed Object.keys — string keys only (symbols are intentionally excluded).
+ * @param o (required: T)
+ * @returns Array<keyof T & string>
+ */
+export const keysOf = <T extends AnyRecord>(o: T): Array<keyof T & string> =>
 
-/**
+--- BEFORE (hunk) ---
  * Typed Object.entries — string keys only.
  * @param o (required: T)
  * @returns Array
  */
 export const entriesOf = <T extends AnyRecord>(o: T): Array<[keyof T & string, T[keyof T]]> =>
-  Object.entries(o) as Array<[keyof T & string, T[keyof T]]>;
+--- AFTER (hunk) ----
+ * Typed Object.entries — string keys only.
+ * @param o (required: T)
+ * @returns Array<[keyof T & string, T[keyof T]]>
+ */
+export const entriesOf = <T extends AnyRecord>(o: T): Array<[keyof T & string, T[keyof T]]> =>
 
-/**
+--- BEFORE (hunk) ---
  * Typed Object.values.
  * @param o (required: T)
  * @returns Array
  */
 export const valuesOf = <T extends AnyRecord>(o: T): Array<T[keyof T]> =>
-  Object.values(o) as Array<T[keyof T]>;
+--- AFTER (hunk) ----
+ * Typed Object.values.
+ * @param o (required: T)
+ * @returns Array<T[keyof T]>
+ */
+export const valuesOf = <T extends AnyRecord>(o: T): Array<T[keyof T]> =>
 
+--- BEFORE (hunk) ---
 /**
  * Strict, typed fromEntries for string keys (no `any`, no unsafe access).
  * @param entries (required: Iterable)
  * @returns object
  */
 export function fromEntriesStrict<K extends string, V>(
-  entries: Iterable<readonly [K, V]>,
-): Record<K, V> {
-  const out = {} as Record<K, V>;
-  for (const [k, v] of entries) out[k] = v;
-  return out;
-}
-
-// -- Utilities ---------------------------------------------------------------
-
-/**
- * List the supported versions (for menus or validation).
- * @returns ReadonlyArray
- */
-export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
-  return VERSIONS;
-}
-/**
- * List the supported plans (for menus or validation).
- * @returns ReadonlyArray
- */
-export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
-  return PLANS;
-}
-/**
- * List the supported (version, plan) pairs (derived from VERSION_TO_PLAN).
- * @returns ReadonlyArray
- */
-export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
-  return VERSIONS.map((v) => ({ version: v, plan: VERSION_TO_PLAN[v] }));
-}
-
-/**
- * Type guard: is the value a valid {@link ApiVersion}.
- * @param x (required: unknown)
- * @returns boolean
- */
-export function isValidVersion(x: unknown): x is ApiVersion {
-  return typeof x === "string" && (VERSIONS as readonly string[]).includes(x);
-}
-/**
- * Type guard: is the value a valid {@link ApiPlan}.
- * @param x (required: unknown)
- * @returns boolean
- */
-export function isValidPlan(x: unknown): x is ApiPlan {
-  return typeof x === "string" && (PLANS as readonly string[]).includes(x);
-}
-/**
- * Type guard for a coherent {@link VersionPlanPair}.
- * @param pair (required: unknown)
- * @returns boolean
- */
-export function isValidVersionPlan(pair: unknown): pair is VersionPlanPair {
-  if (!pair || typeof pair !== "object") return false;
-  const p = pair as { version?: unknown; plan?: unknown };
-  return isValidVersion(p.version) && VERSION_TO_PLAN[p.version] === p.plan;
-}
-
-/**
- * Parse a {@link VersionPlanKey} like "vX.Y.Z/plan" into a structured pair.
- * @param key (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
- * @returns object
- */
-export function parseVersionPlanKey(key: VersionPlanKey): VersionPlanPair {
-  const [version, plan] = key.split("/") as [ApiVersion, ApiPlan];
-  return { version, plan };
-}
-
-/**
- * Tolerant parse from an arbitrary string; returns `null` on invalid.
- * @param key (required: string)
- * @returns null | object
- */
-export function tryParseVersionPlanKey(key: string): VersionPlanPair | null {
-  const parts = key.split("/");
-  if (parts.length !== 2) return null;
-  const [version, plan] = parts as [string, string];
-  if (!isValidVersion(version) || VERSION_TO_PLAN[version] !== (plan as ApiPlan)) return null;
-  return { version, plan: plan as ApiPlan };
-}
-
---- AFTER ----
-/**
- * @file src/helpers/object.ts
- * @module helpers/object
- * @summary Object.
- */
-// src/helpers/object.ts
-
-import type { ApiVersion, ApiPlan, VersionPlanPair, VersionPlanKey } from "../types.js";
-import { VERSIONS, PLANS, VERSION_TO_PLAN } from "./constants.js";
-
-/**
- * Narrow record type for Object.* helpers (string keys only).
- * @remarks Type: { [x: string]: unknown; }
- */
-export type AnyRecord = Record<string, unknown>;
-
-/**
- * Typed Object.keys — string keys only (symbols are intentionally excluded).
- * @returns Array
- * @param o (required: T)
- */
-export const keysOf = <T extends AnyRecord>(o: T): Array<keyof T & string> =>
-  Object.keys(o) as Array<keyof T & string>;
-
-/**
- * Typed Object.entries — string keys only.
- * @returns Array
- * @param o (required: T)
- */
-export const entriesOf = <T extends AnyRecord>(o: T): Array<[keyof T & string, T[keyof T]]> =>
-  Object.entries(o) as Array<[keyof T & string, T[keyof T]]>;
-
-/**
- * Typed Object.values.
- * @returns Array
- * @param o (required: T)
- */
-export const valuesOf = <T extends AnyRecord>(o: T): Array<T[keyof T]> =>
-  Object.values(o) as Array<T[keyof T]>;
-
+--- AFTER (hunk) ----
 /**
  * Strict, typed fromEntries for string keys (no `any`, no unsafe access).
- * @returns object
- * @param entries (required: Iterable)
+ * @param entries (required: Iterable<readonly [K, V]>)
+ * @returns Record<K, V>
  */
 export function fromEntriesStrict<K extends string, V>(
-  entries: Iterable<readonly [K, V]>,
-): Record<K, V> {
-  const out = {} as Record<K, V>;
-  for (const [k, v] of entries) out[k] = v;
-  return out;
-}
 
-// -- Utilities ---------------------------------------------------------------
-
+--- BEFORE (hunk) ---
 /**
  * List the supported versions (for menus or validation).
  * @returns ReadonlyArray
  */
 export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
-  return VERSIONS;
-}
+--- AFTER (hunk) ----
+/**
+ * List the supported versions (for menus or validation).
+ * @returns ReadonlyArray<ApiVersion>
+ */
+export function listSupportedVersions(): ReadonlyArray<ApiVersion> {
+
+--- BEFORE (hunk) ---
 /**
  * List the supported plans (for menus or validation).
  * @returns ReadonlyArray
  */
 export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
-  return PLANS;
-}
+--- AFTER (hunk) ----
+/**
+ * List the supported plans (for menus or validation).
+ * @returns ReadonlyArray<ApiPlan>
+ */
+export function listSupportedPlans(): ReadonlyArray<ApiPlan> {
+
+--- BEFORE (hunk) ---
 /**
  * List the supported (version, plan) pairs (derived from VERSION_TO_PLAN).
  * @returns ReadonlyArray
  */
 export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
-  return VERSIONS.map((v) => ({ version: v, plan: VERSION_TO_PLAN[v] }));
-}
-
+--- AFTER (hunk) ----
 /**
- * Type guard: is the value a valid {@link ApiVersion}.
- * @returns boolean
- * @param x (required: unknown)
+ * List the supported (version, plan) pairs (derived from VERSION_TO_PLAN).
+ * @returns ReadonlyArray<VersionPlanPair>
  */
-export function isValidVersion(x: unknown): x is ApiVersion {
-  return typeof x === "string" && (VERSIONS as readonly string[]).includes(x);
-}
-/**
- * Type guard: is the value a valid {@link ApiPlan}.
- * @returns boolean
- * @param x (required: unknown)
- */
-export function isValidPlan(x: unknown): x is ApiPlan {
-  return typeof x === "string" && (PLANS as readonly string[]).includes(x);
-}
-/**
- * Type guard for a coherent {@link VersionPlanPair}.
- * @returns boolean
- * @param pair (required: unknown)
- */
-export function isValidVersionPlan(pair: unknown): pair is VersionPlanPair {
-  if (!pair || typeof pair !== "object") return false;
-  const p = pair as { version?: unknown; plan?: unknown };
-  return isValidVersion(p.version) && VERSION_TO_PLAN[p.version] === p.plan;
-}
+export function listSupportedVersionPlans(): ReadonlyArray<VersionPlanPair> {
 
-/**
- * Parse a {@link VersionPlanKey} like "vX.Y.Z/plan" into a structured pair.
- * @returns object
- * @param key (required: "v3.0.1/public" | "v3.0.1/paid" | "v3.1.1/public" | "v3.1.1/paid")
- */
-export function parseVersionPlanKey(key: VersionPlanKey): VersionPlanPair {
-  const [version, plan] = key.split("/") as [ApiVersion, ApiPlan];
-  return { version, plan };
-}
-
-/**
- * Tolerant parse from an arbitrary string; returns `null` on invalid.
- * @returns null | object
- * @param key (required: string)
- */
-export function tryParseVersionPlanKey(key: string): VersionPlanPair | null {
-  const parts = key.split("/");
-  if (parts.length !== 2) return null;
-  const [version, plan] = parts as [string, string];
-  if (!isValidVersion(version) || VERSION_TO_PLAN[version] !== (plan as ApiPlan)) return null;
-  return { version, plan: plan as ApiPlan };
-}
-
-
+... (more hunks omitted)
 ===== FILE: src/helpers/parse-request.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/parse-request.ts
- * @module helpers/parse-request
- * @summary Parse Request.
- */
-// src/helpers/parse-request.ts
-
-import { getPathInfo, getQueryRules } from "../registry/index.js";
-import type { QueryValue, RequestShape } from "../types.js";
-
-/** Treat undefined/null/blank-string as "missing" for required checks. */
-function isBlank(v: unknown): boolean {
-  if (v === undefined || v === null) return true;
-  if (typeof v === "string") return v.trim().length === 0;
-  return false;
-}
-
-/**
- * Validate and normalize a request for a given endpoint.
- * - Throws if endpoint is unknown
- * - Throws if required path/query keys are missing/blank
+--- BEFORE (hunk) ---
  * - Returns a shallow-normalized shape (no default filling here)
  * @param endpointPath (required: string)
  * @param input (required: object)
  * @returns object
  */
 export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
-  const pathInfo = getPathInfo(endpointPath);
-  const rules = getQueryRules(endpointPath) ?? [];
-
-  // Unknown endpoint: neither path info nor query rules exist
-  if (!pathInfo && rules.length === 0) {
-    throw new Error(`Unknown endpoint id: ${endpointPath}`);
-  }
-
-  // Path validation
-  if (pathInfo && pathInfo.requiredPath.length > 0) {
-    const p = input.path ?? {};
-    for (const key of pathInfo.requiredPath) {
-      const val = (p as Record<string, unknown>)[key];
-      if (isBlank(val)) {
-        throw new Error(`Missing required path param: ${key}`);
-      }
-    }
-  }
-
-  // Required query validation (derive from rules)
-  const requiredQueryKeys = rules
-    .filter((r) => (r as { required?: boolean }).required === true)
-    .map((r) => r.key);
-
-  if (requiredQueryKeys.length > 0) {
-    const q = input.query ?? {};
-    for (const key of requiredQueryKeys) {
-      const val = (q as Record<string, unknown>)[key];
-      if (isBlank(val)) {
-        throw new Error(`Missing required query param: ${key}`);
-      }
-    }
-  }
-
-  // Normalize: pass-through but ensure objects exist
-  const path = { ...(input.path ?? {}) } as Readonly<Record<string, string>>;
-  const query = { ...(input.query ?? {}) } as Readonly<Record<string, QueryValue>>;
-
-  return { path, query };
-}
-
---- AFTER ----
-/**
- * @file src/helpers/parse-request.ts
- * @module helpers/parse-request
- * @summary Parse Request.
- */
-// src/helpers/parse-request.ts
-
-import { getPathInfo, getQueryRules } from "../registry/index.js";
-import type { QueryValue, RequestShape } from "../types.js";
-
-/** Treat undefined/null/blank-string as "missing" for required checks. */
-function isBlank(v: unknown): boolean {
-  if (v === undefined || v === null) return true;
-  if (typeof v === "string") return v.trim().length === 0;
-  return false;
-}
-
-/**
- * Validate and normalize a request for a given endpoint.
- * - Throws if endpoint is unknown
- * - Throws if required path/query keys are missing/blank
+--- AFTER (hunk) ----
  * - Returns a shallow-normalized shape (no default filling here)
- * @returns object
  * @param endpointPath (required: string)
- * @param input (required: object)
+ * @param input (required: Readonly<RequestShape>)
+ * @returns RequestShape
  */
 export function parseRequest(endpointPath: string, input: Readonly<RequestShape>): RequestShape {
-  const pathInfo = getPathInfo(endpointPath);
-  const rules = getQueryRules(endpointPath) ?? [];
-
-  // Unknown endpoint: neither path info nor query rules exist
-  if (!pathInfo && rules.length === 0) {
-    throw new Error(`Unknown endpoint id: ${endpointPath}`);
-  }
-
-  // Path validation
-  if (pathInfo && pathInfo.requiredPath.length > 0) {
-    const p = input.path ?? {};
-    for (const key of pathInfo.requiredPath) {
-      const val = (p as Record<string, unknown>)[key];
-      if (isBlank(val)) {
-        throw new Error(`Missing required path param: ${key}`);
-      }
-    }
-  }
-
-  // Required query validation (derive from rules)
-  const requiredQueryKeys = rules
-    .filter((r) => (r as { required?: boolean }).required === true)
-    .map((r) => r.key);
-
-  if (requiredQueryKeys.length > 0) {
-    const q = input.query ?? {};
-    for (const key of requiredQueryKeys) {
-      const val = (q as Record<string, unknown>)[key];
-      if (isBlank(val)) {
-        throw new Error(`Missing required query param: ${key}`);
-      }
-    }
-  }
-
-  // Normalize: pass-through but ensure objects exist
-  const path = { ...(input.path ?? {}) } as Readonly<Record<string, string>>;
-  const query = { ...(input.query ?? {}) } as Readonly<Record<string, QueryValue>>;
-
-  return { path, query };
-}
-
-
-===== FILE: src/helpers/parse-response.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/parse-response.ts
- * @module helpers/parse-response
- * @summary Parse Response.
- */
-// src/helpers/parse-response.ts
-
-import { getResponseSchema } from "../registry/index.js";
-import type { ZodLikeSchema } from "../types.js";
-
-/** Check if a value is a ZodLike schema. */
-function isZodLike(s: unknown): s is ZodLikeSchema {
-  return Boolean(s && typeof (s as { parse?: unknown }).parse === "function");
-}
-
-/**
- * Validate/parse an API response for a given endpoint.
- * - Throws if endpoint is unknown
- * - Uses the endpoint's Zod response schema to validate
- * - Returns the parsed (possibly transformed) value
- * @param endpointPath (required: string)
- * @param data (required: unknown)
- * @returns T
- */
-export function parseResponse<T = unknown>(endpointPath: string, data: unknown): T {
-  const schema = getResponseSchema(endpointPath);
-
-  if (!schema) {
-    throw new Error(`Unknown endpoint path: ${endpointPath}`);
-  }
-
-  if (!isZodLike(schema)) {
-    // If a variant lacks Zod at runtime, be explicit rather than silently pass.
-    throw new Error(`Response schema for "${endpointPath}" is not Zod-like`);
-  }
-
-  return schema.parse(data) as T;
-}
-
---- AFTER ----
-/**
- * @file src/helpers/parse-response.ts
- * @module helpers/parse-response
- * @summary Parse Response.
- */
-// src/helpers/parse-response.ts
-
-import { getResponseSchema } from "../registry/index.js";
-import type { ZodLikeSchema } from "../types.js";
-
-/** Check if a value is a ZodLike schema. */
-function isZodLike(s: unknown): s is ZodLikeSchema {
-  return Boolean(s && typeof (s as { parse?: unknown }).parse === "function");
-}
-
-/**
- * Validate/parse an API response for a given endpoint.
- * - Throws if endpoint is unknown
- * - Uses the endpoint's Zod response schema to validate
- * - Returns the parsed (possibly transformed) value
- * @returns T
- * @param endpointPath (required: string)
- * @param data (required: unknown)
- */
-export function parseResponse<T = unknown>(endpointPath: string, data: unknown): T {
-  const schema = getResponseSchema(endpointPath);
-
-  if (!schema) {
-    throw new Error(`Unknown endpoint path: ${endpointPath}`);
-  }
-
-  if (!isZodLike(schema)) {
-    // If a variant lacks Zod at runtime, be explicit rather than silently pass.
-    throw new Error(`Response schema for "${endpointPath}" is not Zod-like`);
-  }
-
-  return schema.parse(data) as T;
-}
-
 
 ===== FILE: src/helpers/to-url.ts =====
---- BEFORE ---
-/**
- * @file src/helpers/to-url.ts
- * @module helpers/to-url
- * @summary To Url.
- */
-/**
- * Function toURL.
+--- BEFORE (hunk) ---
  * @param base (required: string)
  * @param path (required: string)
  * @param query (optional: object) [default={}]
  * @returns string
  */
-export function toURL(
-  base: string,
-  path: string,
-  query: Readonly<Record<string, string>> = {},
-): string {
-  const cleanBase = base.replace(/\/+$/, "");
-  const cleanPath = path.replace(/^\/+/, "");
-  const qs = new URLSearchParams(query).toString();
-  return qs ? `${cleanBase}/${cleanPath}?${qs}` : `${cleanBase}/${cleanPath}`;
-}
-
---- AFTER ----
-/**
- * @file src/helpers/to-url.ts
- * @module helpers/to-url
- * @summary To Url.
- */
-/**
- * Function toURL.
- * @returns string
+--- AFTER (hunk) ----
  * @param base (required: string)
  * @param path (required: string)
- * @param query (optional: object) [default={}]
+ * @param query (optional: Readonly<Record<string, string>>) [default={}]
+ * @returns string
  */
-export function toURL(
-  base: string,
-  path: string,
-  query: Readonly<Record<string, string>> = {},
-): string {
-  const cleanBase = base.replace(/\/+$/, "");
-  const cleanPath = path.replace(/^\/+/, "");
-  const qs = new URLSearchParams(query).toString();
-  return qs ? `${cleanBase}/${cleanPath}?${qs}` : `${cleanBase}/${cleanPath}`;
-}
-
 
 ===== FILE: src/registry/define.ts =====
---- BEFORE ---
-/**
- * @file src/registry/define.ts
- * @module registry/define
- * @summary Define.
- */
-// src/registry/define.ts
-
-// External imports
-import type z from "zod";
-
-// Internal imports
-import { EmptyRequest, EmptyResponse } from "../schemas/_shared/structures.js";
-import type {
-  RegistryEndpoint,
-  QueryRule,
-  HttpMethod,
-  QueryPrimitive,
-  VersionPlanPair,
-} from "../types.js";
-
-/**
- * Input shape for defining a registry endpoint.
- * @property id (required: string).
- * @property validFor (required: VersionPlanPair).
- * @property method (optional: HttpMethod).
- * @property pathTemplate (required: string).
- * @property requiredPath (optional: ReadonlyArray<string>).
- * @property requiredQuery (optional: ReadonlyArray<string>).
- * @property queryRules (optional: ReadonlyArray<QueryRule>).
- * @property serverDefaults (optional: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>).
+--- BEFORE (hunk) ---
  * @property requestSchema (optional: z.ZodTypeAny).
  * @property responseSchema (required: z.ZodTypeAny).
  */
@@ -4022,39 +1802,10 @@ function extractParams(tpl: string): string[] {
   return Array.from(out);
 }
 
---- AFTER ----
-/**
- * @file src/registry/define.ts
- * @module registry/define
- * @summary Define.
- */
-// src/registry/define.ts
-
-// External imports
-import type z from "zod";
-
-// Internal imports
-import { EmptyRequest, EmptyResponse } from "../schemas/_shared/structures.js";
-import type {
-  RegistryEndpoint,
-  QueryRule,
-  HttpMethod,
-  QueryPrimitive,
-  VersionPlanPair,
-} from "../types.js";
-
-/**
- * Input shape for defining a registry endpoint.
- * @property id (required: string).
- * @property validFor (required: VersionPlanPair).
- * @property method (optional: HttpMethod).
- * @property pathTemplate (required: string).
- * @property requiredPath (optional: ReadonlyArray<string>).
- * @property requiredQuery (optional: ReadonlyArray<string>).
- * @property queryRules (optional: ReadonlyArray<QueryRule>).
- * @property serverDefaults (optional: Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>>).
+--- AFTER (hunk) ----
  * @property requestSchema (optional: z.ZodTypeAny).
  * @property responseSchema (required: z.ZodTypeAny).
+ * @remarks Type: DefineEndpointInput
  */
 export type DefineEndpointInput = Readonly<{
   id: string;
@@ -4071,8 +1822,8 @@ export type DefineEndpointInput = Readonly<{
 
 /**
  * Create a normalized RegistryEndpoint from minimal inputs.
- * @returns object
- * @param input (required: object)
+ * @param input (required: DefineEndpointInput)
+ * @returns RegistryEndpoint
  */
 export function defineEndpoint(input: DefineEndpointInput): RegistryEndpoint {
   const method = input.method ?? "GET";
@@ -4106,241 +1857,109 @@ function extractParams(tpl: string): string[] {
 
 
 ===== FILE: src/registry/index.ts =====
---- BEFORE ---
-/**
- * @file src/registry/index.ts
- * @module registry/index
- * @summary Index.
- */
-// External imports
-// (none)
-
-// Internal imports
-import { GENERATED_REGISTRY } from "./generated.js";
-import type { RegistryEndpoint, ZodLikeSchema, QueryPrimitive, VersionPlanPair } from "../types.js";
-
+--- BEFORE (hunk) ---
 /**
  * Function listEndpoints.
  * @param filter (optional: undefined | object)
  * @returns ReadonlyArray
  */
 export function listEndpoints(
-  filter?: Partial<VersionPlanPair>,
-): ReadonlyArray<(typeof GENERATED_REGISTRY)[number]> {
-  if (!filter) return GENERATED_REGISTRY;
-  return GENERATED_REGISTRY.filter(
-    (e) =>
-      (filter.version ? e.validFor.version === filter.version : true) &&
-      (filter.plan ? e.validFor.plan === filter.plan : true),
-  );
-}
-
-/**
- * Function getEndpointDefinition.
- * @param path (required: string)
- * @param validFor (optional: undefined | object)
- * @returns null | object
- */
-export function getEndpointDefinition(
-  path: string,
-  validFor?: VersionPlanPair,
-): (typeof GENERATED_REGISTRY)[number] | null {
-  if (!validFor) return GENERATED_REGISTRY.find((e) => e.pathTemplate === path) ?? null;
-  return (
-    GENERATED_REGISTRY.find(
-      (e) =>
-        e.pathTemplate === path &&
-        e.validFor.version === validFor.version &&
-        e.validFor.plan === validFor.plan,
-    ) ?? null
-  );
-}
-
-/**
- * Function getServerDefaults.
- * @param id (required: string)
- * @param validFor (optional: undefined | object)
- * @returns null | object
- */
-export function getServerDefaults(
-  id: string,
-  validFor?: VersionPlanPair,
-): Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>> | null {
-  const def = getEndpointDefinition(id, validFor);
-  return def ? def.serverDefaults : null;
-}
-
-/**
- * Function getQueryRules.
- * @param path (required: string)
- * @param validFor (optional: undefined | object)
- * @returns null | ReadonlyArray
- */
-export function getQueryRules(
-  path: string,
-  validFor?: VersionPlanPair,
-): RegistryEndpoint["queryRules"] | null {
-  const def = getEndpointDefinition(path, validFor);
-  return def ? def.queryRules : null;
-}
-
-/**
- * Function getPathInfo.
- * @param path (required: string)
- * @param validFor (optional: undefined | object)
- * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string>; } | null
- */
-export function getPathInfo(
-  path: string,
-  validFor?: VersionPlanPair,
-): { pathTemplate: string; requiredPath: ReadonlyArray<string> } | null {
-  const def = getEndpointDefinition(path, validFor);
-  return def ? { pathTemplate: def.pathTemplate, requiredPath: def.requiredPath } : null;
-}
-
-/**
- * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
- * @param path (required: string)
- * @returns undefined | object
- */
-export function getResponseSchema(path: string): ZodLikeSchema | undefined {
-  const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
-  return entry?.responseSchema as ZodLikeSchema | undefined;
-}
-
-/**
- * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
- * @param path (required: string)
- * @returns undefined | object
- */
-export function getRequestSchema(path: string): ZodLikeSchema | undefined {
-  const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
-  return entry?.requestSchema as ZodLikeSchema | undefined;
-}
-
---- AFTER ----
-/**
- * @file src/registry/index.ts
- * @module registry/index
- * @summary Index.
- */
-// External imports
-// (none)
-
-// Internal imports
-import { GENERATED_REGISTRY } from "./generated.js";
-import type { RegistryEndpoint, ZodLikeSchema, QueryPrimitive, VersionPlanPair } from "../types.js";
-
+--- AFTER (hunk) ----
 /**
  * Function listEndpoints.
- * @returns ReadonlyArray
- * @param filter (optional: undefined | object)
+ * @param filter (optional: Partial<VersionPlanPair>)
+ * @returns ReadonlyArray<(typeof GENERATED_REGISTRY)[number]>
  */
 export function listEndpoints(
-  filter?: Partial<VersionPlanPair>,
-): ReadonlyArray<(typeof GENERATED_REGISTRY)[number]> {
-  if (!filter) return GENERATED_REGISTRY;
-  return GENERATED_REGISTRY.filter(
-    (e) =>
-      (filter.version ? e.validFor.version === filter.version : true) &&
-      (filter.plan ? e.validFor.plan === filter.plan : true),
-  );
-}
 
-/**
+--- BEFORE (hunk) ---
  * Function getEndpointDefinition.
- * @returns null | object
  * @param path (required: string)
  * @param validFor (optional: undefined | object)
+ * @returns null | object
  */
 export function getEndpointDefinition(
-  path: string,
-  validFor?: VersionPlanPair,
-): (typeof GENERATED_REGISTRY)[number] | null {
-  if (!validFor) return GENERATED_REGISTRY.find((e) => e.pathTemplate === path) ?? null;
-  return (
-    GENERATED_REGISTRY.find(
-      (e) =>
-        e.pathTemplate === path &&
-        e.validFor.version === validFor.version &&
-        e.validFor.plan === validFor.plan,
-    ) ?? null
-  );
-}
+--- AFTER (hunk) ----
+ * Function getEndpointDefinition.
+ * @param path (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns (typeof GENERATED_REGISTRY)[number] | null
+ */
+export function getEndpointDefinition(
 
-/**
+--- BEFORE (hunk) ---
  * Function getServerDefaults.
- * @returns null | object
  * @param id (required: string)
  * @param validFor (optional: undefined | object)
+ * @returns null | object
  */
 export function getServerDefaults(
-  id: string,
-  validFor?: VersionPlanPair,
-): Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>> | null {
-  const def = getEndpointDefinition(id, validFor);
-  return def ? def.serverDefaults : null;
-}
+--- AFTER (hunk) ----
+ * Function getServerDefaults.
+ * @param id (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns Readonly<Record<string, QueryPrimitive | readonly QueryPrimitive[]>> | null
+ */
+export function getServerDefaults(
 
-/**
+--- BEFORE (hunk) ---
  * Function getQueryRules.
- * @returns null | ReadonlyArray
  * @param path (required: string)
  * @param validFor (optional: undefined | object)
+ * @returns null | ReadonlyArray
  */
 export function getQueryRules(
-  path: string,
-  validFor?: VersionPlanPair,
-): RegistryEndpoint["queryRules"] | null {
-  const def = getEndpointDefinition(path, validFor);
-  return def ? def.queryRules : null;
-}
+--- AFTER (hunk) ----
+ * Function getQueryRules.
+ * @param path (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns RegistryEndpoint["queryRules"] | null
+ */
+export function getQueryRules(
 
-/**
+--- BEFORE (hunk) ---
  * Function getPathInfo.
  * @param path (required: string)
  * @param validFor (optional: undefined | object)
  * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string>; } | null
  */
 export function getPathInfo(
-  path: string,
-  validFor?: VersionPlanPair,
-): { pathTemplate: string; requiredPath: ReadonlyArray<string> } | null {
-  const def = getEndpointDefinition(path, validFor);
-  return def ? { pathTemplate: def.pathTemplate, requiredPath: def.requiredPath } : null;
-}
-
-/**
- * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
- * @returns undefined | object
+--- AFTER (hunk) ----
+ * Function getPathInfo.
  * @param path (required: string)
+ * @param validFor (optional: VersionPlanPair)
+ * @returns { pathTemplate: string; requiredPath: ReadonlyArray<string> } | null
+ */
+export function getPathInfo(
+
+--- BEFORE (hunk) ---
+ * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns undefined | object
  */
 export function getResponseSchema(path: string): ZodLikeSchema | undefined {
-  const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
-  return entry?.responseSchema as ZodLikeSchema | undefined;
-}
-
-/**
- * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
- * @returns undefined | object
+--- AFTER (hunk) ----
+ * Lookup the endpoint's response schema (Zod-like) or undefined if not found.
  * @param path (required: string)
+ * @returns ZodLikeSchema | undefined
+ */
+export function getResponseSchema(path: string): ZodLikeSchema | undefined {
+
+--- BEFORE (hunk) ---
+ * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns undefined | object
  */
 export function getRequestSchema(path: string): ZodLikeSchema | undefined {
-  const entry = GENERATED_REGISTRY.find((e) => e.pathTemplate === path);
-  return entry?.requestSchema as ZodLikeSchema | undefined;
-}
-
+--- AFTER (hunk) ----
+ * Lookup the endpoint's request schema (Zod-like) or undefined if not found.
+ * @param path (required: string)
+ * @returns ZodLikeSchema | undefined
+ */
+export function getRequestSchema(path: string): ZodLikeSchema | undefined {
 
 ===== FILE: src/registry/path-from-slug.ts =====
---- BEFORE ---
-/**
- * @file src/registry/path-from-slug.ts
- * @module registry/path-from-slug
- * @summary Path From Slug.
- */
-
-/**
- * src/registry/path-from-slug.ts
+--- BEFORE (hunk) ---
  * @property template (required: string).
  * @property requiredParams (required: ReadonlyArray<string>).
  */
@@ -4372,17 +1991,10 @@ export function pathTemplateFromSlug(slug: string): PathFromSlug {
   return { template: `/${segments.join("/")}`, requiredParams: params };
 }
 
---- AFTER ----
-/**
- * @file src/registry/path-from-slug.ts
- * @module registry/path-from-slug
- * @summary Path From Slug.
- */
-
-/**
- * src/registry/path-from-slug.ts
+--- AFTER (hunk) ----
  * @property template (required: string).
  * @property requiredParams (required: ReadonlyArray<string>).
+ * @remarks Type: PathFromSlug
  */
 export type PathFromSlug = Readonly<{
   template: string; // e.g. "/coins/{id}/history"
@@ -4391,8 +2003,8 @@ export type PathFromSlug = Readonly<{
 
 /**
  * Build a URL path template from a slug using dot + `by-<param>` rules.
- * @returns object
  * @param slug (required: string)
+ * @returns PathFromSlug
  */
 export function pathTemplateFromSlug(slug: string): PathFromSlug {
   const parts = slug.split(".");
@@ -4414,999 +2026,354 @@ export function pathTemplateFromSlug(slug: string): PathFromSlug {
 
 
 ===== FILE: src/registry/select.ts =====
---- BEFORE ---
-/**
- * @file src/registry/select.ts
- * @module registry/select
- * @summary Select.
- */
-import { GENERATED_REGISTRY } from "./generated.js";
-import type { EndpointIdFor, EntryFor, RegistryEntry, VersionPlanPair } from "../types.js";
-
-// Runtime helpers (pure)
-/**
+--- BEFORE (hunk) ---
  * Function selectEntries.
  * @param validFor (required: V)
  * @returns ReadonlyArray
  */
 export function selectEntries<V extends VersionPlanPair>(validFor: V): ReadonlyArray<EntryFor<V>> {
-  return GENERATED_REGISTRY.filter(
-    (e): e is EntryFor<V> =>
-      e.validFor.version === validFor.version && e.validFor.plan === validFor.plan,
-  );
-}
-
-/**
- * Function selectEntryMap.
- * @param validFor (required: V)
- * @returns object
- */
-export function selectEntryMap<V extends VersionPlanPair>(
-  validFor: V,
-): Readonly<Record<EndpointIdFor<V>, RegistryEntry>> {
-  const entries = selectEntries(validFor);
-
-  const map = new Map<EndpointIdFor<V>, RegistryEntry>();
-  for (const e of entries) {
-    map.set(e.id as EndpointIdFor<V>, e);
-  }
-
-  // Convert once at the end; this is clean and keeps per-insert O(1)
-  return Object.freeze(Object.fromEntries(map)) as Readonly<Record<EndpointIdFor<V>, EntryFor<V>>>;
-}
-
---- AFTER ----
-/**
- * @file src/registry/select.ts
- * @module registry/select
- * @summary Select.
- */
-import { GENERATED_REGISTRY } from "./generated.js";
-import type { EndpointIdFor, EntryFor, RegistryEntry, VersionPlanPair } from "../types.js";
-
-// Runtime helpers (pure)
-/**
+--- AFTER (hunk) ----
  * Function selectEntries.
- * @returns ReadonlyArray
  * @param validFor (required: V)
+ * @returns ReadonlyArray<EntryFor<V>>
  */
 export function selectEntries<V extends VersionPlanPair>(validFor: V): ReadonlyArray<EntryFor<V>> {
-  return GENERATED_REGISTRY.filter(
-    (e): e is EntryFor<V> =>
-      e.validFor.version === validFor.version && e.validFor.plan === validFor.plan,
-  );
-}
 
-/**
+--- BEFORE (hunk) ---
  * Function selectEntryMap.
- * @returns object
  * @param validFor (required: V)
+ * @returns object
  */
 export function selectEntryMap<V extends VersionPlanPair>(
-  validFor: V,
-): Readonly<Record<EndpointIdFor<V>, RegistryEntry>> {
-  const entries = selectEntries(validFor);
-
-  const map = new Map<EndpointIdFor<V>, RegistryEntry>();
-  for (const e of entries) {
-    map.set(e.id as EndpointIdFor<V>, e);
-  }
-
-  // Convert once at the end; this is clean and keeps per-insert O(1)
-  return Object.freeze(Object.fromEntries(map)) as Readonly<Record<EndpointIdFor<V>, EntryFor<V>>>;
-}
-
+--- AFTER (hunk) ----
+ * Function selectEntryMap.
+ * @param validFor (required: V)
+ * @returns Readonly<Record<EndpointIdFor<V>, RegistryEntry>>
+ */
+export function selectEntryMap<V extends VersionPlanPair>(
 
 ===== FILE: src/testkit/default-request.ts =====
---- BEFORE ---
-/**
- * @file src/testkit/default-request.ts
- * @module testkit/default-request
- * @summary Default Request.
- */
-// -----------------------------------------------------------------------------
-// file: src/testkit/default-request.ts
-// -----------------------------------------------------------------------------
-
-import { getRequestFor } from "../helpers/get-request-for.js";
-import type { RequestShape } from "../types.js";
-
-/** Build a default request from registry defaults.
+--- BEFORE (hunk) ---
  * Returns null if required path params are missing.
  * @param endpointId (required: string)
  * @returns null | object
  */
 export function synthesizeDefaultRequest(endpointId: string): RequestShape | null {
-  const seed = getRequestFor(endpointId, {
-    includeUndefinedOptionals: true,
-    fillServerDefaults: true,
-    omitDefaultedFields: false,
-  });
-
-  const path = seed.path ?? {};
-  const missing = Object.values(path).some((v) => v === undefined || v === null || v === "");
-  if (missing) return null;
-  return seed;
-}
-
---- AFTER ----
-/**
- * @file src/testkit/default-request.ts
- * @module testkit/default-request
- * @summary Default Request.
- */
-// -----------------------------------------------------------------------------
-// file: src/testkit/default-request.ts
-// -----------------------------------------------------------------------------
-
-import { getRequestFor } from "../helpers/get-request-for.js";
-import type { RequestShape } from "../types.js";
-
-/** Build a default request from registry defaults.
+--- AFTER (hunk) ----
  * Returns null if required path params are missing.
- * @returns null | object
  * @param endpointId (required: string)
+ * @returns RequestShape | null
  */
 export function synthesizeDefaultRequest(endpointId: string): RequestShape | null {
-  const seed = getRequestFor(endpointId, {
-    includeUndefinedOptionals: true,
-    fillServerDefaults: true,
-    omitDefaultedFields: false,
-  });
-
-  const path = seed.path ?? {};
-  const missing = Object.values(path).some((v) => v === undefined || v === null || v === "");
-  if (missing) return null;
-  return seed;
-}
-
 
 ===== FILE: src/testkit/discover.ts =====
---- BEFORE ---
-/**
- * @file src/testkit/discover.ts
- * @module testkit/discover
- * @summary Discover.
- */
-// -----------------------------------------------------------------------------
-import * as path from "node:path";
-
-import { endpointRoot, listFiles, pathExists, readJSON } from "./fs.js";
-import type {
-  DefaultTestPlan,
-  EndpointFixtureRoot,
-  ScenarioFilePair,
-  ScenarioMeta,
-  ScenarioTestPlan,
-  TestPlan,
-} from "./types.js";
-import type { VersionPlanPair } from "../types.js";
-
-const DEFAULTS_DIR = "defaults";
-const SCENARIOS_DIR = "scenarios";
-
+--- BEFORE (hunk) ---
 /**
  * Discover a single endpoint's fixtures (defaults + scenarios).
  * @param validFor (required: object)
  * @param endpointSlug (required: string)
  * @returns Promise
+--- AFTER (hunk) ----
+/**
+ * Discover a single endpoint's fixtures (defaults + scenarios).
+ * @param validFor (required: VersionPlanPair)
+ * @param endpointSlug (required: string)
+ * @returns Promise<EndpointFixtureRoot | null>
+
+--- BEFORE (hunk) ---
+ * @param validFor (required: object)
+ * @param endpointSlug (required: string)
+ * @returns Promise
  */
 export async function discoverEndpointFixtures(
-  validFor: VersionPlanPair,
-  endpointSlug: string,
-): Promise<EndpointFixtureRoot | null> {
-  const { version, plan } = validFor;
+--- AFTER (hunk) ----
+ * @param validFor (required: VersionPlanPair)
+ * @param endpointSlug (required: string)
+ * @returns Promise<EndpointFixtureRoot | null>
+ */
+export async function discoverEndpointFixtures(
 
-  const rootDir = endpointRoot(version, plan, endpointSlug);
-  const defaultsDir = path.join(rootDir, DEFAULTS_DIR);
-  const scenariosDir = path.join(rootDir, SCENARIOS_DIR);
-
-  if (!(await pathExists(rootDir))) return null;
-
-  const defaults = {
-    requestPath: (await pathExists(path.join(defaultsDir, "default.request.json")))
-      ? path.join(defaultsDir, "default.request.json")
-      : null,
-    responsePath: (await pathExists(path.join(defaultsDir, "default.response.json")))
-      ? path.join(defaultsDir, "default.response.json")
-      : null,
-  } as const;
-
-  const scenarios: ScenarioFilePair[] = [];
-  const files = await listFiles(scenariosDir);
-  for (const f of files) {
-    const base = path.basename(f);
-    if (!base.endsWith(".request.json")) continue;
-
-    const name = base.replace(/\.request\.json$/, "");
-    const requestPath = path.join(scenariosDir, `${name}.request.json`);
-    const errResp = path.join(scenariosDir, `${name}.error.response.json`);
-    const okResp = path.join(scenariosDir, `${name}.response.json`);
-    const meta = path.join(scenariosDir, `${name}.meta.json`);
-
-    const errorResponsePath = (await pathExists(errResp)) ? errResp : null;
-    const responsePath = !errorResponsePath && (await pathExists(okResp)) ? okResp : null;
-    const metaPath = (await pathExists(meta)) ? meta : null;
-
-    scenarios.push({ name, requestPath, responsePath, errorResponsePath, metaPath });
-  }
-
-  if (!defaults.responsePath && scenarios.length === 0) return null;
-
-  return {
-    validFor,
-    endpointSlug,
-    rootDir,
-    defaults,
-    scenarios,
-  };
-}
-
+--- BEFORE (hunk) ---
 /**
  * Build concrete test plans for an endpoint fixture root.
  * @param root (required: object)
  * @returns Promise
  */
 export async function buildTestPlans(root: EndpointFixtureRoot): Promise<TestPlan[]> {
-  const plans: TestPlan[] = [];
-
-  if (root.defaults.responsePath) {
-    const defaultPlan: DefaultTestPlan = {
-      kind: "default",
-      validFor: root.validFor,
-      endpointSlug: root.endpointSlug,
-      rootDir: root.rootDir,
-      requestPath: root.defaults.requestPath,
-      responsePath: root.defaults.responsePath,
-    };
-    plans.push(defaultPlan);
-  }
-
-  for (const s of root.scenarios) {
-    const meta: ScenarioMeta = s.metaPath ? await readJSON<ScenarioMeta>(s.metaPath) : {};
-    const scenarioPlan: ScenarioTestPlan = {
-      kind: "scenario",
-      validFor: root.validFor,
-      endpointSlug: root.endpointSlug,
-      rootDir: root.rootDir,
-      name: s.name,
-      requestPath: s.requestPath,
-      responsePath: s.responsePath,
-      errorResponsePath: s.errorResponsePath,
-      meta: { expect: meta.expect ?? (s.errorResponsePath ? "fail" : "pass") },
-    };
-    plans.push(scenarioPlan);
-  }
-
-  return plans;
-}
-
---- AFTER ----
-/**
- * @file src/testkit/discover.ts
- * @module testkit/discover
- * @summary Discover.
- */
-// -----------------------------------------------------------------------------
-import * as path from "node:path";
-
-import { endpointRoot, listFiles, pathExists, readJSON } from "./fs.js";
-import type {
-  DefaultTestPlan,
-  EndpointFixtureRoot,
-  ScenarioFilePair,
-  ScenarioMeta,
-  ScenarioTestPlan,
-  TestPlan,
-} from "./types.js";
-import type { VersionPlanPair } from "../types.js";
-
-const DEFAULTS_DIR = "defaults";
-const SCENARIOS_DIR = "scenarios";
-
-/**
- * Discover a single endpoint's fixtures (defaults + scenarios).
- * @returns Promise
- * @param validFor (required: object)
- * @param endpointSlug (required: string)
- */
-export async function discoverEndpointFixtures(
-  validFor: VersionPlanPair,
-  endpointSlug: string,
-): Promise<EndpointFixtureRoot | null> {
-  const { version, plan } = validFor;
-
-  const rootDir = endpointRoot(version, plan, endpointSlug);
-  const defaultsDir = path.join(rootDir, DEFAULTS_DIR);
-  const scenariosDir = path.join(rootDir, SCENARIOS_DIR);
-
-  if (!(await pathExists(rootDir))) return null;
-
-  const defaults = {
-    requestPath: (await pathExists(path.join(defaultsDir, "default.request.json")))
-      ? path.join(defaultsDir, "default.request.json")
-      : null,
-    responsePath: (await pathExists(path.join(defaultsDir, "default.response.json")))
-      ? path.join(defaultsDir, "default.response.json")
-      : null,
-  } as const;
-
-  const scenarios: ScenarioFilePair[] = [];
-  const files = await listFiles(scenariosDir);
-  for (const f of files) {
-    const base = path.basename(f);
-    if (!base.endsWith(".request.json")) continue;
-
-    const name = base.replace(/\.request\.json$/, "");
-    const requestPath = path.join(scenariosDir, `${name}.request.json`);
-    const errResp = path.join(scenariosDir, `${name}.error.response.json`);
-    const okResp = path.join(scenariosDir, `${name}.response.json`);
-    const meta = path.join(scenariosDir, `${name}.meta.json`);
-
-    const errorResponsePath = (await pathExists(errResp)) ? errResp : null;
-    const responsePath = !errorResponsePath && (await pathExists(okResp)) ? okResp : null;
-    const metaPath = (await pathExists(meta)) ? meta : null;
-
-    scenarios.push({ name, requestPath, responsePath, errorResponsePath, metaPath });
-  }
-
-  if (!defaults.responsePath && scenarios.length === 0) return null;
-
-  return {
-    validFor,
-    endpointSlug,
-    rootDir,
-    defaults,
-    scenarios,
-  };
-}
-
+--- AFTER (hunk) ----
 /**
  * Build concrete test plans for an endpoint fixture root.
- * @returns Promise
- * @param root (required: object)
+ * @param root (required: EndpointFixtureRoot)
+ * @returns Promise<TestPlan[]>
  */
 export async function buildTestPlans(root: EndpointFixtureRoot): Promise<TestPlan[]> {
-  const plans: TestPlan[] = [];
-
-  if (root.defaults.responsePath) {
-    const defaultPlan: DefaultTestPlan = {
-      kind: "default",
-      validFor: root.validFor,
-      endpointSlug: root.endpointSlug,
-      rootDir: root.rootDir,
-      requestPath: root.defaults.requestPath,
-      responsePath: root.defaults.responsePath,
-    };
-    plans.push(defaultPlan);
-  }
-
-  for (const s of root.scenarios) {
-    const meta: ScenarioMeta = s.metaPath ? await readJSON<ScenarioMeta>(s.metaPath) : {};
-    const scenarioPlan: ScenarioTestPlan = {
-      kind: "scenario",
-      validFor: root.validFor,
-      endpointSlug: root.endpointSlug,
-      rootDir: root.rootDir,
-      name: s.name,
-      requestPath: s.requestPath,
-      responsePath: s.responsePath,
-      errorResponsePath: s.errorResponsePath,
-      meta: { expect: meta.expect ?? (s.errorResponsePath ? "fail" : "pass") },
-    };
-    plans.push(scenarioPlan);
-  }
-
-  return plans;
-}
-
 
 ===== FILE: src/testkit/fs.ts =====
---- BEFORE ---
-/**
- * @file src/testkit/fs.ts
- * @module testkit/fs
- * @summary Fs.
- */
-// src/testkit/fs.ts
-import { promises as fs } from "node:fs";
-import * as fsSync from "node:fs";
-import * as path from "node:path";
-
-/**
+--- BEFORE (hunk) ---
  * Function pathExists.
  * @param p (required: string)
  * @returns Promise
  */
 export async function pathExists(p: string): Promise<boolean> {
-  try {
-    await fs.access(p);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Function readJSON.
- * @param p (required: string)
- * @returns Promise
- */
-export async function readJSON<T>(p: string): Promise<T> {
-  const raw = await fs.readFile(p, "utf8");
-  try {
-    return JSON.parse(raw) as T;
-  } catch (e) {
-    throw new Error(`Invalid JSON in ${p}: ${(e as Error).message}`);
-  }
-}
-
-/**
- * Function listFiles.
- * @param p (required: string)
- * @returns Promise
- */
-export async function listFiles(p: string): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(p);
-    return entries.map((e) => path.join(p, e));
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Resolve the fixtures root, preferring src/testkit/... if it exists.
- * @returns string
- */
-export function fixturesRoot(): string {
-  const cwd = process.cwd();
-  const candidates = [
-    path.join(cwd, "src", "testkit", "__tests__", "fixtures"),
-    path.join(cwd, "testkit", "__tests__", "fixtures"),
-  ];
-
-  for (const p of candidates) {
-    try {
-      fsSync.accessSync(p);
-      return p;
-    } catch {
-      // continue
-    }
-  }
-  // Default to src layout to keep relative paths stable in runner/specs.
-  return candidates[0];
-}
-
-/**
- * Function endpointRoot.
- * @param version (required: string)
- * @param plan (required: string)
- * @param testkitlug (required: string)
- * @returns string
- */
-export function endpointRoot(version: string, plan: string, testkitlug: string): string {
-  return path.join(fixturesRoot(), version, plan, testkitlug);
-}
-
---- AFTER ----
-/**
- * @file src/testkit/fs.ts
- * @module testkit/fs
- * @summary Fs.
- */
-// src/testkit/fs.ts
-import { promises as fs } from "node:fs";
-import * as fsSync from "node:fs";
-import * as path from "node:path";
-
-/**
+--- AFTER (hunk) ----
  * Function pathExists.
- * @returns Promise
  * @param p (required: string)
+ * @returns Promise<boolean>
  */
 export async function pathExists(p: string): Promise<boolean> {
-  try {
-    await fs.access(p);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
-/**
+--- BEFORE (hunk) ---
  * Function readJSON.
- * @returns Promise
  * @param p (required: string)
+ * @returns Promise
  */
 export async function readJSON<T>(p: string): Promise<T> {
-  const raw = await fs.readFile(p, "utf8");
-  try {
-    return JSON.parse(raw) as T;
-  } catch (e) {
-    throw new Error(`Invalid JSON in ${p}: ${(e as Error).message}`);
-  }
-}
-
-/**
- * Function listFiles.
- * @returns Promise
+--- AFTER (hunk) ----
+ * Function readJSON.
  * @param p (required: string)
+ * @returns Promise<T>
+ */
+export async function readJSON<T>(p: string): Promise<T> {
+
+--- BEFORE (hunk) ---
+ * Function listFiles.
+ * @param p (required: string)
+ * @returns Promise
  */
 export async function listFiles(p: string): Promise<string[]> {
-  try {
-    const entries = await fs.readdir(p);
-    return entries.map((e) => path.join(p, e));
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Resolve the fixtures root, preferring src/testkit/... if it exists.
- * @returns string
+--- AFTER (hunk) ----
+ * Function listFiles.
+ * @param p (required: string)
+ * @returns Promise<string[]>
  */
-export function fixturesRoot(): string {
-  const cwd = process.cwd();
-  const candidates = [
-    path.join(cwd, "src", "testkit", "__tests__", "fixtures"),
-    path.join(cwd, "testkit", "__tests__", "fixtures"),
-  ];
-
-  for (const p of candidates) {
-    try {
-      fsSync.accessSync(p);
-      return p;
-    } catch {
-      // continue
-    }
-  }
-  // Default to src layout to keep relative paths stable in runner/specs.
-  return candidates[0];
-}
-
-/**
- * Function endpointRoot.
- * @returns string
- * @param version (required: string)
- * @param plan (required: string)
- * @param testkitlug (required: string)
- */
-export function endpointRoot(version: string, plan: string, testkitlug: string): string {
-  return path.join(fixturesRoot(), version, plan, testkitlug);
-}
-
+export async function listFiles(p: string): Promise<string[]> {
 
 ===== FILE: src/testkit/run.ts =====
---- BEFORE ---
-/**
- * @file src/testkit/run.ts
- * @module testkit/run
- * @summary Run.
- */
-// -----------------------------------------------------------------------------
-// file: src/testkit/run.ts
-// -----------------------------------------------------------------------------
-
-// Internal imports (alphabetized; single group)
-import { synthesizeDefaultRequest } from "./default-request.js";
-import { readJSON } from "./fs.js";
-import type { DefaultTestPlan, ScenarioTestPlan } from "./types.js";
-import { explainError } from "../helpers/explain-error.js";
-import { formatParamsForEndpoint } from "../helpers/format-params.js";
-import { formatPath } from "../helpers/format-path.js";
-import { parseRequest } from "../helpers/parse-request.js";
-import { parseResponse } from "../helpers/parse-response.js";
-import { toURL } from "../helpers/to-url.js";
-import { pathTemplateFromSlug } from "../registry/path-from-slug.js";
-import type { QueryValue, RequestShape } from "../types.js";
-
-type DefaultResult =
-  | { status: "pass"; url: string }
-  | { status: "fail"; url: string; message: string }
-  | { status: "skipped"; reason: string };
-
-type ScenarioResult =
-  | { status: "pass"; url: string }
-  | { status: "fail"; url: string; message: string };
-
-/** Safely convert unknown error-like values into a string message. */
-function toMessage(e: unknown): string {
-  if (typeof e === "string") return e;
-  if (e && typeof e === "object") {
-    const m = (e as { message?: unknown }).message;
-    if (typeof m === "string") return m;
-  }
-  try {
-    return JSON.stringify(e);
-  } catch {
-    return "Unknown error";
-  }
-}
-
-/** Narrow arbitrary input to a minimal RequestShape without using `any`. */
-function sanitizeRequestShape(x: unknown): RequestShape {
-  const out: { path?: Record<string, string>; query?: Record<string, QueryValue> } = {};
-
-  if (x && typeof x === "object") {
-    const obj = x as Record<string, unknown>;
-
-    // path: { [k: string]: string }
-    if (obj.path && typeof obj.path === "object" && obj.path !== null && !Array.isArray(obj.path)) {
-      const p: Record<string, string> = {};
-      for (const [k, v] of Object.entries(obj.path as Record<string, unknown>)) {
-        if (typeof v === "string") p[k] = v;
-      }
-      if (Object.keys(p).length > 0) out.path = p;
-    }
-
-    // query: { [k: string]: QueryValue }
-    if (
-      obj.query &&
-      typeof obj.query === "object" &&
-      obj.query !== null &&
-      !Array.isArray(obj.query)
-    ) {
-      const q: Record<string, QueryValue> = {};
-      for (const [k, v] of Object.entries(obj.query as Record<string, unknown>)) {
-        const t = typeof v;
-        if (t === "string" || t === "number" || t === "boolean") {
-          q[k] = v as QueryValue;
-          continue;
-        }
-        if (Array.isArray(v)) {
-          let ok = true;
-          for (const el of v) {
-            const et = typeof el;
-            if (!(et === "string" || et === "number" || et === "boolean")) {
-              ok = false;
-              break;
-            }
-          }
-          if (ok) q[k] = v as QueryValue;
-        }
-      }
-      if (Object.keys(q).length > 0) out.query = q;
-    }
-  }
-
-  return out;
-}
-
+--- BEFORE (hunk) ---
 /**
  * Function runDefaultTest.
  * @param plan (required: object)
  * @returns Promise
  */
 export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResult> {
-  // Build a raw request source; if synth returns null, skip immediately
-  let raw: unknown;
-  if (plan.requestPath) {
-    raw = await readJSON<unknown>(plan.requestPath);
-  } else {
-    const synth = synthesizeDefaultRequest(plan.endpointSlug); // RequestShape | null
-    if (!synth) {
-      return {
-        status: "skipped",
-        reason:
-          "Endpoint requires path params; provide defaults/default.request.json to enable default test.",
-      };
-    }
-    raw = synth;
-  }
-
-  // Sanitize unknown → RequestShape, then validate/normalize
-  const reqShape = sanitizeRequestShape(raw);
-  const parsedReq = parseRequest(plan.endpointSlug, reqShape);
-
-  // Derive path template from slug (slug→/coins/{id} rule)
-  const { template } = pathTemplateFromSlug(plan.endpointSlug);
-  const path = formatPath(template, parsedReq.path ?? {});
-  const qs = formatParamsForEndpoint(plan.endpointSlug, parsedReq.query ?? {});
-  const url = toURL("https://api.coingecko.com/api", path, qs);
-
-  // Read response as unknown and validate
-  const response = await readJSON<unknown>(plan.responsePath);
-  try {
-    parseResponse(plan.endpointSlug, response);
-    return { status: "pass", url };
-  } catch (e: unknown) {
-    return { status: "fail", url, message: explainError(toMessage(e)) };
-  }
-}
-
-/**
- * Function runScenarioTest.
- * @param plan (required: object)
- * @returns Promise
- */
-export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
-  // Request as unknown → sanitize → validate/normalize
-  const raw = await readJSON<unknown>(plan.requestPath);
-  const reqShape = sanitizeRequestShape(raw);
-  const parsedReq = parseRequest(plan.endpointSlug, reqShape);
-
-  // Response as unknown (branch to avoid unknown|null unions)
-  let response: unknown;
-  if (plan.errorResponsePath) {
-    response = await readJSON<unknown>(plan.errorResponsePath);
-  } else if (plan.responsePath) {
-    response = await readJSON<unknown>(plan.responsePath);
-  } else {
-    response = undefined;
-  }
-
-  const { template } = pathTemplateFromSlug(plan.endpointSlug);
-  const path = formatPath(template, parsedReq.path ?? {});
-  const qs = formatParamsForEndpoint(plan.endpointSlug, parsedReq.query ?? {});
-  const url = toURL("https://api.coingecko.com/api", path, qs);
-
-  try {
-    if (plan.meta.expect === "fail") {
-      let threw = false;
-      try {
-        parseResponse(plan.endpointSlug, response);
-      } catch {
-        threw = true;
-      }
-      if (!threw) {
-        return {
-          status: "fail",
-          url,
-          message: "Expected response to fail validation, but it passed.",
-        };
-      }
-      return { status: "pass", url };
-    }
-
-    parseResponse(plan.endpointSlug, response);
-    return { status: "pass", url };
-  } catch (e: unknown) {
-    return { status: "fail", url, message: explainError(toMessage(e)) };
-  }
-}
-
---- AFTER ----
-/**
- * @file src/testkit/run.ts
- * @module testkit/run
- * @summary Run.
- */
-// -----------------------------------------------------------------------------
-// file: src/testkit/run.ts
-// -----------------------------------------------------------------------------
-
-// Internal imports (alphabetized; single group)
-import { synthesizeDefaultRequest } from "./default-request.js";
-import { readJSON } from "./fs.js";
-import type { DefaultTestPlan, ScenarioTestPlan } from "./types.js";
-import { explainError } from "../helpers/explain-error.js";
-import { formatParamsForEndpoint } from "../helpers/format-params.js";
-import { formatPath } from "../helpers/format-path.js";
-import { parseRequest } from "../helpers/parse-request.js";
-import { parseResponse } from "../helpers/parse-response.js";
-import { toURL } from "../helpers/to-url.js";
-import { pathTemplateFromSlug } from "../registry/path-from-slug.js";
-import type { QueryValue, RequestShape } from "../types.js";
-
-type DefaultResult =
-  | { status: "pass"; url: string }
-  | { status: "fail"; url: string; message: string }
-  | { status: "skipped"; reason: string };
-
-type ScenarioResult =
-  | { status: "pass"; url: string }
-  | { status: "fail"; url: string; message: string };
-
-/** Safely convert unknown error-like values into a string message. */
-function toMessage(e: unknown): string {
-  if (typeof e === "string") return e;
-  if (e && typeof e === "object") {
-    const m = (e as { message?: unknown }).message;
-    if (typeof m === "string") return m;
-  }
-  try {
-    return JSON.stringify(e);
-  } catch {
-    return "Unknown error";
-  }
-}
-
-/** Narrow arbitrary input to a minimal RequestShape without using `any`. */
-function sanitizeRequestShape(x: unknown): RequestShape {
-  const out: { path?: Record<string, string>; query?: Record<string, QueryValue> } = {};
-
-  if (x && typeof x === "object") {
-    const obj = x as Record<string, unknown>;
-
-    // path: { [k: string]: string }
-    if (obj.path && typeof obj.path === "object" && obj.path !== null && !Array.isArray(obj.path)) {
-      const p: Record<string, string> = {};
-      for (const [k, v] of Object.entries(obj.path as Record<string, unknown>)) {
-        if (typeof v === "string") p[k] = v;
-      }
-      if (Object.keys(p).length > 0) out.path = p;
-    }
-
-    // query: { [k: string]: QueryValue }
-    if (
-      obj.query &&
-      typeof obj.query === "object" &&
-      obj.query !== null &&
-      !Array.isArray(obj.query)
-    ) {
-      const q: Record<string, QueryValue> = {};
-      for (const [k, v] of Object.entries(obj.query as Record<string, unknown>)) {
-        const t = typeof v;
-        if (t === "string" || t === "number" || t === "boolean") {
-          q[k] = v as QueryValue;
-          continue;
-        }
-        if (Array.isArray(v)) {
-          let ok = true;
-          for (const el of v) {
-            const et = typeof el;
-            if (!(et === "string" || et === "number" || et === "boolean")) {
-              ok = false;
-              break;
-            }
-          }
-          if (ok) q[k] = v as QueryValue;
-        }
-      }
-      if (Object.keys(q).length > 0) out.query = q;
-    }
-  }
-
-  return out;
-}
-
+--- AFTER (hunk) ----
 /**
  * Function runDefaultTest.
- * @returns Promise
- * @param plan (required: object)
+ * @param plan (required: DefaultTestPlan)
+ * @returns Promise<DefaultResult>
  */
 export async function runDefaultTest(plan: DefaultTestPlan): Promise<DefaultResult> {
-  // Build a raw request source; if synth returns null, skip immediately
-  let raw: unknown;
-  if (plan.requestPath) {
-    raw = await readJSON<unknown>(plan.requestPath);
-  } else {
-    const synth = synthesizeDefaultRequest(plan.endpointSlug); // RequestShape | null
-    if (!synth) {
-      return {
-        status: "skipped",
-        reason:
-          "Endpoint requires path params; provide defaults/default.request.json to enable default test.",
-      };
-    }
-    raw = synth;
-  }
 
-  // Sanitize unknown → RequestShape, then validate/normalize
-  const reqShape = sanitizeRequestShape(raw);
-  const parsedReq = parseRequest(plan.endpointSlug, reqShape);
-
-  // Derive path template from slug (slug→/coins/{id} rule)
-  const { template } = pathTemplateFromSlug(plan.endpointSlug);
-  const path = formatPath(template, parsedReq.path ?? {});
-  const qs = formatParamsForEndpoint(plan.endpointSlug, parsedReq.query ?? {});
-  const url = toURL("https://api.coingecko.com/api", path, qs);
-
-  // Read response as unknown and validate
-  const response = await readJSON<unknown>(plan.responsePath);
-  try {
-    parseResponse(plan.endpointSlug, response);
-    return { status: "pass", url };
-  } catch (e: unknown) {
-    return { status: "fail", url, message: explainError(toMessage(e)) };
-  }
-}
-
+--- BEFORE (hunk) ---
 /**
  * Function runScenarioTest.
- * @returns Promise
  * @param plan (required: object)
+ * @returns Promise
  */
 export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
-  // Request as unknown → sanitize → validate/normalize
-  const raw = await readJSON<unknown>(plan.requestPath);
-  const reqShape = sanitizeRequestShape(raw);
-  const parsedReq = parseRequest(plan.endpointSlug, reqShape);
-
-  // Response as unknown (branch to avoid unknown|null unions)
-  let response: unknown;
-  if (plan.errorResponsePath) {
-    response = await readJSON<unknown>(plan.errorResponsePath);
-  } else if (plan.responsePath) {
-    response = await readJSON<unknown>(plan.responsePath);
-  } else {
-    response = undefined;
-  }
-
-  const { template } = pathTemplateFromSlug(plan.endpointSlug);
-  const path = formatPath(template, parsedReq.path ?? {});
-  const qs = formatParamsForEndpoint(plan.endpointSlug, parsedReq.query ?? {});
-  const url = toURL("https://api.coingecko.com/api", path, qs);
-
-  try {
-    if (plan.meta.expect === "fail") {
-      let threw = false;
-      try {
-        parseResponse(plan.endpointSlug, response);
-      } catch {
-        threw = true;
-      }
-      if (!threw) {
-        return {
-          status: "fail",
-          url,
-          message: "Expected response to fail validation, but it passed.",
-        };
-      }
-      return { status: "pass", url };
-    }
-
-    parseResponse(plan.endpointSlug, response);
-    return { status: "pass", url };
-  } catch (e: unknown) {
-    return { status: "fail", url, message: explainError(toMessage(e)) };
-  }
-}
-
-
-===== FILE: src/testkit/slug.ts =====
---- BEFORE ---
+--- AFTER (hunk) ----
 /**
- * @file src/testkit/slug.ts
- * @module testkit/slug
- * @summary Slug.
+ * Function runScenarioTest.
+ * @param plan (required: ScenarioTestPlan)
+ * @returns Promise<ScenarioResult>
  */
-// -----------------------------------------------------------------------------
-// file: src/testkit/slug.ts
-// -----------------------------------------------------------------------------
+export async function runScenarioTest(plan: ScenarioTestPlan): Promise<ScenarioResult> {
+
+===== FILE: src/testkit/types.ts =====
+--- BEFORE (hunk) ---
+ * Optional scenario metadata.
+ * @property expect (optional: "pass" | "fail").
+ */
+export type ScenarioMeta = Readonly<{
+  /** Expected validator outcome. Default inferred from presence of error.response fixture. */
+  expect?: "pass" | "fail";
+}>;
 
 /**
- * Convert an unversioned API path template to our repo slug (dot + by-).
- * @param template (required: string)
- * @returns string
+ * A discovered scenario file group (request + response variants).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property metaPath (required: string | null).
  */
-export function slugFromPathTemplate(template: string): string {
-  return template
-    .replace(/^\//, "")
-    .split("/")
-    .filter(Boolean)
-    .map((seg) => {
-      const m = seg.match(/^\{(.+?)\}$/);
-      return m ? `by-${m[1]}` : seg; // keep underscores as-is
-    })
-    .join(".");
-}
-
---- AFTER ----
-/**
- * @file src/testkit/slug.ts
- * @module testkit/slug
- * @summary Slug.
- */
-// -----------------------------------------------------------------------------
-// file: src/testkit/slug.ts
-// -----------------------------------------------------------------------------
+export type ScenarioFilePair = Readonly<{
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  metaPath: string | null;
+}>;
 
 /**
- * Convert an unversioned API path template to our repo slug (dot + by-).
- * @returns string
- * @param template (required: string)
+ * Root info for an endpoint’s fixtures.
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>).
+ * @property scenarios (required: ReadonlyArray<ScenarioFilePair>).
  */
-export function slugFromPathTemplate(template: string): string {
-  return template
-    .replace(/^\//, "")
-    .split("/")
-    .filter(Boolean)
-    .map((seg) => {
-      const m = seg.match(/^\{(.+?)\}$/);
-      return m ? `by-${m[1]}` : seg; // keep underscores as-is
-    })
-    .join(".");
-}
+export type EndpointFixtureRoot = Readonly<{
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  defaults: Readonly<{
+    requestPath: string | null;
+    responsePath: string | null;
+  }>;
+  scenarios: ReadonlyArray<ScenarioFilePair>;
+}>;
+
+/**
+ * Default (docs) test plan.
+ * @property kind (required: "default").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property requestPath (required: string | null).
+ * @property responsePath (required: string).
+ */
+export type DefaultTestPlan = Readonly<{
+  kind: "default";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  requestPath: string | null;
+  responsePath: string;
+}>;
+
+/**
+ * Scenario (variant) test plan.
+ * @property kind (required: "scenario").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property meta (required: Readonly<{ expect: "pass" | "fail" }>).
+ */
+export type ScenarioTestPlan = Readonly<{
+  kind: "scenario";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  meta: Readonly<{ expect: "pass" | "fail" }>;
+}>;
+
+/**
+ * Union of supported plans.
+ * @remarks Type: DefaultTestPlan | ScenarioTestPlan
+ */
+export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
+
+/** Re-export for tests that import only from testkit. */
+export type { RequestShape } from "../types.js";
+export type { VersionPlanPair } from "../types.js";
+
+--- AFTER (hunk) ----
+ * Optional scenario metadata.
+ * @property expect (optional: "pass" | "fail").
+ * @remarks Type: ScenarioMeta
+ */
+export type ScenarioMeta = Readonly<{
+  /** Expected validator outcome. Default inferred from presence of error.response fixture. */
+  expect?: "pass" | "fail";
+}>;
+
+/**
+ * A discovered scenario file group (request + response variants).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property metaPath (required: string | null).
+ * @remarks Type: ScenarioFilePair
+ */
+export type ScenarioFilePair = Readonly<{
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  metaPath: string | null;
+}>;
+
+/**
+ * Root info for an endpoint’s fixtures.
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property defaults (required: Readonly<{ requestPath: string | null; responsePath: string | null; }>).
+ * @property scenarios (required: ReadonlyArray<ScenarioFilePair>).
+ * @remarks Type: EndpointFixtureRoot
+ */
+export type EndpointFixtureRoot = Readonly<{
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  defaults: Readonly<{
+    requestPath: string | null;
+    responsePath: string | null;
+  }>;
+  scenarios: ReadonlyArray<ScenarioFilePair>;
+}>;
+
+/**
+ * Default (docs) test plan.
+ * @property kind (required: "default").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property requestPath (required: string | null).
+ * @property responsePath (required: string).
+ * @remarks Type: DefaultTestPlan
+ */
+export type DefaultTestPlan = Readonly<{
+  kind: "default";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  requestPath: string | null;
+  responsePath: string;
+}>;
+
+/**
+ * Scenario (variant) test plan.
+ * @property kind (required: "scenario").
+ * @property validFor (required: VersionPlanPair).
+ * @property endpointSlug (required: string).
+ * @property rootDir (required: string).
+ * @property name (required: string).
+ * @property requestPath (required: string).
+ * @property responsePath (required: string | null).
+ * @property errorResponsePath (required: string | null).
+ * @property meta (required: Readonly<{ expect: "pass" | "fail" }>).
+ * @remarks Type: ScenarioTestPlan
+ */
+export type ScenarioTestPlan = Readonly<{
+  kind: "scenario";
+  validFor: VersionPlanPair;
+  endpointSlug: string;
+  rootDir: string;
+  name: string;
+  requestPath: string;
+  responsePath: string | null;
+  errorResponsePath: string | null;
+  meta: Readonly<{ expect: "pass" | "fail" }>;
+}>;
+
+/**
+ * Union of supported plans.
+ * @remarks Type: DefaultTestPlan | ScenarioTestPlan
+ */
+export type TestPlan = DefaultTestPlan | ScenarioTestPlan;
+
+/** Re-export for tests that import only from testkit. */
+export type { RequestShape } from "../types.js";
+export type { VersionPlanPair } from "../types.js";
 
